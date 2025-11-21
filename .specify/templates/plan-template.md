@@ -31,7 +31,21 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify compliance with Zulu Pilot Constitution principles:
+
+- **Code Quality**: Does the design align with code quality standards? Are
+  complexity and maintainability considered?
+- **Testing & Coverage**: Are testing strategies defined? Will coverage
+  thresholds (80% overall, 85% for new code) be met?
+- **User Experience Consistency**: If user-facing, does the design maintain UX
+  consistency? Are accessibility requirements considered?
+- **Pre-Commit Requirements**: Can all required pre-commit checks (quality,
+  testing, security, formatting) pass for this feature?
+- **Performance Requirements**: Are performance targets defined? Do they meet
+  established SLAs and thresholds?
+
+**Constitution violations MUST be documented with justification and remediation
+plans.**
 
 ## Project Structure
 
