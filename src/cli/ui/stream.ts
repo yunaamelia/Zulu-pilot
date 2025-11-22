@@ -16,7 +16,7 @@ export class StreamHandler {
     this.cancelled = false;
 
     // Handle Ctrl+C cancellation
-    const cancelHandler = () => {
+    const cancelHandler = (): void => {
       this.cancelled = true;
     };
     process.on('SIGINT', cancelHandler);

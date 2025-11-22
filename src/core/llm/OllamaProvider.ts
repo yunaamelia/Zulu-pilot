@@ -80,21 +80,18 @@ export class OllamaProvider implements IModelProvider {
         buffer = lines.pop() ?? '';
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') {
-              return;
-            }
+          if (!line.startsWith('data: ')) {
+            continue;
+          }
 
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                yield content;
-              }
-            } catch {
-              // Ignore parse errors for malformed chunks
-            }
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') {
+            return;
+          }
+
+          const parsedContent = this.parseStreamChunk(data);
+          if (parsedContent) {
+            yield parsedContent;
           }
         }
       }
@@ -126,6 +123,23 @@ export class OllamaProvider implements IModelProvider {
       return content;
     } catch (error) {
       throw this.handleError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Parse a single stream chunk and extract content.
+   *
+   * @param data - Raw chunk data from stream
+   * @returns Content string if found, null otherwise
+   */
+  private parseStreamChunk(data: string): string | null {
+    try {
+      const parsed = JSON.parse(data);
+      const content = parsed.choices?.[0]?.delta?.content;
+      return content ?? null;
+    } catch {
+      // Ignore parse errors for malformed chunks
+      return null;
     }
   }
 

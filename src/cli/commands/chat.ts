@@ -3,6 +3,7 @@ import { OllamaProvider } from '../../core/llm/OllamaProvider.js';
 import { StreamHandler } from '../ui/stream.js';
 import { ConnectionError } from '../../utils/errors.js';
 import { validateProviderName } from '../../utils/validators.js';
+import { getContextManager } from './add.js';
 
 /**
  * Chat command handler.
@@ -49,10 +50,20 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
     process.exit(1);
   }
 
-  // Stream response
+  // Get context from context manager
+  const contextManager = getContextManager();
+  const context = contextManager.getContext();
+
+  // Check token limit and warn if approaching
+  const warning = contextManager.checkTokenLimit(32000); // Default 32k limit
+  if (warning) {
+    console.warn(`⚠ ${warning}`);
+  }
+
+  // Stream response with context
   const streamHandler = new StreamHandler();
   try {
-    await streamHandler.streamToStdout(provider.streamResponse(userPrompt, []));
+    await streamHandler.streamToStdout(provider.streamResponse(userPrompt, context));
   } catch (error) {
     if (error instanceof ConnectionError) {
       console.error(`\nError: ${error.getUserMessage()}`);
