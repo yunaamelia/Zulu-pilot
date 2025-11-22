@@ -22,8 +22,9 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
-      complexity: ['warn', 15],
-      'max-depth': ['warn', 4],
+      // Constitution mandates max complexity 10
+      complexity: ['error', 10],
+      'max-depth': ['error', 4],
       'max-lines-per-function': ['warn', 100],
     },
   },
