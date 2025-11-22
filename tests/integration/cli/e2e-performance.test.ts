@@ -66,19 +66,13 @@ describe('E2E Performance Validation', () => {
       const mockStream = new Readable({
         read() {
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":"Here"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":"Here"}}]}\n\n')
           );
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" is"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" is"}}]}\n\n')
           );
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" the"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" the"}}]}\n\n')
           );
           this.push(
             Buffer.from(
@@ -149,7 +143,11 @@ describe('E2E Performance Validation', () => {
       const sessionStart = Date.now();
 
       // Ask 3 questions
-      const questions = ['What does this function do?', 'How can I improve it?', 'Add error handling'];
+      const questions = [
+        'What does this function do?',
+        'How can I improve it?',
+        'Add error handling',
+      ];
       for (const question of questions) {
         let responseText = '';
         for await (const token of provider.streamResponse(question, context)) {
@@ -227,4 +225,3 @@ describe('E2E Performance Validation', () => {
     });
   });
 });
-

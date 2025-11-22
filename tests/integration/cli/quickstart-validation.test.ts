@@ -47,19 +47,13 @@ describe('Quickstart Validation', () => {
       const mockStream = new Readable({
         read() {
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":"How"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":"How"}}]}\n\n')
           );
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" to"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" to"}}]}\n\n')
           );
           this.push(
-            Buffer.from(
-              'data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" sort"}}]}\n\n'
-            )
+            Buffer.from('data: {"id":"chatcmpl-123","choices":[{"delta":{"content":" sort"}}]}\n\n')
           );
           this.push(Buffer.from('data: [DONE]\n\n'));
           this.push(null);
@@ -71,7 +65,10 @@ describe('Quickstart Validation', () => {
       });
 
       const tokens: string[] = [];
-      for await (const token of provider.streamResponse('How do I sort an array in TypeScript?', [])) {
+      for await (const token of provider.streamResponse(
+        'How do I sort an array in TypeScript?',
+        []
+      )) {
         tokens.push(token);
       }
 
@@ -182,7 +179,7 @@ function add(a: number, b: number): number {
       mockAdapter.onPost('/v1/chat/completions').networkError();
 
       await expect(provider.generateResponse('Hello', [])).rejects.toThrow();
-      
+
       try {
         await provider.generateResponse('Hello', []);
       } catch (error: unknown) {
@@ -224,4 +221,3 @@ function add(a: number, b: number): number {
     });
   });
 });
-

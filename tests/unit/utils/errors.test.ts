@@ -1,9 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import {
-  ConnectionError,
-  RateLimitError,
-  ValidationError,
-} from '../../../src/utils/errors.js';
+import { ConnectionError, RateLimitError, ValidationError } from '../../../src/utils/errors.js';
 
 describe('Error Message Formatting', () => {
   describe('ConnectionError', () => {
@@ -95,10 +91,7 @@ describe('Error Message Formatting', () => {
     });
 
     it('should provide actionable guidance for file path errors', () => {
-      const error = new ValidationError(
-        'File path is outside the allowed directory',
-        'filePath'
-      );
+      const error = new ValidationError('File path is outside the allowed directory', 'filePath');
       const message = error.getUserMessage();
 
       expect(message).toContain('Validation failed');
@@ -107,4 +100,3 @@ describe('Error Message Formatting', () => {
     });
   });
 });
-

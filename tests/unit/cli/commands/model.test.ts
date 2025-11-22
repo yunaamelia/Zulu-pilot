@@ -36,9 +36,12 @@ describe('model command', () => {
 
     await handleModelCommand({ list: true });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Available models:');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Available models by provider:');
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Default:'));
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Provider-specific models:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Configured provider models:')
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('All available models:'));
   });
 
   it('should set default model', async () => {
@@ -106,7 +109,6 @@ describe('model command', () => {
 
     await handleModelCommand({ list: true });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Available models:');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Available models by provider:');
   });
 });
-

@@ -44,7 +44,9 @@ describe('DiffDisplay', () => {
 
     // Check that addition line contains green color code
     const calls = consoleLogSpy.mock.calls.map((call: unknown[]) => call[0]);
-    const additionCall = calls.find((call: unknown) => typeof call === 'string' && call.includes('+const y = 2'));
+    const additionCall = calls.find(
+      (call: unknown) => typeof call === 'string' && call.includes('+const y = 2')
+    );
     expect(additionCall).toContain('\x1b[32m'); // Green color code
   });
 
@@ -60,7 +62,9 @@ describe('DiffDisplay', () => {
 
     // Check that deletion line contains red color code
     const calls = consoleLogSpy.mock.calls.map((call: unknown[]) => call[0]);
-    const deletionCall = calls.find((call: unknown) => typeof call === 'string' && call.includes('-const y = 2'));
+    const deletionCall = calls.find(
+      (call: unknown) => typeof call === 'string' && call.includes('-const y = 2')
+    );
     expect(deletionCall).toContain('\x1b[31m'); // Red color code
   });
 
@@ -74,7 +78,9 @@ describe('DiffDisplay', () => {
     diffDisplay.display(diff, 'test.ts');
 
     const calls = consoleLogSpy.mock.calls.map((call: unknown[]) => call[0]);
-    expect(calls.some((call: unknown) => typeof call === 'string' && call.startsWith('@@'))).toBe(true);
+    expect(calls.some((call: unknown) => typeof call === 'string' && call.startsWith('@@'))).toBe(
+      true
+    );
   });
 
   it('should handle no newline indicator', () => {
@@ -89,7 +95,9 @@ describe('DiffDisplay', () => {
     diffDisplay.display(diff, 'test.ts');
 
     const calls = consoleLogSpy.mock.calls.map((call: unknown[]) => call[0]);
-    expect(calls.some((call: unknown) => typeof call === 'string' && call.includes('\\ No newline'))).toBe(true);
+    expect(
+      calls.some((call: unknown) => typeof call === 'string' && call.includes('\\ No newline'))
+    ).toBe(true);
   });
 
   it('should display context lines without color', () => {
@@ -105,7 +113,9 @@ describe('DiffDisplay', () => {
     diffDisplay.display(diff, 'test.ts');
 
     const calls = consoleLogSpy.mock.calls.map((call: unknown[]) => call[0]);
-    const contextCall = calls.find((call: unknown) => typeof call === 'string' && call.includes(' const x = 1;'));
+    const contextCall = calls.find(
+      (call: unknown) => typeof call === 'string' && call.includes(' const x = 1;')
+    );
     expect(contextCall).toBeDefined();
     // Context lines should not have color codes
     if (contextCall && typeof contextCall === 'string' && contextCall.includes(' const x = 1;')) {
@@ -119,7 +129,9 @@ describe('DiffDisplay', () => {
 
     diffDisplay.displaySummary(changes);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Proposed changes to 3 file(s):'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('📋 Proposed changes to 3 file(s):')
+    );
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  - test1.ts'));
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  - test2.ts'));
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  - test3.ts'));
@@ -128,14 +140,17 @@ describe('DiffDisplay', () => {
   it('should handle empty changes array in summary', () => {
     diffDisplay.displaySummary([]);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Proposed changes to 0 file(s):'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('📋 Proposed changes to 0 file(s):')
+    );
   });
 
   it('should handle single file change in summary', () => {
     diffDisplay.displaySummary(['test.ts']);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Proposed changes to 1 file(s):'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('📋 Proposed changes to 1 file(s):')
+    );
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  - test.ts'));
   });
 });
-
