@@ -31,21 +31,35 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with Zulu Pilot Constitution principles:
+**Code Quality (I)**: 
+- [ ] Linting and formatting tools configured
+- [ ] Type checking enabled (if applicable)
+- [ ] Code review process defined
 
-- **Code Quality**: Does the design align with code quality standards? Are
-  complexity and maintainability considered?
-- **Testing & Coverage**: Are testing strategies defined? Will coverage
-  thresholds (80% overall, 85% for new code) be met?
-- **User Experience Consistency**: If user-facing, does the design maintain UX
-  consistency? Are accessibility requirements considered?
-- **Pre-Commit Requirements**: Can all required pre-commit checks (quality,
-  testing, security, formatting) pass for this feature?
-- **Performance Requirements**: Are performance targets defined? Do they meet
-  established SLAs and thresholds?
+**Testing with Coverage (II)**:
+- [ ] Test framework selected and configured
+- [ ] Coverage thresholds defined (minimum 80% global, 90% for new code)
+- [ ] Test types planned (unit, integration, contract, E2E as applicable)
 
-**Constitution violations MUST be documented with justification and remediation
-plans.**
+**User Experience Consistency (III)** (if applicable):
+- [ ] Design system/component library identified
+- [ ] Accessibility requirements defined (WCAG 2.1 AA minimum)
+- [ ] Responsive design approach planned
+
+**Pre-commit Quality Gates (IV)**:
+- [ ] Pre-commit hooks configured (.pre-commit-config.yaml)
+- [ ] Hooks include: linting, formatting, type checking, test coverage, security scanning
+- [ ] Hooks verified to run in < 30s
+
+**Performance Requirements (V)**:
+- [ ] Performance targets defined (Web Vitals for web, response times for APIs)
+- [ ] Performance testing strategy planned
+- [ ] Monitoring/alerting approach identified
+
+**Compliance Status**: ✅ All checks pass | ⚠️ Exceptions documented below
+
+**Exceptions** (if any):
+- [Exception description and justification]
 
 ## Project Structure
 

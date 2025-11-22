@@ -1,17 +1,20 @@
 <!--
 Sync Impact Report:
-- Version change: [none] → 1.0.0 (initial constitution)
-- Modified principles: N/A (new document)
-- Added sections:
-  - Core Principles: Code Quality, Testing & Coverage, User Experience Consistency, Pre-Commit Requirements, Performance Requirements
-  - Development Workflow: Pre-Commit Gates, Code Review Standards, Quality Gates
-  - Governance: Amendment Procedure, Versioning Policy, Compliance Review
-- Removed sections: N/A
-- Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md (Constitution Check section exists, will reference new principles)
-  - ✅ .specify/templates/spec-template.md (no changes needed - already supports testing requirements)
-  - ✅ .specify/templates/tasks-template.md (no changes needed - already supports test tasks)
-- Follow-up TODOs: None
+Version: 1.0.0 (initial creation)
+Modified Principles: N/A (new constitution)
+Added Sections:
+  - I. Code Quality (NON-NEGOTIABLE)
+  - II. Testing with Coverage Standards (NON-NEGOTIABLE)
+  - III. User Experience Consistency
+  - IV. Pre-commit Quality Gates (NON-NEGOTIABLE)
+  - V. Performance Requirements
+  - Development Workflow
+  - Governance
+Templates requiring updates:
+  ✅ plan-template.md - Constitution Check section updated
+  ✅ spec-template.md - Testing requirements aligned
+  ✅ tasks-template.md - Testing tasks aligned
+Follow-up TODOs: None
 -->
 
 # Zulu Pilot Constitution
@@ -20,217 +23,216 @@ Sync Impact Report:
 
 ### I. Code Quality (NON-NEGOTIABLE)
 
-All code MUST adhere to established quality standards before merge. Code quality is
-enforced through automated tooling and manual review.
+All code MUST adhere to strict quality standards enforced through automated tooling and code review processes. Code quality is not negotiable and must be maintained at all times.
 
 **Requirements:**
 
-- All code MUST pass static analysis checks (linters, type checkers, code quality
-  scanners) with zero blocking issues
-- Code MUST follow project-specific style guides and formatting standards
-- Code complexity MUST be justified; cyclomatic complexity exceeding thresholds
-  requires explicit documentation of rationale
-- Code smells, technical debt, and maintainability issues MUST be addressed or
-  documented with remediation plans
-- All public APIs, classes, and functions MUST have clear documentation
-- Code MUST be reviewed by at least one peer before merge
+- **Linting**: All code MUST pass ESLint (or language-equivalent linter) with zero errors. Warnings MUST be addressed or explicitly justified in code comments.
+- **Formatting**: Code MUST be automatically formatted using project-standard formatters (e.g., Prettier, Black, gofmt) with consistent style enforced across the codebase.
+- **Type Safety**: TypeScript projects MUST have strict type checking enabled with zero type errors. Dynamically typed languages MUST use type hints/annotations where supported (e.g., Python type hints, JSDoc with @type).
+- **Code Review**: All code changes MUST be reviewed by at least one other developer before merging. Reviewers MUST verify code quality standards are met.
+- **Complexity**: Cyclomatic complexity MUST be kept below 15 per function/method. Functions exceeding this limit MUST be refactored or justified with documentation explaining why complexity is necessary.
+- **Documentation**: Public APIs, complex algorithms, and non-obvious business logic MUST include clear documentation explaining purpose, parameters, return values, and edge cases.
 
-**Rationale:** High code quality reduces bugs, improves maintainability, and
-accelerates development velocity. Automated enforcement ensures consistency and
-catches issues early.
+**Rationale**: High code quality reduces bugs, improves maintainability, enables faster onboarding, and reduces technical debt. Automated enforcement ensures consistency and prevents quality degradation over time.
 
-### II. Testing & Coverage Standards (NON-NEGOTIABLE)
+### II. Testing with Coverage Standards (NON-NEGOTIABLE)
 
-All code changes MUST be accompanied by appropriate tests with measurable coverage
-targets. Testing is a first-class requirement, not an afterthought.
+Comprehensive testing with mandatory coverage thresholds is required for all production code. Tests MUST be written before or alongside implementation (TDD preferred).
 
 **Requirements:**
 
-- All new code MUST have corresponding tests (unit, integration, or contract tests
-  as appropriate)
-- Overall code coverage MUST maintain a minimum of 80% for the entire codebase
-- New code contributions MUST achieve at least 85% coverage for the changed modules
-- Critical paths (authentication, payment processing, data validation) MUST achieve
-  95%+ coverage
-- Coverage reports MUST be generated and reviewed as part of the pre-commit process
-- Tests MUST be fast, reliable, and independent (no test interdependencies)
-- Test failures MUST block commits and merges
-- Flaky tests MUST be fixed or removed immediately
+- **Coverage Thresholds**:
+  - Global minimum: 80% line coverage, 80% branch coverage, 80% function coverage
+  - Critical paths (authentication, payment processing, data validation): 95% coverage minimum
+  - New code: 90% coverage minimum (enforced via pre-commit hooks)
+- **Test Types**: Projects MUST include:
+  - Unit tests for all business logic and utilities
+  - Integration tests for API endpoints, database interactions, and service integrations
+  - Contract tests for external API dependencies
+  - End-to-end tests for critical user journeys (minimum: P1 user stories)
+- **Test Quality**: Tests MUST be:
+  - Independent and isolated (no shared state between tests)
+  - Fast (unit tests < 100ms each, integration tests < 5s each)
+  - Deterministic (same input always produces same output)
+  - Well-named (describe what is being tested and expected outcome)
+- **Coverage Reporting**: Coverage reports MUST be generated on every test run and included in CI/CD pipelines. Coverage MUST NOT decrease below thresholds.
 
-**Coverage Measurement:**
-
-- Line coverage: minimum 80% overall, 85% for new code
-- Branch coverage: minimum 75% overall, 80% for new code
-- Function coverage: minimum 80% overall, 85% for new code
-- Coverage reports MUST be generated in multiple formats (terminal, HTML, XML)
-  for different use cases
-
-**Rationale:** Comprehensive testing prevents regressions, enables confident
-refactoring, and serves as living documentation. Coverage standards ensure
-meaningful test coverage across the codebase.
+**Rationale**: High test coverage catches regressions early, enables confident refactoring, documents expected behavior, and reduces production bugs. Coverage thresholds ensure critical code paths are thoroughly tested.
 
 ### III. User Experience Consistency
 
-User-facing features MUST provide consistent, predictable experiences across all
-interfaces and touchpoints.
+User interfaces MUST maintain visual and behavioral consistency across all features and platforms. Consistency improves usability, reduces cognitive load, and builds user trust.
 
 **Requirements:**
 
-- UI/UX patterns MUST follow established design systems and style guides
-- User-facing text MUST be clear, consistent, and free of technical jargon
-- Error messages MUST be user-friendly, actionable, and consistent in tone
-- Loading states, error states, and empty states MUST be handled consistently
-- Accessibility standards (WCAG 2.1 Level AA minimum) MUST be met for all
-  user-facing features
-- Responsive design MUST be maintained across supported device sizes
-- User workflows MUST be intuitive and follow established patterns
-- Breaking changes to user-facing APIs MUST be versioned and documented
+- **Design System**: Projects with user interfaces MUST use a design system or component library. Custom components MUST follow established design tokens (colors, typography, spacing, shadows).
+- **Component Reuse**: Existing UI components MUST be reused when possible. New components MUST be added to the design system if reusable.
+- **Accessibility**: All user interfaces MUST meet WCAG 2.1 Level AA standards minimum:
+  - Keyboard navigation support
+  - Screen reader compatibility
+  - Color contrast ratios (4.5:1 for normal text, 3:1 for large text)
+  - Focus indicators visible
+  - Form labels and error messages
+- **Responsive Design**: Interfaces MUST be responsive and tested across target device sizes. Mobile-first approach preferred.
+- **Error Handling**: User-facing errors MUST be clear, actionable, and consistent in tone. Error messages MUST not expose technical implementation details.
+- **Loading States**: All asynchronous operations MUST show appropriate loading indicators. Users MUST receive feedback for operations taking > 500ms.
 
-**Rationale:** Consistent user experience reduces cognitive load, improves
-usability, and builds user trust. Consistency is a competitive advantage.
+**Rationale**: Consistent UX reduces user confusion, improves accessibility, speeds up development through component reuse, and creates a cohesive brand experience.
 
-### IV. Pre-Commit Requirements (NON-NEGOTIABLE)
+### IV. Pre-commit Quality Gates (NON-NEGOTIABLE)
 
-All commits MUST pass automated quality gates before being accepted. Pre-commit
-hooks enforce standards automatically and prevent substandard code from entering
-the repository.
+Pre-commit hooks MUST enforce code quality, testing, and security checks before code can be committed. This prevents low-quality code from entering the repository.
 
-**Required Pre-Commit Checks:**
+**Required Pre-commit Hooks:**
 
-- **Code Quality**: Linting, formatting, static analysis, type checking
-- **Testing**: All tests MUST pass; coverage thresholds MUST be met
-- **Security**: Secret detection, dependency vulnerability scanning, security
-  linting
-- **Formatting**: Code formatting (auto-fixable issues MUST be auto-fixed)
-- **Documentation**: Required documentation present and valid
-- **Build**: Project MUST build successfully
-- **Commit Message**: Commit messages MUST follow conventional commit format
+- **Code Quality**:
+  - Linting (ESLint, flake8, golangci-lint, etc.)
+  - Formatting checks (Prettier, Black, gofmt, etc.)
+  - Type checking (TypeScript, mypy, etc.)
+  - Import sorting and organization
+- **Testing**:
+  - Run affected unit tests (fast tests only, < 30s total)
+  - Verify test coverage for changed files meets minimum thresholds
+  - Prevent commits if coverage decreases below thresholds
+- **Security**:
+  - Secret detection (prevent committing API keys, passwords, tokens)
+  - Dependency vulnerability scanning
+  - SQL injection and XSS pattern detection
+- **Documentation**:
+  - Verify required documentation exists for new public APIs
+  - Check that commit messages follow conventional commit format
+- **File Checks**:
+  - Trailing whitespace removal
+  - End-of-file newline enforcement
+  - YAML/JSON validity checks
+  - Large file detection (> 1MB warning)
 
-**Pre-Commit Hook Configuration:**
+**Configuration**: Pre-commit hooks MUST be configured via `.pre-commit-config.yaml` (or equivalent) and installed automatically via setup scripts. Hooks MUST be fast (< 30s total) to avoid developer friction.
 
-- Hooks MUST run on `pre-commit` and `pre-push` stages
-- Hooks MUST be fast (<30 seconds for typical changes)
-- Hooks MUST provide clear, actionable error messages
-- Failed hooks MUST block the commit/push
-- Hooks MUST be version-controlled and reproducible across environments
-
-**Exemptions:**
-
-- Emergency hotfixes may bypass pre-commit with explicit approval (post-commit
-  validation still required)
-- All exemptions MUST be documented and remediated within 24 hours
-
-**Rationale:** Pre-commit enforcement prevents technical debt accumulation,
-reduces review burden, and maintains code quality standards automatically.
+**Rationale**: Pre-commit hooks catch issues before code review, reduce review cycle time, prevent security vulnerabilities, and maintain code quality standards automatically.
 
 ### V. Performance Requirements
 
-All features MUST meet defined performance criteria. Performance is a feature, not
-an optimization to be deferred.
+Applications MUST meet defined performance benchmarks. Performance is a feature, not an optimization to defer.
 
 **Requirements:**
 
-- API endpoints MUST respond within defined SLA thresholds (e.g., p95 < 200ms for
-  standard operations)
-- Database queries MUST be optimized; N+1 queries and missing indexes are
-  blocking issues
-- Frontend pages MUST achieve Core Web Vitals thresholds (LCP < 2.5s, FID < 100ms,
-  CLS < 0.1)
-- Background jobs MUST complete within defined time windows
-- Resource usage (memory, CPU, disk) MUST remain within acceptable bounds
-- Performance regressions MUST be identified and addressed before merge
-- Performance tests MUST be included for critical paths
+- **Web Applications** (if applicable):
+  - Largest Contentful Paint (LCP): < 2.5s (good), < 4.0s (acceptable)
+  - First Input Delay (FID) / Interaction to Next Paint (INP): < 100ms (good), < 300ms (acceptable)
+  - Cumulative Layout Shift (CLS): < 0.1 (good), < 0.25 (acceptable)
+  - Time to First Byte (TTFB): < 800ms (good), < 1.8s (acceptable)
+  - First Contentful Paint (FCP): < 1.8s (good), < 3.0s (acceptable)
+- **API Endpoints**:
+  - P95 response time: < 500ms for standard operations
+  - P99 response time: < 1s for standard operations
+  - P95 response time: < 2s for complex operations (data processing, reports)
+  - Error rate: < 0.1% under normal load
+- **Database Queries**:
+  - All queries MUST complete in < 100ms under normal load
+  - Queries exceeding 100ms MUST be optimized or justified with documentation
+  - N+1 query patterns MUST be eliminated
+- **Performance Testing**:
+  - Performance benchmarks MUST be included in CI/CD pipeline
+  - Performance regressions MUST fail the build
+  - Load testing MUST be performed before major releases
 
-**Performance Monitoring:**
-
-- Performance metrics MUST be tracked and monitored in production
-- Performance budgets MUST be defined and enforced
-- Performance regressions detected in production MUST be prioritized for
-  remediation
-
-**Rationale:** Performance directly impacts user experience and system scalability.
-Proactive performance requirements prevent costly retrofitting.
+**Rationale**: Performance directly impacts user experience, conversion rates, and infrastructure costs. Meeting performance targets ensures applications remain responsive and scalable.
 
 ## Development Workflow
 
-### Pre-Commit Gates
+### Code Review Process
 
-All code changes MUST pass the following gates before commit:
+1. **Pull Request Requirements**:
 
-1. Code quality checks (linting, formatting, static analysis)
-2. All tests passing with coverage thresholds met
-3. Security scans (secrets, vulnerabilities)
-4. Build success
-5. Documentation validation
+   - All PRs MUST pass all pre-commit hooks
+   - All PRs MUST have passing CI/CD checks (tests, linting, coverage, security scans)
+   - PRs MUST include tests for new functionality
+   - PRs MUST not decrease test coverage below thresholds
+   - PRs MUST be reviewed by at least one other developer
+   - PRs MUST be approved before merging (no self-approvals)
 
-### Code Review Standards
+2. **Review Checklist**:
+   - Code quality standards met (linting, formatting, types)
+   - Tests are comprehensive and pass
+   - Coverage thresholds maintained
+   - Performance impact considered
+   - Security implications reviewed
+   - Documentation updated if needed
+   - UX consistency maintained (if applicable)
 
-- All code MUST be reviewed by at least one peer
-- Reviewers MUST verify compliance with constitution principles
-- Reviews MUST check: code quality, test coverage, performance implications,
-  security considerations, user experience consistency
-- Reviews MUST be completed within 48 hours (or escalated)
-- Approval requires explicit confirmation of constitution compliance
+### Testing Workflow
 
-### Quality Gates
+1. **Test-First Development**: Write tests before implementation when possible (TDD). At minimum, tests MUST be written alongside implementation.
+2. **Test Execution**:
+   - Run tests locally before committing
+   - All tests MUST pass in CI/CD before merge
+   - Coverage reports MUST be reviewed in PRs
+3. **Test Maintenance**: Tests MUST be updated when functionality changes. Broken tests MUST be fixed immediately.
 
-The following quality gates MUST pass before merge:
+### Performance Monitoring
 
-- All pre-commit checks passing
-- Code review approval with constitution compliance verified
-- CI/CD pipeline passing (includes extended test suites, integration tests)
-- Coverage reports meeting thresholds
-- Performance benchmarks within acceptable ranges
-- Security scans passing
+1. **Metrics Collection**: Applications MUST collect and report performance metrics (Web Vitals for web, response times for APIs).
+2. **Alerting**: Performance degradation beyond acceptable thresholds MUST trigger alerts.
+3. **Optimization**: Performance issues identified in production MUST be prioritized and addressed within one sprint.
 
 ## Governance
 
-### Amendment Procedure
+### Amendment Process
 
-This constitution supersedes all other development practices and guidelines.
-Amendments to this constitution require:
+1. **Proposal**: Constitution amendments MUST be proposed via pull request with:
+   - Clear rationale for the change
+   - Impact analysis on existing code and processes
+   - Migration plan if the change affects existing code
+2. **Review**: Amendments require review and approval from at least two senior team members or project maintainers.
+3. **Documentation**: All amendments MUST be documented in the Sync Impact Report at the top of this file.
+4. **Versioning**: Constitution versions follow semantic versioning:
+   - **MAJOR**: Backward-incompatible changes (removing principles, changing mandatory requirements)
+   - **MINOR**: New principles or sections added, or significant expansions to existing principles
+   - **PATCH**: Clarifications, wording improvements, typo fixes, non-semantic refinements
 
-1. **Proposal**: Document the proposed change with rationale, impact analysis,
-   and migration plan
-2. **Review**: Technical lead and at least two team members review the proposal
-3. **Approval**: Consensus or majority approval from the development team
-4. **Implementation**: Update constitution, propagate changes to dependent
-   templates and documentation
-5. **Communication**: Announce changes to the team and update onboarding materials
+### Compliance and Enforcement
 
-### Versioning Policy
-
-Constitution versions follow semantic versioning (MAJOR.MINOR.PATCH):
-
-- **MAJOR**: Backward incompatible changes (principle removals, redefinitions
-  that break existing practices)
-- **MINOR**: New principles added, existing principles materially expanded
-- **PATCH**: Clarifications, wording improvements, typo fixes, non-semantic
-  refinements
-
-### Compliance Review
-
-- All pull requests MUST include a constitution compliance checklist
-- Quarterly reviews MUST assess adherence to principles and identify improvement
-  opportunities
-- Violations MUST be documented with remediation plans
-- Constitution compliance is a factor in code review approval
+1. **Constitution Supremacy**: This constitution supersedes all other coding standards, style guides, and development practices. When conflicts arise, the constitution takes precedence.
+2. **Compliance Verification**:
+   - All PRs MUST include a "Constitution Check" section verifying compliance with relevant principles
+   - Automated tools (pre-commit, CI/CD) enforce technical requirements
+   - Code reviews MUST verify non-automated requirements (documentation, UX consistency)
+3. **Exceptions**: Exceptions to constitution principles MUST be:
+   - Documented in PR descriptions with clear justification
+   - Approved by project maintainers
+   - Tracked in a exceptions log for future review
+4. **Regular Review**: Constitution compliance MUST be reviewed quarterly. Violations MUST be addressed through refactoring, documentation updates, or constitution amendments.
 
 ### Technical Decision Guidance
 
-When making technical decisions, this constitution MUST be consulted:
+When making technical decisions, developers MUST consider constitution principles in this order:
 
-- **Architecture decisions**: Evaluate against performance, code quality, and
-  testing principles
-- **Technology choices**: Consider impact on code quality tooling, testing
-  frameworks, and pre-commit integration
-- **Feature implementation**: Ensure user experience consistency and performance
-  requirements are met
-- **Process changes**: Verify alignment with pre-commit and quality gate
-  requirements
+1. **Code Quality**: Does this choice maintain or improve code quality? Does it introduce technical debt?
+2. **Testing**: Can this be tested effectively? Does it maintain coverage thresholds?
+3. **Performance**: Does this meet performance requirements? Will it scale?
+4. **UX Consistency**: Does this maintain design system consistency? Is it accessible?
+5. **Pre-commit**: Can quality be enforced via pre-commit hooks?
 
-All technical decisions that conflict with constitution principles MUST be
-explicitly justified and documented, with a plan to align with principles over
-time.
+If a decision conflicts with a principle, it MUST be:
+
+- Justified with clear rationale
+- Documented in the decision record
+- Approved by maintainers
+- Considered for constitution amendment if it represents a pattern
+
+### Implementation Guidance
+
+- **New Projects**: All new projects MUST be initialized with pre-commit hooks, test frameworks, and linting configured from day one.
+- **Existing Projects**: Existing projects MUST be brought into compliance incrementally:
+  - Phase 1: Add pre-commit hooks (1-2 weeks)
+  - Phase 2: Increase test coverage to thresholds (ongoing, target: 3 months)
+  - Phase 3: Address code quality issues (ongoing, target: 6 months)
+  - Phase 4: Implement performance monitoring (1 month)
+- **Legacy Code**: Legacy code that doesn't meet standards MUST be:
+  - Documented as technical debt
+  - Refactored when modified (boy scout rule: leave code better than you found it)
+  - Gradually improved over time
 
 **Version**: 1.0.0 | **Ratified**: 2025-01-27 | **Last Amended**: 2025-01-27
