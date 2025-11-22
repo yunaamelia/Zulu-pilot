@@ -317,6 +317,10 @@ function createGoogleCloudProvider(
         projectId?: string;
         region?: string;
         model?: string;
+        endpoint?: 'v1beta1' | 'v1';
+        maxTokens?: number;
+        temperature?: number;
+        topP?: number;
         [key: string]: unknown;
       }
     | undefined
@@ -333,5 +337,9 @@ function createGoogleCloudProvider(
     projectId,
     region,
     model: (providerConfig?.model as string | undefined) ?? 'deepseek-ai/deepseek-v3.1-maas',
+    endpoint: providerConfig?.endpoint as 'v1beta1' | 'v1' | undefined,
+    maxTokens: providerConfig?.maxTokens as number | undefined,
+    temperature: providerConfig?.temperature as number | undefined,
+    topP: providerConfig?.topP as number | undefined,
   });
 }

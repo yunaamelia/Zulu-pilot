@@ -8,12 +8,68 @@ import { ConnectionError, RateLimitError } from '../../utils/errors.js';
 const execAsync = promisify(exec);
 
 /**
+ * Model configuration mapping for Google Cloud AI Platform models.
+ */
+interface ModelConfig {
+  endpoint: 'v1beta1' | 'v1';
+  maxTokens: number;
+  temperature: number;
+  topP: number;
+}
+
+/**
+ * Model configuration presets.
+ */
+const MODEL_CONFIGS: Record<string, ModelConfig> = {
+  'deepseek-ai/deepseek-v3.1-maas': {
+    endpoint: 'v1beta1',
+    maxTokens: 32768,
+    temperature: 0.4,
+    topP: 0.95,
+  },
+  'qwen/qwen3-coder-480b-a35b-instruct-maas': {
+    endpoint: 'v1beta1',
+    maxTokens: 32768,
+    temperature: 0.4,
+    topP: 0.8,
+  },
+  'deepseek-ai/deepseek-r1-0528-maas': {
+    endpoint: 'v1beta1',
+    maxTokens: 32768,
+    temperature: 0.4,
+    topP: 0.95,
+  },
+  'moonshotai/kimi-k2-thinking-maas': {
+    endpoint: 'v1',
+    maxTokens: 32768,
+    temperature: 0.4,
+    topP: 0.95,
+  },
+  'openai/gpt-oss-120b-maas': {
+    endpoint: 'v1beta1',
+    maxTokens: 8192,
+    temperature: 0.4,
+    topP: 0.95,
+  },
+  'meta/llama-3.1-405b-instruct-maas': {
+    endpoint: 'v1beta1',
+    maxTokens: 32768,
+    temperature: 0.4,
+    topP: 0.95,
+  },
+};
+
+/**
  * Configuration for GoogleCloudProvider.
  */
 export interface GoogleCloudProviderConfig {
   projectId: string;
   region: string;
   model: string;
+  endpoint?: 'v1beta1' | 'v1';
+  maxTokens?: number;
+  temperature?: number;
+  topP?: number;
   getAccessToken?: () => Promise<string>;
   axiosInstance?: AxiosInstance;
 }
@@ -26,6 +82,10 @@ export class GoogleCloudProvider implements IModelProvider {
   private readonly projectId: string;
   private readonly region: string;
   private readonly model: string;
+  private readonly endpoint: 'v1beta1' | 'v1';
+  private readonly maxTokens: number;
+  private readonly temperature: number;
+  private readonly topP: number;
   private readonly getAccessToken: () => Promise<string>;
   private readonly axiosInstance: AxiosInstance;
 
@@ -33,6 +93,20 @@ export class GoogleCloudProvider implements IModelProvider {
     this.projectId = config.projectId;
     this.region = config.region;
     this.model = config.model;
+
+    // Get model-specific config or use provided/ defaults
+    const modelConfig = MODEL_CONFIGS[config.model] ?? {
+      endpoint: 'v1beta1' as const,
+      maxTokens: 32768,
+      temperature: 0.4,
+      topP: 0.95,
+    };
+
+    this.endpoint = config.endpoint ?? modelConfig.endpoint;
+    this.maxTokens = config.maxTokens ?? modelConfig.maxTokens;
+    this.temperature = config.temperature ?? modelConfig.temperature;
+    this.topP = config.topP ?? modelConfig.topP;
+
     this.getAccessToken =
       config.getAccessToken ??
       (async (): Promise<string> => {
@@ -47,10 +121,14 @@ export class GoogleCloudProvider implements IModelProvider {
           );
         }
       });
+
+    // Build base URL based on endpoint version
+    const baseURL = `https://aiplatform.googleapis.com/${this.endpoint}/projects/${this.projectId}/locations/${this.region}/endpoints/openapi`;
+
     this.axiosInstance =
       config.axiosInstance ??
       axios.create({
-        baseURL: `https://aiplatform.googleapis.com/v1beta1/projects/${this.projectId}/locations/${this.region}/endpoints/openapi`,
+        baseURL,
       });
   }
 
@@ -127,7 +205,7 @@ export class GoogleCloudProvider implements IModelProvider {
    * Build OpenAI-compatible API request body.
    */
   private buildRequest(prompt: string, context: FileContext[], stream: boolean): unknown {
-    const messages: Array<{ role: string; content: string }> = [];
+    const messages: Array<{ role: string; content: string | unknown[] }> = [];
 
     // System prompt with code change format instructions
     const systemPrompt = `You are a coding assistant. When proposing code changes, use this format:
@@ -146,6 +224,7 @@ ${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) =>
     });
 
     // Add user prompt
+    // For Kimi K2, content should be a string, not an array
     messages.push({
       role: 'user',
       content: prompt,
@@ -155,9 +234,9 @@ ${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) =>
       model: this.model,
       messages,
       stream,
-      temperature: 0.4,
-      max_tokens: 32768,
-      top_p: 0.95,
+      temperature: this.temperature,
+      max_tokens: this.maxTokens,
+      top_p: this.topP,
     };
   }
 
