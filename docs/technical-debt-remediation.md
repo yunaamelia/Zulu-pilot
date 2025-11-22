@@ -14,13 +14,35 @@ This document tracks technical debt items that must be addressed to achieve full
 
 **Standard**: Maximum cyclomatic complexity of 10 per function (Constitution Section: Code Quality)
 
+**Current ESLint Configuration**: `complexity: ['warn', 10]` (temporary)
+
+- **Rationale**: Set to 'warn' to allow establishment of standards without blocking existing code
+- **Goal**: Change to `complexity: ['error', 10]` once all violations are fixed
+- **Tracking**: This document tracks all 14+ complexity violations requiring remediation
+
 #### Violations
 
-| File                                  | Function             | Current Complexity | Target | Effort |
-| ------------------------------------- | -------------------- | ------------------ | ------ | ------ |
-| `src/cli/commands/model.ts`           | `handleModelCommand` | 22                 | ≤10    | Medium |
-| `src/core/llm/GoogleCloudProvider.ts` | `streamResponse`     | 23                 | ≤10    | High   |
-| `src/core/llm/GoogleCloudProvider.ts` | `handleAxiosError`   | 26                 | ≤10    | High   |
+**Total**: 14 errors (as of 2025-11-22)
+
+| File                                  | Function                    | Current Complexity | Target | Priority | Effort |
+| ------------------------------------- | --------------------------- | ------------------ | ------ | -------- | ------ |
+| `src/core/llm/GoogleCloudProvider.ts` | `handleAxiosError`          | 26                 | ≤10    | P0       | High   |
+| `src/core/llm/GoogleCloudProvider.ts` | `streamResponse`            | 23                 | ≤10    | P0       | High   |
+| `src/cli/commands/model.ts`           | `handleModelCommand`        | 22                 | ≤10    | P1       | Medium |
+| `src/utils/validators.ts`             | `validateConfiguration`     | 15                 | ≤10    | P1       | Medium |
+| `src/cli/commands/chat.ts`            | `streamResponseWithSpinner` | 14                 | ≤10    | P2       | Medium |
+| `src/cli/commands/chat.ts`            | `createGoogleCloudProvider` | 14                 | ≤10    | P2       | Medium |
+| `src/core/parser/FilePatcher.ts`      | `applyChange`               | 14                 | ≤10    | P2       | Medium |
+| `src/core/llm/GeminiProvider.ts`      | `parseStreamChunk`          | 13                 | ≤10    | P2       | Low    |
+| `src/core/llm/GoogleCloudProvider.ts` | `constructor`               | 13                 | ≤10    | P3       | Low    |
+| `src/core/llm/OllamaProvider.ts`      | `handleError`               | 12                 | ≤10    | P3       | Low    |
+
+**Priority Levels**:
+
+- **P0**: Critical - Core provider logic, blocks quality gates
+- **P1**: High - CLI commands and validators, user-facing
+- **P2**: Medium - UI and parser logic
+- **P3**: Low - Constructors and error handlers
 
 #### Remediation Strategy
 
