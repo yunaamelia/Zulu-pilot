@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { IModelProvider } from './IModelProvider.js';
@@ -77,28 +77,13 @@ export class GoogleCloudProvider implements IModelProvider {
       let buffer = '';
       for await (const chunk of response.data) {
         buffer += chunk.toString();
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-          if (line.trim() === '' || !line.startsWith('data: ')) {
-            continue;
-          }
-
-          const data = line.slice(6).trim();
-          if (data === '[DONE]') {
-            return;
-          }
-
-          try {
-            const parsed = JSON.parse(data);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              yield content;
-            }
-          } catch {
-            // Ignore parse errors
-          }
+        const result = this.parseStreamBuffer(buffer);
+        buffer = result.remainingBuffer;
+        for (const token of result.tokens) {
+          yield token;
+        }
+        if (result.done) {
+          return;
         }
       }
     } catch (error) {
@@ -177,32 +162,85 @@ ${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) =>
   }
 
   /**
+   * Parse stream buffer and extract tokens.
+   */
+  private parseStreamBuffer(buffer: string): {
+    tokens: string[];
+    remainingBuffer: string;
+    done: boolean;
+  } {
+    const lines = buffer.split('\n');
+    const remainingBuffer = lines.pop() ?? '';
+    const tokens: string[] = [];
+    let done = false;
+
+    for (const line of lines) {
+      if (line.trim() === '' || !line.startsWith('data: ')) {
+        continue;
+      }
+
+      const data = line.slice(6).trim();
+      if (data === '[DONE]') {
+        done = true;
+        return { tokens, remainingBuffer: '', done };
+      }
+
+      const content = this.extractContentFromData(data);
+      if (content) {
+        tokens.push(content);
+      }
+    }
+
+    return { tokens, remainingBuffer, done };
+  }
+
+  /**
+   * Extract content from SSE data line.
+   */
+  private extractContentFromData(data: string): string | null {
+    try {
+      const parsed = JSON.parse(data);
+      return parsed.choices?.[0]?.delta?.content ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Handle errors from Google Cloud AI Platform API.
    */
   private handleError(error: unknown): Error {
     if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        return new ConnectionError('Invalid credentials or authentication failed', 'googleCloud');
-      }
-      if (error.response?.status === 429) {
-        const retryAfterHeader =
-          error.response.headers['retry-after'] || error.response.headers['Retry-After'];
-        const retryAfter = retryAfterHeader ? parseInt(String(retryAfterHeader), 10) : undefined;
-        return new RateLimitError('Rate limit exceeded', retryAfter);
-      }
-      if (error.response?.status === 404) {
-        return new ConnectionError('Model or endpoint not found', 'googleCloud');
-      }
-      return new ConnectionError(
-        `Google Cloud AI Platform error: ${error.response?.status} ${error.response?.statusText}`,
-        'googleCloud'
-      );
+      return this.handleAxiosError(error);
     }
     if (error instanceof ConnectionError || error instanceof RateLimitError) {
       return error;
     }
     return new ConnectionError(
       `Failed to connect to Google Cloud AI Platform: ${error instanceof Error ? error.message : String(error)}`,
+      'googleCloud'
+    );
+  }
+
+  /**
+   * Handle Axios errors.
+   */
+  private handleAxiosError(error: AxiosError): Error {
+    const status = error.response?.status;
+    if (status === 401 || status === 403) {
+      return new ConnectionError('Invalid credentials or authentication failed', 'googleCloud');
+    }
+    if (status === 429) {
+      const retryAfterHeader =
+        error.response?.headers['retry-after'] || error.response?.headers['Retry-After'];
+      const retryAfter = retryAfterHeader ? parseInt(String(retryAfterHeader), 10) : undefined;
+      return new RateLimitError('Rate limit exceeded', retryAfter);
+    }
+    if (status === 404) {
+      return new ConnectionError('Model or endpoint not found', 'googleCloud');
+    }
+    return new ConnectionError(
+      `Google Cloud AI Platform error: ${status} ${error.response?.statusText ?? 'Unknown error'}`,
       'googleCloud'
     );
   }

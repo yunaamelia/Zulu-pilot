@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import type { IModelProvider } from './IModelProvider.js';
 import type { FileContext } from '../context/FileContext.js';
 import { ConnectionError, RateLimitError } from '../../utils/errors.js';
@@ -53,58 +53,94 @@ export class OpenAIProvider implements IModelProvider {
       let buffer = '';
       for await (const chunk of response.data) {
         buffer += chunk.toString();
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-          if (line.trim() === '' || !line.startsWith('data: ')) {
-            continue;
-          }
-
-          const data = line.slice(6).trim();
-          if (data === '[DONE]') {
-            return;
-          }
-
-          try {
-            const parsed = JSON.parse(data);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              yield content;
-            }
-          } catch {
-            // Ignore parse errors
-          }
+        const tokens = this.parseStreamBuffer(buffer);
+        buffer = tokens.remainingBuffer;
+        for (const token of tokens.tokens) {
+          yield token;
         }
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          throw new ConnectionError('Invalid API key or authentication failed', 'openai');
-        }
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers['retry-after'];
-          throw new RateLimitError(
-            'Rate limit exceeded',
-            retryAfter ? parseInt(String(retryAfter), 10) : undefined
-          );
-        }
-        if (error.response?.status === 404) {
-          throw new ConnectionError('Model not found', 'openai');
-        }
-        throw new ConnectionError(
-          `API error: ${error.response?.status} ${error.response?.statusText}`,
-          'openai'
-        );
+      throw this.handleStreamError(error);
+    }
+  }
+
+  /**
+   * Parse stream buffer and extract tokens.
+   */
+  private parseStreamBuffer(buffer: string): { tokens: string[]; remainingBuffer: string } {
+    const lines = buffer.split('\n');
+    const remainingBuffer = lines.pop() ?? '';
+    const tokens: string[] = [];
+
+    for (const line of lines) {
+      if (line.trim() === '' || !line.startsWith('data: ')) {
+        continue;
       }
-      if (error instanceof ConnectionError || error instanceof RateLimitError) {
-        throw error;
+
+      const data = line.slice(6).trim();
+      if (data === '[DONE]') {
+        return { tokens, remainingBuffer: '' };
       }
-      throw new ConnectionError(
-        `Failed to connect to API: ${error instanceof Error ? error.message : String(error)}`,
-        'openai'
+
+      const content = this.extractContentFromData(data);
+      if (content) {
+        tokens.push(content);
+      }
+    }
+
+    return { tokens, remainingBuffer };
+  }
+
+  /**
+   * Extract content from SSE data line.
+   */
+  private extractContentFromData(data: string): string | null {
+    try {
+      const parsed = JSON.parse(data);
+      return parsed.choices?.[0]?.delta?.content ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Handle stream errors.
+   */
+  private handleStreamError(error: unknown): Error {
+    if (axios.isAxiosError(error)) {
+      return this.handleAxiosError(error);
+    }
+    if (error instanceof ConnectionError || error instanceof RateLimitError) {
+      return error;
+    }
+    return new ConnectionError(
+      `Failed to connect to API: ${error instanceof Error ? error.message : String(error)}`,
+      'openai'
+    );
+  }
+
+  /**
+   * Handle Axios errors.
+   */
+  private handleAxiosError(error: AxiosError): Error {
+    const status = error.response?.status;
+    if (status === 401 || status === 403) {
+      return new ConnectionError('Invalid API key or authentication failed', 'openai');
+    }
+    if (status === 429) {
+      const retryAfter = error.response?.headers['retry-after'];
+      return new RateLimitError(
+        'Rate limit exceeded',
+        retryAfter ? parseInt(String(retryAfter), 10) : undefined
       );
     }
+    if (status === 404) {
+      return new ConnectionError('Model not found', 'openai');
+    }
+    return new ConnectionError(
+      `API error: ${status} ${error.response?.statusText ?? 'Unknown error'}`,
+      'openai'
+    );
   }
 
   /**
@@ -122,45 +158,29 @@ export class OpenAIProvider implements IModelProvider {
         },
       });
 
-      const choices = response.data.choices;
-      if (!choices || choices.length === 0) {
-        throw new ConnectionError('No response from API', 'openai');
-      }
-
-      const content = choices[0].message?.content;
-      if (!content) {
-        throw new ConnectionError('Empty response from API', 'openai');
-      }
-
-      return content;
+      return this.extractResponseContent(response.data);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          throw new ConnectionError('Invalid API key or authentication failed', 'openai');
-        }
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers['retry-after'];
-          throw new RateLimitError(
-            'Rate limit exceeded',
-            retryAfter ? parseInt(String(retryAfter), 10) : undefined
-          );
-        }
-        if (error.response?.status === 404) {
-          throw new ConnectionError('Model not found', 'openai');
-        }
-        throw new ConnectionError(
-          `API error: ${error.response?.status} ${error.response?.statusText}`,
-          'openai'
-        );
-      }
-      if (error instanceof ConnectionError || error instanceof RateLimitError) {
-        throw error;
-      }
-      throw new ConnectionError(
-        `Failed to connect to API: ${error instanceof Error ? error.message : String(error)}`,
-        'openai'
-      );
+      throw this.handleStreamError(error);
     }
+  }
+
+  /**
+   * Extract content from OpenAI response.
+   */
+  private extractResponseContent(data: {
+    choices?: Array<{ message?: { content?: string } }>;
+  }): string {
+    const choices = data.choices;
+    if (!choices || choices.length === 0) {
+      throw new ConnectionError('No response from API', 'openai');
+    }
+
+    const content = choices[0].message?.content;
+    if (!content) {
+      throw new ConnectionError('Empty response from API', 'openai');
+    }
+
+    return content;
   }
 
   /**

@@ -168,65 +168,117 @@ async function createProvider(
   configManager: ConfigManager
 ): Promise<IModelProvider> {
   switch (providerName) {
-    case 'ollama': {
-      return new OllamaProvider({
-        baseUrl: providerConfig?.baseUrl as string | undefined,
-        model: providerConfig?.model as string | undefined,
-      });
-    }
-
-    case 'gemini': {
-      const apiKey = providerConfig?.apiKey
-        ? configManager.resolveApiKey(providerConfig.apiKey)
-        : undefined;
-      if (!apiKey) {
-        throw new ConnectionError(
-          'Gemini API key not configured. Please set apiKey in provider config.',
-          'gemini'
-        );
-      }
-      return new GeminiProvider({
-        apiKey,
-        model: providerConfig?.model as string | undefined,
-        baseUrl: providerConfig?.baseUrl as string | undefined,
-        enableGoogleSearch: providerConfig?.enableGoogleSearch as boolean | undefined,
-      });
-    }
-
-    case 'openai': {
-      const apiKey = providerConfig?.apiKey
-        ? configManager.resolveApiKey(providerConfig.apiKey)
-        : undefined;
-      if (!apiKey) {
-        throw new ConnectionError(
-          'OpenAI API key not configured. Please set apiKey in provider config.',
-          'openai'
-        );
-      }
-      return new OpenAIProvider({
-        apiKey,
-        baseUrl: (providerConfig?.baseUrl as string | undefined) ?? 'https://api.openai.com/v1',
-        model: (providerConfig?.model as string | undefined) ?? 'gpt-4',
-      });
-    }
-
-    case 'googleCloud': {
-      const projectId = providerConfig?.projectId as string | undefined;
-      const region = providerConfig?.region as string | undefined;
-      if (!projectId || !region) {
-        throw new ConnectionError(
-          'Google Cloud projectId and region must be configured.',
-          'googleCloud'
-        );
-      }
-      return new GoogleCloudProvider({
-        projectId,
-        region,
-        model: (providerConfig?.model as string | undefined) ?? 'deepseek-ai/deepseek-v3.1-maas',
-      });
-    }
-
+    case 'ollama':
+      return createOllamaProvider(providerConfig);
+    case 'gemini':
+      return createGeminiProvider(providerConfig, configManager);
+    case 'openai':
+      return createOpenAIProvider(providerConfig, configManager);
+    case 'googleCloud':
+      return createGoogleCloudProvider(providerConfig);
     default:
       throw new ConnectionError(`Unsupported provider: ${providerName}`, providerName);
   }
+}
+
+/**
+ * Create Ollama provider.
+ */
+function createOllamaProvider(
+  providerConfig: { baseUrl?: string; model?: string; [key: string]: unknown } | undefined
+): IModelProvider {
+  return new OllamaProvider({
+    baseUrl: providerConfig?.baseUrl as string | undefined,
+    model: providerConfig?.model as string | undefined,
+  });
+}
+
+/**
+ * Create Gemini provider.
+ */
+function createGeminiProvider(
+  providerConfig:
+    | {
+        apiKey?: string;
+        baseUrl?: string;
+        model?: string;
+        enableGoogleSearch?: boolean;
+        [key: string]: unknown;
+      }
+    | undefined,
+  configManager: ConfigManager
+): IModelProvider {
+  const apiKey = providerConfig?.apiKey
+    ? configManager.resolveApiKey(providerConfig.apiKey)
+    : undefined;
+  if (!apiKey) {
+    throw new ConnectionError(
+      'Gemini API key not configured. Please set apiKey in provider config.',
+      'gemini'
+    );
+  }
+  return new GeminiProvider({
+    apiKey,
+    model: providerConfig?.model as string | undefined,
+    baseUrl: providerConfig?.baseUrl as string | undefined,
+    enableGoogleSearch: providerConfig?.enableGoogleSearch as boolean | undefined,
+  });
+}
+
+/**
+ * Create OpenAI provider.
+ */
+function createOpenAIProvider(
+  providerConfig:
+    | {
+        apiKey?: string;
+        baseUrl?: string;
+        model?: string;
+        [key: string]: unknown;
+      }
+    | undefined,
+  configManager: ConfigManager
+): IModelProvider {
+  const apiKey = providerConfig?.apiKey
+    ? configManager.resolveApiKey(providerConfig.apiKey)
+    : undefined;
+  if (!apiKey) {
+    throw new ConnectionError(
+      'OpenAI API key not configured. Please set apiKey in provider config.',
+      'openai'
+    );
+  }
+  return new OpenAIProvider({
+    apiKey,
+    baseUrl: (providerConfig?.baseUrl as string | undefined) ?? 'https://api.openai.com/v1',
+    model: (providerConfig?.model as string | undefined) ?? 'gpt-4',
+  });
+}
+
+/**
+ * Create Google Cloud provider.
+ */
+function createGoogleCloudProvider(
+  providerConfig:
+    | {
+        projectId?: string;
+        region?: string;
+        model?: string;
+        [key: string]: unknown;
+      }
+    | undefined
+): IModelProvider {
+  const projectId = providerConfig?.projectId as string | undefined;
+  const region = providerConfig?.region as string | undefined;
+  if (!projectId || !region) {
+    throw new ConnectionError(
+      'Google Cloud projectId and region must be configured.',
+      'googleCloud'
+    );
+  }
+  return new GoogleCloudProvider({
+    projectId,
+    region,
+    model: (providerConfig?.model as string | undefined) ?? 'deepseek-ai/deepseek-v3.1-maas',
+  });
 }

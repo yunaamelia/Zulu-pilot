@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosError } from 'axios';
 import type { IModelProvider } from './IModelProvider.js';
 import type { FileContext } from '../context/FileContext.js';
 import { ConnectionError, RateLimitError } from '../../utils/errors.js';
@@ -48,56 +48,101 @@ export class GeminiProvider implements IModelProvider {
       });
 
       for await (const chunk of response.data) {
-        const text = chunk.toString();
-        const lines = text.split('\n');
-
-        for (const line of lines) {
-          if (line.trim() === '') continue;
-
-          try {
-            const parsed = JSON.parse(line);
-            const textContent = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textContent) {
-              yield textContent;
-            }
-
-            // Check if finished
-            if (parsed.candidates?.[0]?.finishReason === 'STOP') {
-              return;
-            }
-          } catch {
-            // Ignore parse errors
-          }
+        const tokens = this.parseStreamChunk(chunk.toString());
+        for (const token of tokens) {
+          yield token;
         }
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          throw new ConnectionError('Invalid API key or authentication failed', 'gemini');
-        }
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers['retry-after'];
-          throw new RateLimitError(
-            'Rate limit exceeded',
-            retryAfter ? parseInt(String(retryAfter), 10) : undefined
-          );
-        }
-        if (error.response?.status === 404) {
-          throw new ConnectionError('Model not found', 'gemini');
-        }
-        throw new ConnectionError(
-          `Gemini API error: ${error.response?.status} ${error.response?.statusText}`,
-          'gemini'
-        );
+      throw this.handleStreamError(error);
+    }
+  }
+
+  /**
+   * Parse stream chunk and extract tokens.
+   */
+  private *parseStreamChunk(chunkText: string): Generator<string, void, unknown> {
+    const lines = chunkText.split('\n');
+    for (const line of lines) {
+      if (line.trim() === '') {
+        continue;
       }
-      if (error instanceof ConnectionError || error instanceof RateLimitError) {
-        throw error;
+
+      const parsed = this.parseJsonLine(line);
+      if (!parsed) {
+        continue;
       }
-      throw new ConnectionError(
-        `Failed to connect to Gemini API: ${error instanceof Error ? error.message : String(error)}`,
-        'gemini'
+
+      const textContent = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (textContent) {
+        yield textContent;
+      }
+
+      if (parsed.candidates?.[0]?.finishReason === 'STOP') {
+        return;
+      }
+    }
+  }
+
+  /**
+   * Parse JSON line safely.
+   */
+  private parseJsonLine(line: string): {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+      finishReason?: string;
+    }>;
+  } | null {
+    try {
+      return JSON.parse(line) as {
+        candidates?: Array<{
+          content?: { parts?: Array<{ text?: string }> };
+          finishReason?: string;
+        }>;
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Handle stream errors.
+   */
+  private handleStreamError(error: unknown): Error {
+    if (axios.isAxiosError(error)) {
+      return this.handleAxiosError(error);
+    }
+    if (error instanceof ConnectionError || error instanceof RateLimitError) {
+      return error;
+    }
+    return new ConnectionError(
+      `Failed to connect to Gemini API: ${error instanceof Error ? error.message : String(error)}`,
+      'gemini'
+    );
+  }
+
+  /**
+   * Handle Axios errors.
+   */
+  private handleAxiosError(error: AxiosError): Error {
+    const status = error.response?.status;
+    if (status === 401 || status === 403) {
+      return new ConnectionError('Invalid API key or authentication failed', 'gemini');
+    }
+    if (status === 429) {
+      const retryAfter = error.response?.headers['retry-after'];
+      return new RateLimitError(
+        'Rate limit exceeded',
+        retryAfter ? parseInt(String(retryAfter), 10) : undefined
       );
     }
+    if (status === 404) {
+      return new ConnectionError('Model not found', 'gemini');
+    }
+    return new ConnectionError(
+      `Gemini API error: ${status} ${error.response?.statusText ?? 'Unknown error'}`,
+      'gemini'
+    );
   }
 
   /**
@@ -109,46 +154,29 @@ export class GeminiProvider implements IModelProvider {
 
     try {
       const response = await this.axiosInstance.post(url, requestBody);
-
-      const candidates = response.data.candidates;
-      if (!candidates || candidates.length === 0) {
-        throw new ConnectionError('No response from Gemini API', 'gemini');
-      }
-
-      const parts = candidates[0].content?.parts;
-      if (!parts || parts.length === 0) {
-        throw new ConnectionError('Empty response from Gemini API', 'gemini');
-      }
-
-      return parts.map((part: { text?: string }) => part.text ?? '').join('');
+      return this.extractResponseText(response.data);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          throw new ConnectionError('Invalid API key or authentication failed', 'gemini');
-        }
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers['retry-after'];
-          throw new RateLimitError(
-            'Rate limit exceeded',
-            retryAfter ? parseInt(String(retryAfter), 10) : undefined
-          );
-        }
-        if (error.response?.status === 404) {
-          throw new ConnectionError('Model not found', 'gemini');
-        }
-        throw new ConnectionError(
-          `Gemini API error: ${error.response?.status} ${error.response?.statusText}`,
-          'gemini'
-        );
-      }
-      if (error instanceof ConnectionError || error instanceof RateLimitError) {
-        throw error;
-      }
-      throw new ConnectionError(
-        `Failed to connect to Gemini API: ${error instanceof Error ? error.message : String(error)}`,
-        'gemini'
-      );
+      throw this.handleStreamError(error);
     }
+  }
+
+  /**
+   * Extract text from Gemini response.
+   */
+  private extractResponseText(data: {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  }): string {
+    const candidates = data.candidates;
+    if (!candidates || candidates.length === 0) {
+      throw new ConnectionError('No response from Gemini API', 'gemini');
+    }
+
+    const parts = candidates[0].content?.parts;
+    if (!parts || parts.length === 0) {
+      throw new ConnectionError('Empty response from Gemini API', 'gemini');
+    }
+
+    return parts.map((part: { text?: string }) => part.text ?? '').join('');
   }
 
   /**
