@@ -6,14 +6,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import type { Config } from '@google/gemini-cli-core';
-import type { IModelAdapter, GenerateContentParams, GenerateContentResponse } from '@zulu-pilot/adapter';
+import type { IModelAdapter, GenerateContentParams } from '@zulu-pilot/adapter';
 import { GeminiCLIModelAdapter } from '@zulu-pilot/adapter';
 import { MultiProviderRouter } from '@zulu-pilot/adapter';
 import { ProviderRegistry } from '@zulu-pilot/adapter';
-import { OllamaProvider } from '@zulu-pilot/providers';
 import type { UnifiedConfiguration } from '@zulu-pilot/core';
-import { UnifiedConfigManager } from '@zulu-pilot/core';
 
 describe('Integration Test: Interactive Chat Flow (T052)', () => {
   let config: UnifiedConfiguration;
@@ -23,7 +20,6 @@ describe('Integration Test: Interactive Chat Flow (T052)', () => {
 
   beforeEach(async () => {
     // Setup test configuration
-    const configManager = new UnifiedConfigManager();
     config = {
       defaultProvider: 'ollama',
       defaultModel: 'ollama:qwen2.5-coder',
@@ -40,7 +36,7 @@ describe('Integration Test: Interactive Chat Flow (T052)', () => {
 
     // Setup provider registry
     registry = new ProviderRegistry();
-    
+
     // Setup router
     router = new MultiProviderRouter(registry, config);
 
@@ -115,4 +111,3 @@ describe('Integration Test: Interactive Chat Flow (T052)', () => {
     }
   });
 });
-

@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import type { IModelProvider, FileContext } from './IModelProvider.js';
+import type { IModelProvider } from './IModelProvider.js';
+import type { FileContext } from '@zulu-pilot/core';
 import { ConnectionError, RateLimitError, getProviderTimeout } from './utils/errors.js';
 
 /**

@@ -5,12 +5,15 @@
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { ProviderRegistry } from '../../../packages/adapter/src/ProviderRegistry.js';
-import type { ProviderConfiguration } from '../../../packages/core/src/config/ProviderConfiguration.js';
-import type { IModelProvider, ProviderConfig } from '../../../packages/providers/src/IModelProvider.js';
+import type { ProviderConfiguration } from '@zulu-pilot/core';
+import type {
+  IModelProvider,
+  ProviderConfig,
+} from '../../../packages/providers/src/IModelProvider.js';
 
 // Mock provider for testing
 class MockProvider implements IModelProvider {
-  constructor(private readonly name: string) {}
+  constructor(_name: string) {}
 
   async *streamResponse(): AsyncGenerator<string, void, unknown> {
     yield 'test response';
@@ -54,10 +57,10 @@ describe('ProviderRegistry', () => {
   describe('getProvider', () => {
     it('should get provider instance with lazy initialization', () => {
       const factory = (config: ProviderConfig) => new MockProvider(config.name);
-      registry.registerFactory('test', factory);
+      registry.registerFactory('ollama', factory);
 
       const config: ProviderConfiguration = {
-        type: 'test',
+        type: 'ollama',
         name: 'test-provider',
         enabled: true,
       };
@@ -103,4 +106,3 @@ describe('ProviderRegistry', () => {
     });
   });
 });
-

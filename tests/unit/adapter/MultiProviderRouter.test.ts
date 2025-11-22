@@ -6,15 +6,17 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MultiProviderRouter } from '../../../packages/adapter/src/MultiProviderRouter.js';
 import { ProviderRegistry } from '../../../packages/adapter/src/ProviderRegistry.js';
-import type { ProviderConfiguration } from '../../../packages/core/src/config/ProviderConfiguration.js';
-import type { IModelProvider, ProviderConfig } from '../../../packages/providers/src/IModelProvider.js';
-import type { UnifiedConfiguration } from '../../../packages/core/src/config/UnifiedConfiguration.js';
+import type { UnifiedConfiguration } from '@zulu-pilot/core';
+import type {
+  IModelProvider,
+  ProviderConfig,
+} from '../../../packages/providers/src/IModelProvider.js';
 
 // Mock provider for testing
 class MockProvider implements IModelProvider {
   private model: string = 'default-model';
 
-  constructor(private readonly name: string) {}
+  constructor(_name: string) {}
 
   async *streamResponse(): AsyncGenerator<string, void, unknown> {
     yield 'test response';
@@ -63,7 +65,7 @@ describe('MultiProviderRouter', () => {
     registry.registerProvider('ollama', config.providers.ollama);
     registry.registerProvider('openai', config.providers.openai);
 
-    router = new MultiProviderRouter(registry);
+    router = new MultiProviderRouter(registry, config);
   });
 
   describe('parseModelId', () => {
@@ -112,4 +114,3 @@ describe('MultiProviderRouter', () => {
     });
   });
 });
-
