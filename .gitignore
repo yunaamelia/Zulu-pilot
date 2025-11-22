@@ -58,3 +58,4 @@ Thumbs.db
 # Configuration (user-specific)
 .zulu-pilotrc.local
 
+request.json
