@@ -119,7 +119,7 @@ describe('ChatCommand', () => {
       // May fail without actual provider, but we can test the structure
       try {
         await chatCommand.run(options);
-      } catch (error) {
+      } catch {
         // Expected to fail without actual provider setup
         // But we can verify that setZuluPilotAdapter was called
         expect(setAdapterSpy).toHaveBeenCalled();
@@ -295,9 +295,9 @@ describe('ChatCommand', () => {
       };
 
       // Mock to throw error
-      jest.spyOn(UnifiedConfigManager.prototype, 'loadConfig').mockRejectedValue(
-        new Error('Config load failed')
-      );
+      jest
+        .spyOn(UnifiedConfigManager.prototype, 'loadConfig')
+        .mockRejectedValue(new Error('Config load failed'));
 
       await expect(chatCommand.run(options)).rejects.toThrow('Config load failed');
     });
@@ -329,4 +329,3 @@ describe('ChatCommand', () => {
     });
   });
 });
-

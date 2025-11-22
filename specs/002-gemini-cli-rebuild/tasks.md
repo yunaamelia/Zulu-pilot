@@ -208,30 +208,30 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 3
 
-- [ ] T074 [P] [US3] Write unit tests for FileContext entity in tests/unit/core/context/FileContext.test.ts
-- [ ] T075 [P] [US3] Write unit tests for ContextManager in tests/unit/core/context/ContextManager.test.ts
-- [ ] T076 [P] [US3] Write integration test for add command in tests/integration/cli/add-command.test.ts
-- [ ] T077 [P] [US3] Write integration test for context command in tests/integration/cli/context-command.test.ts
-- [ ] T078 [P] [US3] Write integration test for clear command in tests/integration/cli/clear-command.test.ts
-- [ ] T079 [P] [US3] Write E2E test for context management workflow in tests/e2e/full-workflows/context-management.test.ts
+- [x] T074 [P] [US3] Write unit tests for FileContext entity in tests/unit/core/context/FileContext.test.ts
+- [x] T075 [P] [US3] Write unit tests for ContextManager in tests/unit/core/context/ContextManager.test.ts
+- [x] T076 [P] [US3] Write integration test for add command in tests/integration/cli/add-command.test.ts
+- [x] T077 [P] [US3] Write integration test for context command in tests/integration/cli/context-command.test.ts
+- [x] T078 [P] [US3] Write integration test for clear command in tests/integration/cli/clear-command.test.ts
+- [x] T079 [P] [US3] Write E2E test for context management workflow in tests/e2e/full-workflows/context-management.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T080 [P] [US3] Port FileContext interface from current Zulu Pilot to packages/core/src/context/FileContext.ts
-- [ ] T081 [P] [US3] Port ContextManager from current Zulu Pilot to packages/core/src/context/ContextManager.ts
-- [ ] T082 [P] [US3] Port TokenEstimator from current Zulu Pilot to packages/core/src/context/TokenEstimator.ts
-- [ ] T083 [US3] Create AddCommand class in packages/cli/src/commands/add.ts
-- [ ] T084 [US3] Implement file path validation with directory traversal prevention in packages/cli/src/commands/add.ts (reject paths with `../`, absolute paths outside base directory, validate against allowed directories per FR-016)
-- [ ] T085 [US3] Implement glob pattern support in packages/cli/src/commands/add.ts
-- [ ] T086 [US3] Implement token estimation and warnings in packages/cli/src/commands/add.ts
-- [ ] T087 [US3] Create ContextCommand class in packages/cli/src/commands/context.ts
-- [ ] T088 [US3] Implement context listing with metadata in packages/cli/src/commands/context.ts
-- [ ] T089 [US3] Create ClearCommand class in packages/cli/src/commands/clear.ts
-- [ ] T090 [US3] Implement context clearing with confirmation in packages/cli/src/commands/clear.ts
-- [ ] T091 [US3] Integrate context with adapter for prompt generation in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T092 [US3] Write unit tests for AddCommand in tests/unit/cli/commands/add.test.ts (90%+ coverage)
-- [ ] T093 [US3] Write unit tests for ContextCommand in tests/unit/cli/commands/context.test.ts (90%+ coverage)
-- [ ] T094 [US3] Write unit tests for ClearCommand in tests/unit/cli/commands/clear.test.ts (90%+ coverage)
+- [x] T080 [P] [US3] Port FileContext interface from current Zulu Pilot to packages/core/src/context/FileContext.ts
+- [x] T081 [P] [US3] Port ContextManager from current Zulu Pilot to packages/core/src/context/ContextManager.ts
+- [x] T082 [P] [US3] Port TokenEstimator from current Zulu Pilot to packages/core/src/context/TokenEstimator.ts
+- [x] T083 [US3] Create AddCommand class in packages/cli/src/commands/add.ts
+- [x] T084 [US3] Implement file path validation with directory traversal prevention in packages/cli/src/commands/add.ts (reject paths with `../`, absolute paths outside base directory, validate against allowed directories per FR-016)
+- [x] T085 [US3] Implement glob pattern support in packages/cli/src/commands/add.ts
+- [x] T086 [US3] Implement token estimation and warnings in packages/cli/src/commands/add.ts
+- [x] T087 [US3] Create ContextCommand class in packages/cli/src/commands/context.ts
+- [x] T088 [US3] Implement context listing with metadata in packages/cli/src/commands/context.ts
+- [x] T089 [US3] Create ClearCommand class in packages/cli/src/commands/clear.ts
+- [x] T090 [US3] Implement context clearing with confirmation in packages/cli/src/commands/clear.ts
+- [x] T091 [US3] Integrate context with adapter for prompt generation in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T092 [US3] Write unit tests for AddCommand in tests/unit/cli/commands/add.test.ts (90%+ coverage)
+- [x] T093 [US3] Write unit tests for ContextCommand in tests/unit/cli/commands/context.test.ts (90%+ coverage)
+- [x] T094 [US3] Write unit tests for ClearCommand in tests/unit/cli/commands/clear.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 3 complete - context management working with custom models
 

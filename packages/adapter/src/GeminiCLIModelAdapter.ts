@@ -5,10 +5,15 @@
  * @package @zulu-pilot/adapter
  */
 
-import type { IModelAdapter, GenerateContentParams, GenerateContentResponse } from './interfaces/IModelAdapter.js';
+import type {
+  IModelAdapter,
+  GenerateContentParams,
+  GenerateContentResponse,
+} from './interfaces/IModelAdapter.js';
 import type { IModelProvider, FileContext } from '@zulu-pilot/providers';
 import { MultiProviderRouter } from './MultiProviderRouter.js';
 import type { UnifiedConfiguration } from '@zulu-pilot/core';
+import type { ContextManager } from '@zulu-pilot/core';
 
 /**
  * Gemini CLI Model Adapter
@@ -18,14 +23,22 @@ import type { UnifiedConfiguration } from '@zulu-pilot/core';
 export class GeminiCLIModelAdapter implements IModelAdapter {
   private readonly router: MultiProviderRouter;
   private readonly config: UnifiedConfiguration;
+  private contextManager?: ContextManager;
 
-  constructor(router: MultiProviderRouter, config: UnifiedConfiguration) {
+  constructor(
+    router: MultiProviderRouter,
+    config: UnifiedConfiguration,
+    contextManager?: ContextManager
+  ) {
     this.router = router;
     this.config = config;
+    this.contextManager = contextManager;
   }
 
   /**
+   * T091: Integrate context with adapter for prompt generation
    * Convert Gemini CLI contents to provider prompt and file context
+   * Merges context from ContextManager with any file references in the prompt
    *
    * @param contents - Gemini CLI format contents
    * @returns Object with prompt and file contexts
@@ -34,7 +47,12 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
     prompt: string;
     context: FileContext[];
   } {
-    const context: FileContext[] = [];
+    // T091: Get context from ContextManager if available
+    const contextManagerContext: FileContext[] = this.contextManager
+      ? this.contextManager.getContext()
+      : [];
+
+    const context: FileContext[] = [...contextManagerContext];
     const promptParts: string[] = [];
 
     for (const content of contents) {
@@ -50,8 +68,19 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
       }
     }
 
+    // T091: If context is available, prepend context information to prompt
+    let prompt = promptParts.join('\n');
+    if (context.length > 0) {
+      const contextInfo = context.map((file) => {
+        const path = file.path;
+        const content = file.content;
+        return `--- File: ${path} ---\n${content}\n--- End of ${path} ---`;
+      });
+      prompt = `--- Context Files (${context.length} files) ---\n${contextInfo.join('\n\n')}\n--- End of Context Files ---\n\n${prompt}`;
+    }
+
     return {
-      prompt: promptParts.join('\n'),
+      prompt,
       context,
     };
   }
@@ -133,5 +162,23 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
   switchProvider(providerName: string): void {
     this.router.switchProvider(providerName);
   }
-}
 
+  /**
+   * T091: Set ContextManager for this adapter
+   * This allows the adapter to use context added via CLI commands
+   *
+   * @param contextManager - ContextManager instance
+   */
+  setContextManager(contextManager: ContextManager): void {
+    this.contextManager = contextManager;
+  }
+
+  /**
+   * Get ContextManager instance
+   *
+   * @returns ContextManager instance or undefined
+   */
+  getContextManager(): ContextManager | undefined {
+    return this.contextManager;
+  }
+}

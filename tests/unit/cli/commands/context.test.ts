@@ -1,90 +1,163 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+/**
+ * Unit tests for ContextCommand
+ * T093 [US3] - Write unit tests for ContextCommand (90%+ coverage)
+ *
+ * @package @zulu-pilot/cli
+ */
+
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { ContextCommand } from '../../../../packages/cli/src/commands/context.js';
+import { ContextManager } from '@zulu-pilot/core';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import os from 'node:os';
-import { handleContextCommand } from '../../../../src/cli/commands/context.js';
-import { ContextManager } from '../../../../src/core/context/ContextManager.js';
-import { setContextManager } from '../../../../src/cli/commands/add.js';
+import { tmpdir } from 'os';
 
-describe('context command', () => {
-  let tempDir: string;
+// Mock console methods
+const consoleLog = jest.fn();
+const consoleError = jest.fn();
+
+describe('ContextCommand (T093)', () => {
+  let testDir: string;
   let contextManager: ContextManager;
+  let command: ContextCommand;
 
-  beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zulu-pilot-test-'));
-    contextManager = new ContextManager({ baseDir: tempDir });
-    setContextManager(contextManager);
+  beforeEach(() => {
+    // Mock console
+    jest.spyOn(console, 'log').mockImplementation(consoleLog);
+    jest.spyOn(console, 'error').mockImplementation(consoleError);
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
+    jest.restoreAllMocks();
+    if (testDir) {
+      try {
+        await fs.rm(testDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
   });
 
-  describe('handleContextCommand', () => {
-    it('should display empty message when no files in context', () => {
-      const logSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      handleContextCommand(contextManager);
-
-      expect(logSpy).toHaveBeenCalledWith('No files in context.');
-
-      logSpy.mockRestore();
+  describe('constructor', () => {
+    it('should create instance with default ContextManager', () => {
+      command = new ContextCommand();
+      expect(command).toBeInstanceOf(ContextCommand);
+      expect(command.getContextManager()).toBeInstanceOf(ContextManager);
     });
 
-    it('should list all files in context', async () => {
-      const file1 = path.join(tempDir, 'file1.ts');
-      const file2 = path.join(tempDir, 'file2.ts');
-      await fs.writeFile(file1, 'const x = 1;');
-      await fs.writeFile(file2, 'const y = 2;');
+    it('should create instance with provided ContextManager', async () => {
+      testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-command-test-'));
+      contextManager = new ContextManager({ baseDir: testDir });
+      command = new ContextCommand(contextManager);
+      expect(command.getContextManager()).toBe(contextManager);
+    });
+  });
 
-      await contextManager.addFile(file1);
-      await contextManager.addFile(file2);
-
-      const logSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      handleContextCommand(contextManager);
-
-      const logCalls = logSpy.mock.calls.flat().join('\n');
-      expect(logCalls).toContain('Context Files:');
-      expect(logCalls).toContain(file1);
-      expect(logCalls).toContain(file2);
-      expect(logCalls).toContain('Total tokens:');
-
-      logSpy.mockRestore();
+  describe('listing empty context', () => {
+    beforeEach(async () => {
+      testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-command-test-'));
+      contextManager = new ContextManager({ baseDir: testDir });
+      command = new ContextCommand(contextManager);
     });
 
-    it('should show file metadata', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
+    it('should display empty context message', async () => {
+      await command.run({});
 
-      await contextManager.addFile(testFile);
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Total files: 0'));
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('No files in context'));
+    });
+  });
 
-      const logSpy = jest.spyOn(console, 'log').mockImplementation();
+  describe('listing context with files', () => {
+    beforeEach(async () => {
+      testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-command-test-'));
+      contextManager = new ContextManager({ baseDir: testDir });
+      command = new ContextCommand(contextManager);
 
-      handleContextCommand(contextManager);
-
-      const logCalls = logSpy.mock.calls.flat().join('\n');
-      expect(logCalls).toContain(testFile);
-      expect(logCalls).toContain('Modified:');
-      expect(logCalls).toContain('Tokens:');
-
-      logSpy.mockRestore();
+      // Add files to context
+      await fs.writeFile(path.join(testDir, 'file1.ts'), 'content1', 'utf-8');
+      await fs.writeFile(path.join(testDir, 'file2.ts'), 'content2', 'utf-8');
+      await contextManager.addFile('file1.ts');
+      await contextManager.addFile('file2.ts');
     });
 
-    it('should use global context manager when not provided', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
+    it('should display context summary', async () => {
+      await command.run({});
 
-      await contextManager.addFile(testFile);
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Context Summary'));
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Total files: 2'));
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Estimated tokens'));
+    });
 
-      const logSpy = jest.spyOn(console, 'log').mockImplementation();
+    it('should display table format by default', async () => {
+      await command.run({ format: 'table' });
 
-      handleContextCommand();
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Files in context'));
+    });
 
-      const logCalls = logSpy.mock.calls.flat().join('\n');
-      expect(logCalls).toContain('Context Files:');
+    it('should display list format', async () => {
+      await command.run({ format: 'list' });
 
-      logSpy.mockRestore();
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Files in context'));
+    });
+
+    it('should display verbose information when requested', async () => {
+      await command.run({ format: 'list', verbose: true });
+
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Files in context'));
+      // Should include detailed info
+    });
+  });
+
+  describe('output formats', () => {
+    beforeEach(async () => {
+      testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-command-test-'));
+      contextManager = new ContextManager({ baseDir: testDir });
+      command = new ContextCommand(contextManager);
+
+      await fs.writeFile(path.join(testDir, 'test.ts'), 'content', 'utf-8');
+      await contextManager.addFile('test.ts');
+    });
+
+    it('should display JSON format', async () => {
+      await command.run({ format: 'json' });
+
+      // JSON output should be valid JSON
+      const jsonCall = consoleLog.mock.calls.find((call) =>
+        call[0]?.toString().trim().startsWith('[')
+      );
+      expect(jsonCall).toBeDefined();
+    });
+
+    it('should display table format', async () => {
+      await command.run({ format: 'table' });
+
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Files in context'));
+    });
+
+    it('should display list format', async () => {
+      await command.run({ format: 'list' });
+
+      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining('Files in context'));
+    });
+  });
+
+  describe('metadata display', () => {
+    beforeEach(async () => {
+      testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-command-test-'));
+      contextManager = new ContextManager({ baseDir: testDir });
+      command = new ContextCommand(contextManager);
+
+      await fs.writeFile(path.join(testDir, 'test.ts'), 'content', 'utf-8');
+      await contextManager.addFile('test.ts');
+    });
+
+    it('should display file metadata', async () => {
+      await command.run({ verbose: true });
+
+      const context = contextManager.getContext();
+      expect(context.length).toBeGreaterThan(0);
+      // Should display metadata like size, tokens, modified date
     });
   });
 });

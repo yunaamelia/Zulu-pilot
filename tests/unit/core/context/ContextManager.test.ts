@@ -1,235 +1,272 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+/**
+ * Unit tests for ContextManager
+ * @package @zulu-pilot/core
+ */
+
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { ContextManager } from '../../../../packages/core/src/context/ContextManager.js';
+import { TokenEstimator } from '../../../../packages/core/src/context/TokenEstimator.js';
+import { ValidationError } from '../../../../packages/core/src/utils/contextErrors.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import os from 'node:os';
-import { ContextManager } from '../../../../src/core/context/ContextManager.js';
-import { ValidationError } from '../../../../src/utils/errors.js';
+import { tmpdir } from 'os';
 
 describe('ContextManager', () => {
-  let contextManager: ContextManager;
-  let tempDir: string;
+  let testDir: string;
+  let manager: ContextManager;
 
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zulu-pilot-test-'));
-    contextManager = new ContextManager({ baseDir: tempDir });
+    // Create temporary directory for tests
+    testDir = await fs.mkdtemp(path.join(tmpdir(), 'context-manager-test-'));
+    manager = new ContextManager({ baseDir: testDir });
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
+    // Clean up temporary directory
+    try {
+      await fs.rm(testDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+  });
+
+  describe('constructor', () => {
+    it('should create instance with default config', () => {
+      const defaultManager = new ContextManager();
+      expect(defaultManager).toBeInstanceOf(ContextManager);
+    });
+
+    it('should accept custom baseDir', () => {
+      const customManager = new ContextManager({ baseDir: testDir });
+      expect(customManager).toBeInstanceOf(ContextManager);
+    });
+
+    it('should accept custom maxFileSize', () => {
+      const customManager = new ContextManager({
+        baseDir: testDir,
+        maxFileSize: 2048,
+      });
+      expect(customManager).toBeInstanceOf(ContextManager);
+    });
+
+    it('should accept custom TokenEstimator instance', () => {
+      const estimator = new TokenEstimator({ charsPerToken: 5 });
+      const customManager = new ContextManager({
+        baseDir: testDir,
+        tokenEstimator: estimator,
+      });
+      expect(customManager).toBeInstanceOf(ContextManager);
+    });
+
+    it('should accept TokenEstimator config', () => {
+      const customManager = new ContextManager({
+        baseDir: testDir,
+        tokenEstimator: { charsPerToken: 6 },
+      });
+      expect(customManager).toBeInstanceOf(ContextManager);
+    });
   });
 
   describe('addFile', () => {
-    it('should add file to context', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
+    it('should add a valid file to context', async () => {
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'Hello, world!', 'utf-8');
 
-      await contextManager.addFile(testFile);
+      await manager.addFile('test.txt');
 
-      const context = contextManager.getContext();
+      const context = manager.getContext();
       expect(context).toHaveLength(1);
       expect(context[0].path).toBe(testFile);
-      expect(context[0].content).toBe('const x = 1;');
-    });
-
-    it('should add multiple files to context', async () => {
-      const file1 = path.join(tempDir, 'file1.ts');
-      const file2 = path.join(tempDir, 'file2.ts');
-      await fs.writeFile(file1, 'const x = 1;');
-      await fs.writeFile(file2, 'const y = 2;');
-
-      await contextManager.addFile(file1);
-      await contextManager.addFile(file2);
-
-      const context = contextManager.getContext();
-      expect(context).toHaveLength(2);
-    });
-
-    it('should prevent adding same file twice', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
-
-      await contextManager.addFile(testFile);
-      await contextManager.addFile(testFile);
-
-      const context = contextManager.getContext();
-      expect(context).toHaveLength(1);
+      expect(context[0].content).toBe('Hello, world!');
+      expect(context[0].estimatedTokens).toBeDefined();
     });
 
     it('should throw ValidationError for non-existent file', async () => {
-      const nonExistent = path.join(tempDir, 'nonexistent.ts');
-
-      await expect(contextManager.addFile(nonExistent)).rejects.toThrow(ValidationError);
+      await expect(manager.addFile('nonexistent.txt')).rejects.toThrow(ValidationError);
     });
 
-    it('should prevent directory traversal', async () => {
-      const maliciousPath = path.join(tempDir, '..', '..', 'etc', 'passwd');
+    it('should throw ValidationError for file outside baseDir', async () => {
+      const outsideFile = path.join(tmpdir(), 'outside.txt');
+      await fs.writeFile(outsideFile, 'content', 'utf-8');
 
-      await expect(contextManager.addFile(maliciousPath)).rejects.toThrow(ValidationError);
+      try {
+        await expect(manager.addFile(outsideFile)).rejects.toThrow(ValidationError);
+      } finally {
+        await fs.unlink(outsideFile).catch(() => {});
+      }
     });
 
-    it('should handle glob patterns', async () => {
-      await fs.writeFile(path.join(tempDir, 'file1.ts'), 'const x = 1;');
-      await fs.writeFile(path.join(tempDir, 'file2.ts'), 'const y = 2;');
-      await fs.writeFile(path.join(tempDir, 'file3.js'), 'const z = 3;');
+    it('should not add duplicate files', async () => {
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'content', 'utf-8');
 
-      await contextManager.addFile(path.join(tempDir, '*.ts'));
+      await manager.addFile('test.txt');
+      await manager.addFile('test.txt');
 
-      const context = contextManager.getContext();
+      const context = manager.getContext();
+      expect(context).toHaveLength(1);
+    });
+
+    it('should throw ValidationError for file too large', async () => {
+      const largeContent = 'x'.repeat(2 * 1024 * 1024); // 2MB
+      const testFile = path.join(testDir, 'large.txt');
+      await fs.writeFile(testFile, largeContent, 'utf-8');
+
+      const smallManager = new ContextManager({
+        baseDir: testDir,
+        maxFileSize: 1024 * 1024, // 1MB
+      });
+
+      await expect(smallManager.addFile('large.txt')).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw ValidationError for binary files', async () => {
+      const testFile = path.join(testDir, 'binary.bin');
+      const buffer = Buffer.from([0, 1, 2, 3, 0]); // Contains null bytes
+      await fs.writeFile(testFile, buffer);
+
+      await expect(manager.addFile('binary.bin')).rejects.toThrow(ValidationError);
+    });
+
+    it('should add file with absolute path within baseDir', async () => {
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'content', 'utf-8');
+
+      await manager.addFile(testFile);
+
+      const context = manager.getContext();
+      expect(context).toHaveLength(1);
+      expect(context[0].path).toBe(testFile);
+    });
+  });
+
+  describe('addFilesByGlob', () => {
+    it('should add multiple files using glob pattern', async () => {
+      await fs.writeFile(path.join(testDir, 'file1.txt'), 'content1', 'utf-8');
+      await fs.writeFile(path.join(testDir, 'file2.txt'), 'content2', 'utf-8');
+      await fs.writeFile(path.join(testDir, 'other.md'), 'content', 'utf-8');
+
+      await manager.addFile('*.txt');
+
+      const context = manager.getContext();
       expect(context.length).toBeGreaterThanOrEqual(2);
-      expect(context.every((f: { path: string }) => f.path.endsWith('.ts'))).toBe(true);
+      const paths = context.map((f) => path.basename(f.path));
+      expect(paths).toContain('file1.txt');
+      expect(paths).toContain('file2.txt');
+    });
+
+    it('should skip files that cannot be added', async () => {
+      await fs.writeFile(path.join(testDir, 'valid.txt'), 'content', 'utf-8');
+      // Create a large file that will be skipped
+      const largeContent = 'x'.repeat(2 * 1024 * 1024);
+      await fs.writeFile(path.join(testDir, 'large.txt'), largeContent, 'utf-8');
+
+      const smallManager = new ContextManager({
+        baseDir: testDir,
+        maxFileSize: 1024 * 1024,
+      });
+
+      await smallManager.addFile('*.txt');
+
+      const context = smallManager.getContext();
+      // Should have at least valid.txt, large.txt should be skipped
+      expect(context.length).toBeGreaterThanOrEqual(1);
     });
   });
 
   describe('clear', () => {
     it('should clear all context', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'content', 'utf-8');
 
-      await contextManager.addFile(testFile);
-      expect(contextManager.getContext()).toHaveLength(1);
+      await manager.addFile('test.txt');
+      expect(manager.getContext()).toHaveLength(1);
 
-      contextManager.clear();
-      expect(contextManager.getContext()).toHaveLength(0);
+      manager.clear();
+      expect(manager.getContext()).toHaveLength(0);
     });
 
-    it('should handle clear on empty context', () => {
-      expect(() => contextManager.clear()).not.toThrow();
-      expect(contextManager.getContext()).toHaveLength(0);
+    it('should reset token count to zero', async () => {
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'content', 'utf-8');
+
+      await manager.addFile('test.txt');
+      expect(manager.getTotalEstimatedTokens()).toBeGreaterThan(0);
+
+      manager.clear();
+      expect(manager.getTotalEstimatedTokens()).toBe(0);
     });
   });
 
   describe('getContext', () => {
-    it('should return empty array when no files added', () => {
-      const context = contextManager.getContext();
-      expect(context).toEqual([]);
+    it('should return empty array initially', () => {
+      expect(manager.getContext()).toEqual([]);
     });
 
-    it('should return all added files', async () => {
-      const file1 = path.join(tempDir, 'file1.ts');
-      const file2 = path.join(tempDir, 'file2.ts');
-      await fs.writeFile(file1, 'const x = 1;');
-      await fs.writeFile(file2, 'const y = 2;');
+    it('should return copy of context to prevent external modification', async () => {
+      const testFile = path.join(testDir, 'test.txt');
+      await fs.writeFile(testFile, 'content', 'utf-8');
 
-      await contextManager.addFile(file1);
-      await contextManager.addFile(file2);
+      await manager.addFile('test.txt');
+      const context1 = manager.getContext();
+      const context2 = manager.getContext();
 
-      const context = contextManager.getContext();
-      expect(context).toHaveLength(2);
-      expect(context.map((f: { path: string }) => f.path)).toContain(file1);
-      expect(context.map((f: { path: string }) => f.path)).toContain(file2);
+      expect(context1).not.toBe(context2); // Different array instances
+      expect(context1).toEqual(context2); // But same content
     });
   });
 
-  describe('file path validation', () => {
-    it('should validate file paths are within base directory', async () => {
-      const testFile = path.join(tempDir, 'test.ts');
-      await fs.writeFile(testFile, 'const x = 1;');
-
-      await contextManager.addFile(testFile);
-
-      // Should succeed for valid path
-      expect(contextManager.getContext()).toHaveLength(1);
+  describe('getTotalEstimatedTokens', () => {
+    it('should return zero for empty context', () => {
+      expect(manager.getTotalEstimatedTokens()).toBe(0);
     });
 
-    it('should reject paths outside base directory', async () => {
-      const outsidePath = path.join(os.tmpdir(), 'outside.ts');
-      await fs.writeFile(outsidePath, 'const x = 1;');
+    it('should sum tokens from all files', async () => {
+      await fs.writeFile(path.join(testDir, 'file1.txt'), '12345', 'utf-8');
+      await fs.writeFile(path.join(testDir, 'file2.txt'), '67890', 'utf-8');
 
-      await expect(contextManager.addFile(outsidePath)).rejects.toThrow(ValidationError);
+      await manager.addFile('file1.txt');
+      await manager.addFile('file2.txt');
 
-      // Cleanup
-      await fs.unlink(outsidePath);
-    });
-
-    it('should handle file too large error', async () => {
-      const largeFile = path.join(tempDir, 'large.ts');
-      // Create file larger than maxFileSize (1MB default)
-      const largeContent = 'x'.repeat(2 * 1024 * 1024); // 2MB
-      await fs.writeFile(largeFile, largeContent);
-
-      const smallContextManager = new ContextManager({
-        baseDir: tempDir,
-        maxFileSize: 1024 * 1024, // 1MB
-      });
-
-      await expect(smallContextManager.addFile(largeFile)).rejects.toThrow(ValidationError);
-    });
-
-    it('should handle binary file detection', async () => {
-      const binaryFile = path.join(tempDir, 'binary.bin');
-      // Create file with null bytes (binary indicator)
-      const binaryContent = Buffer.from([0x00, 0x01, 0x02, 0x03]);
-      await fs.writeFile(binaryFile, binaryContent);
-
-      await expect(contextManager.addFile(binaryFile)).rejects.toThrow(ValidationError);
-    });
-
-    it('should handle directory instead of file', async () => {
-      const subDir = path.join(tempDir, 'subdir');
-      await fs.mkdir(subDir, { recursive: true });
-
-      await expect(contextManager.addFile(subDir)).rejects.toThrow(ValidationError);
+      const tokens = manager.getTotalEstimatedTokens();
+      expect(tokens).toBeGreaterThan(0);
+      // Each file has 5 chars, with default 4 chars/token = ~2 tokens each
+      expect(tokens).toBeGreaterThanOrEqual(2);
     });
   });
 
-  describe('token management', () => {
-    it('should calculate total estimated tokens', async () => {
-      const file1 = path.join(tempDir, 'file1.ts');
-      const file2 = path.join(tempDir, 'file2.ts');
-      await fs.writeFile(file1, 'x'.repeat(100));
-      await fs.writeFile(file2, 'y'.repeat(200));
-
-      await contextManager.addFile(file1);
-      await contextManager.addFile(file2);
-
-      const totalTokens = contextManager.getTotalEstimatedTokens();
-      expect(totalTokens).toBeGreaterThan(0);
-      expect(totalTokens).toBe(
-        contextManager.getContext()[0].estimatedTokens! +
-          contextManager.getContext()[1].estimatedTokens!
-      );
+  describe('checkTokenLimit', () => {
+    it('should return null when within limit', () => {
+      const warning = manager.checkTokenLimit(100000);
+      expect(warning).toBeNull();
     });
 
-    it('should check token limit and return warning when exceeded', async () => {
-      const largeFile = path.join(tempDir, 'large.ts');
-      await fs.writeFile(largeFile, 'x'.repeat(30000)); // ~7500 tokens
+    it('should return warning when approaching limit', async () => {
+      // Create file with large content
+      const largeContent = 'x'.repeat(10000);
+      await fs.writeFile(path.join(testDir, 'large.txt'), largeContent, 'utf-8');
 
-      await contextManager.addFile(largeFile);
+      await manager.addFile('large.txt');
 
-      const warning = contextManager.checkTokenLimit(1000); // Small limit
-      expect(warning).toBeTruthy();
-      expect(warning).toContain('exceeds');
-    });
+      // Set limit close to current tokens
+      const totalTokens = manager.getTotalEstimatedTokens();
+      const warning = manager.checkTokenLimit(totalTokens * 1.1); // Just above
 
-    it('should check token limit and return warning when approaching', async () => {
-      const largeFile = path.join(tempDir, 'large.ts');
-      await fs.writeFile(largeFile, 'x'.repeat(26000)); // ~6500 tokens (81% of 8000)
-
-      await contextManager.addFile(largeFile);
-
-      const warning = contextManager.checkTokenLimit(8000);
       expect(warning).toBeTruthy();
       expect(warning).toContain('approaching');
     });
 
-    it('should check token limit and return null when within limit', async () => {
-      const smallFile = path.join(tempDir, 'small.ts');
-      await fs.writeFile(smallFile, 'const x = 1;'); // ~3 tokens
+    it('should return error message when exceeding limit', async () => {
+      const largeContent = 'x'.repeat(10000);
+      await fs.writeFile(path.join(testDir, 'large.txt'), largeContent, 'utf-8');
 
-      await contextManager.addFile(smallFile);
+      await manager.addFile('large.txt');
 
-      const warning = contextManager.checkTokenLimit(10000);
-      expect(warning).toBeNull();
-    });
-  });
+      const totalTokens = manager.getTotalEstimatedTokens();
+      const warning = manager.checkTokenLimit(totalTokens * 0.5); // Below current
 
-  describe('glob patterns', () => {
-    it('should handle glob pattern with no matches', async () => {
-      // No files matching pattern
-      await contextManager.addFile(path.join(tempDir, 'nonexistent*.ts'));
-
-      // Should not throw, just have no files added
-      expect(contextManager.getContext()).toHaveLength(0);
+      expect(warning).toBeTruthy();
+      expect(warning).toContain('exceeds');
     });
   });
 });

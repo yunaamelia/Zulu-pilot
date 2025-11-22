@@ -13,6 +13,8 @@ export * from './config/UnifiedConfigManager.js';
 
 // Export context
 export * from './context/FileContext.js';
+export * from './context/ContextManager.js';
+export * from './context/TokenEstimator.js';
 export * from './output/types.js';
 export * from './output/json-formatter.js';
 export * from './output/stream-json-formatter.js';
@@ -126,10 +128,7 @@ export * from './tools/write-todos.js';
 
 // MCP OAuth
 export { MCPOAuthProvider } from './mcp/oauth-provider.js';
-export type {
-  OAuthToken,
-  OAuthCredentials,
-} from './mcp/token-storage/types.js';
+export type { OAuthToken, OAuthCredentials } from './mcp/token-storage/types.js';
 export { MCPOAuthTokenStorage } from './mcp/oauth-token-storage.js';
 export type { MCPOAuthConfig } from './mcp/oauth-provider.js';
 export type {
@@ -153,3 +152,5 @@ export * from './hooks/types.js';
 // Export stdio utils
 export * from './utils/stdio.js';
 export * from './utils/terminal.js';
+export * from './utils/contextErrors.js';
+export * from './utils/validators.js';
