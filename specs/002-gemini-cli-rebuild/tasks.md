@@ -183,18 +183,18 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 2
 
-- [ ] T065 [P] [US2] Write integration test for file read operation in tests/integration/tools/file-read.test.ts
-- [ ] T066 [P] [US2] Write integration test for file write operation in tests/integration/tools/file-write.test.ts
-- [ ] T067 [P] [US2] Write integration test for file search operation in tests/integration/tools/file-search.test.ts
-- [ ] T068 [P] [US2] Write E2E test for file operations workflow in tests/e2e/full-workflows/file-operations.test.ts
+- [x] T065 [P] [US2] Write integration test for file read operation in tests/integration/tools/file-read.test.ts
+- [x] T066 [P] [US2] Write integration test for file write operation in tests/integration/tools/file-write.test.ts
+- [x] T067 [P] [US2] Write integration test for file search operation in tests/integration/tools/file-search.test.ts
+- [x] T068 [P] [US2] Write E2E test for file operations workflow in tests/e2e/full-workflows/file-operations.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T069 [US2] Verify Gemini CLI file operations tools work with custom adapter in packages/core/src/tools/FileOperationsTool.ts
-- [ ] T070 [US2] Test ReadFileTool with custom providers in tests/integration/tools/ReadFileTool.test.ts
-- [ ] T071 [US2] Test WriteFileTool with custom providers in tests/integration/tools/WriteFileTool.test.ts
-- [ ] T072 [US2] Test GlobTool (file search) with custom providers in tests/integration/tools/GlobTool.test.ts
-- [ ] T073 [US2] Ensure all file operations tools route through adapter correctly
+- [x] T069 [US2] Verify Gemini CLI file operations tools work with custom adapter in packages/core/src/tools/FileOperationsTool.ts
+- [x] T070 [US2] Test ReadFileTool with custom providers in tests/integration/tools/ReadFileTool.test.ts
+- [x] T071 [US2] Test WriteFileTool with custom providers in tests/integration/tools/WriteFileTool.test.ts
+- [x] T072 [US2] Test GlobTool (file search) with custom providers in tests/integration/tools/GlobTool.test.ts
+- [x] T073 [US2] Ensure all file operations tools route through adapter correctly in tests/integration/tools/FileOperationsRouting.test.ts
 
 **Checkpoint**: User Story 2 complete - all file operations work with custom models
 
