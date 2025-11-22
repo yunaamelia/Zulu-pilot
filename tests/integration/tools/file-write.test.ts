@@ -14,7 +14,7 @@ import { UnifiedConfigManager } from '@zulu-pilot/core';
 import { ProviderRegistry } from '@zulu-pilot/adapter';
 import { MultiProviderRouter } from '@zulu-pilot/adapter';
 import { OllamaProvider } from '@zulu-pilot/providers';
-import { readFile, mkdir } from 'fs/promises';
+import { readFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -118,7 +118,7 @@ describe('File Write Operation Integration', () => {
       content: 'New content',
     });
 
-    await invocation.execute();
+    await invocation.execute(abortSignal);
 
     const content = await readFile(testFile, 'utf-8');
     expect(content).toBe('New content');
@@ -132,7 +132,7 @@ describe('File Write Operation Integration', () => {
       content: 'Nested content',
     });
 
-    await invocation.execute();
+    await invocation.execute(abortSignal);
 
     const content = await readFile(nestedFile, 'utf-8');
     expect(content).toBe('Nested content');

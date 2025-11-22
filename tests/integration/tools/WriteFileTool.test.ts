@@ -14,7 +14,7 @@ import { UnifiedConfigManager } from '@zulu-pilot/core';
 import { ProviderRegistry } from '@zulu-pilot/adapter';
 import { MultiProviderRouter } from '@zulu-pilot/adapter';
 import { OllamaProvider } from '@zulu-pilot/providers';
-import { readFile, mkdir } from 'fs/promises';
+import { readFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 

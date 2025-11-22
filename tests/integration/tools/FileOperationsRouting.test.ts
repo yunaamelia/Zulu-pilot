@@ -115,8 +115,7 @@ describe('File Operations Tools Routing Through Adapter', () => {
     const baseLlmClient = mockConfig.getBaseLlmClient();
     // BaseLlmClient uses ContentGenerator internally, which uses the custom adapter
     // Verification: adapter is set in config
-
-    expect(contentGenerator).toBeDefined();
+    expect(baseLlmClient).toBeDefined();
     // ContentGenerator should be using the custom adapter
     // This is verified by checking that adapter is set in config
     expect(mockConfig.getZuluPilotAdapter()).toBe(adapter);
