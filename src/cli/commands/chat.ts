@@ -1,5 +1,9 @@
 import { ConfigManager } from '../../core/config/ConfigManager.js';
 import { OllamaProvider } from '../../core/llm/OllamaProvider.js';
+import { GeminiProvider } from '../../core/llm/GeminiProvider.js';
+import { OpenAIProvider } from '../../core/llm/OpenAIProvider.js';
+import { GoogleCloudProvider } from '../../core/llm/GoogleCloudProvider.js';
+import type { IModelProvider } from '../../core/llm/IModelProvider.js';
 import { ConnectionError } from '../../utils/errors.js';
 import { validateProviderName } from '../../utils/validators.js';
 import { getContextManager } from './add.js';
@@ -28,23 +32,11 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
     process.exit(1);
   }
 
-  // For Phase 3, only support Ollama
-  if (providerName !== 'ollama') {
-    console.error(
-      `Error: Provider "${providerName}" not yet implemented. Only "ollama" is supported in Phase 3.`
-    );
-    process.exit(1);
-  }
-
   // Get provider config
-  const providerConfig = await configManager.getProviderConfig('ollama');
-  const model = providerConfig?.model ?? config.model ?? 'qwen2.5-coder';
+  const providerConfig = await configManager.getProviderConfig(providerName);
 
-  // Initialize provider
-  const provider = new OllamaProvider({
-    baseUrl: providerConfig?.baseUrl as string | undefined,
-    model,
-  });
+  // Initialize provider based on provider name
+  const provider = await createProvider(providerName, providerConfig, configManager);
 
   // Get prompt from user if not provided
   const userPrompt = prompt;
@@ -151,4 +143,90 @@ async function handleCodeChanges(
   }
 
   rl.close();
+}
+
+/**
+ * Create provider instance based on provider name.
+ *
+ * @param providerName - Provider name
+ * @param providerConfig - Provider configuration
+ * @param configManager - Config manager for resolving API keys
+ * @returns Provider instance
+ */
+async function createProvider(
+  providerName: string,
+  providerConfig:
+    | {
+        apiKey?: string;
+        baseUrl?: string;
+        model?: string;
+        projectId?: string;
+        region?: string;
+        [key: string]: unknown;
+      }
+    | undefined,
+  configManager: ConfigManager
+): Promise<IModelProvider> {
+  switch (providerName) {
+    case 'ollama': {
+      return new OllamaProvider({
+        baseUrl: providerConfig?.baseUrl as string | undefined,
+        model: providerConfig?.model as string | undefined,
+      });
+    }
+
+    case 'gemini': {
+      const apiKey = providerConfig?.apiKey
+        ? configManager.resolveApiKey(providerConfig.apiKey)
+        : undefined;
+      if (!apiKey) {
+        throw new ConnectionError(
+          'Gemini API key not configured. Please set apiKey in provider config.',
+          'gemini'
+        );
+      }
+      return new GeminiProvider({
+        apiKey,
+        model: providerConfig?.model as string | undefined,
+        baseUrl: providerConfig?.baseUrl as string | undefined,
+        enableGoogleSearch: providerConfig?.enableGoogleSearch as boolean | undefined,
+      });
+    }
+
+    case 'openai': {
+      const apiKey = providerConfig?.apiKey
+        ? configManager.resolveApiKey(providerConfig.apiKey)
+        : undefined;
+      if (!apiKey) {
+        throw new ConnectionError(
+          'OpenAI API key not configured. Please set apiKey in provider config.',
+          'openai'
+        );
+      }
+      return new OpenAIProvider({
+        apiKey,
+        baseUrl: (providerConfig?.baseUrl as string | undefined) ?? 'https://api.openai.com/v1',
+        model: (providerConfig?.model as string | undefined) ?? 'gpt-4',
+      });
+    }
+
+    case 'googleCloud': {
+      const projectId = providerConfig?.projectId as string | undefined;
+      const region = providerConfig?.region as string | undefined;
+      if (!projectId || !region) {
+        throw new ConnectionError(
+          'Google Cloud projectId and region must be configured.',
+          'googleCloud'
+        );
+      }
+      return new GoogleCloudProvider({
+        projectId,
+        region,
+        model: (providerConfig?.model as string | undefined) ?? 'deepseek-ai/deepseek-v3.1-maas',
+      });
+    }
+
+    default:
+      throw new ConnectionError(`Unsupported provider: ${providerName}`, providerName);
+  }
 }

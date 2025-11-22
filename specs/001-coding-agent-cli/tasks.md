@@ -300,61 +300,64 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T058 [P] [US4] Unit test for GeminiProvider in tests/unit/core/llm/GeminiProvider.test.ts
+- [x] T058 [P] [US4] Unit test for GeminiProvider in tests/unit/core/llm/GeminiProvider.test.ts
   - Test Gemini API format conversion
   - Test streaming response handling
   - Test error handling
-- [ ] T059 [P] [US4] Unit test for OpenAIProvider in tests/unit/core/llm/OpenAIProvider.test.ts
+- [x] T059 [P] [US4] Unit test for OpenAIProvider in tests/unit/core/llm/OpenAIProvider.test.ts
   - Test OpenAI API format
   - Test DeepSeek/Groq compatibility
   - Test streaming response handling
   - Test error handling
-- [ ] T060 [P] [US4] Unit test for GoogleCloudProvider in tests/unit/core/llm/GoogleCloudProvider.test.ts
+- [x] T060 [P] [US4] Unit test for GoogleCloudProvider in tests/unit/core/llm/GoogleCloudProvider.test.ts
   - Test Google Cloud AI Platform endpoint
   - Test gcloud auth token handling
   - Test model-specific configurations
-- [ ] T061 [P] [US4] Contract test for Gemini API in tests/contract/gemini-api.test.ts
+- [x] T061 [P] [US4] Contract test for Gemini API in tests/contract/gemini-api.test.ts
   - Verify Gemini API request/response format
   - Test streaming format
-- [ ] T062 [P] [US4] Contract test for OpenAI API in tests/contract/openai-api.test.ts
+- [x] T062 [P] [US4] Contract test for OpenAI API in tests/contract/openai-api.test.ts
   - Verify OpenAI-compatible API format
   - Test streaming format
-- [ ] T063 [US4] Integration test for provider switching in tests/integration/providers/provider-switching.test.ts
+- [x] T063 [US4] Integration test for provider switching in tests/integration/providers/provider-switching.test.ts
   - Test switching between providers
   - Test provider-specific configurations
   - Validate 100% success rate for provider switching (SC-004 requirement)
-- [ ] T064 [US4] Verify test coverage meets 90% threshold for new code
+- [x] T064 [US4] Verify test coverage meets 90% threshold for new code
+  - GeminiProvider: Coverage meets requirements ✓
+  - OpenAIProvider: Coverage meets requirements ✓
+  - GoogleCloudProvider: Coverage meets requirements ✓
 
 ### Implementation for User Story 4
 
-- [ ] T065 [US4] Implement GeminiProvider in src/core/llm/GeminiProvider.ts
+- [x] T065 [US4] Implement GeminiProvider in src/core/llm/GeminiProvider.ts
   - Convert to Gemini API format (contents, generationConfig, safetySettings)
   - Handle streaming responses
   - Support Google Search tool integration
   - Handle authentication (API key or OAuth)
-- [ ] T066 [US4] Implement OpenAIProvider in src/core/llm/OpenAIProvider.ts
+- [x] T066 [US4] Implement OpenAIProvider in src/core/llm/OpenAIProvider.ts
   - Support OpenAI, DeepSeek, Groq APIs
   - Handle OpenAI-compatible format
   - Support streaming responses
   - Handle authentication (Bearer token)
-- [ ] T067 [US4] Implement GoogleCloudProvider in src/core/llm/GoogleCloudProvider.ts
+- [x] T067 [US4] Implement GoogleCloudProvider in src/core/llm/GoogleCloudProvider.ts
   - Support Google Cloud AI Platform models
   - Use gcloud auth print-access-token for authentication
   - Support different regions and project IDs
   - Handle model-specific configurations (DeepSeek, Qwen, Llama, etc.)
-- [ ] T068 [US4] Update ConfigManager to support all provider configurations
+- [x] T068 [US4] Update ConfigManager to support all provider configurations
   - Add provider-specific config sections
   - Support API keys and environment variable references
   - Support Google Cloud project/region configuration
-- [ ] T069 [US4] Update CLI to support --provider flag (implementation in T013, this task ensures integration)
+- [x] T069 [US4] Update CLI to support --provider flag (implementation in T013, this task ensures integration)
   - Verify --provider flag works with all commands
   - Validate provider selection
   - Ensure flag override doesn't modify saved configuration
-- [ ] T070 [US4] Update chat command to use selected provider
+- [x] T070 [US4] Update chat command to use selected provider
   - Instantiate correct provider based on config/flag
   - Handle provider-specific errors
-- [ ] T071 [US4] Ensure code passes all pre-commit hooks
-- [ ] T072 [US4] Verify cyclomatic complexity < 15 per function
+- [x] T071 [US4] Ensure code passes all pre-commit hooks
+- [x] T072 [US4] Verify cyclomatic complexity < 15 per function
 
 **Checkpoint**: At this point, all user stories should work independently. Developers can use any supported provider.
 
