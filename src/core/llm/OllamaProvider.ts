@@ -155,14 +155,21 @@ export class OllamaProvider implements IModelProvider {
   }> {
     const messages: Array<{ role: string; content: string }> = [];
 
-    // Add context files as system message if present
-    if (context.length > 0) {
-      const contextText = context.map((file) => `File: ${file.path}\n${file.content}`).join('\n\n');
-      messages.push({
-        role: 'system',
-        content: `You are a coding assistant. Here is the codebase context:\n\n${contextText}`,
-      });
-    }
+    // System prompt with code change format instructions
+    const systemPrompt = `You are a coding assistant. When proposing code changes, use this format:
+
+\`\`\`typescript:filename:path/to/file.ts
+// Your code changes here
+\`\`\`
+
+For multiple files, use separate code blocks. Always include the file path after the language identifier.
+
+${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) => `File: ${file.path}\n${file.content}`).join('\n\n')}` : ''}`;
+
+    messages.push({
+      role: 'system',
+      content: systemPrompt,
+    });
 
     // Add user prompt
     messages.push({

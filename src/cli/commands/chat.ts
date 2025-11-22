@@ -1,9 +1,14 @@
 import { ConfigManager } from '../../core/config/ConfigManager.js';
 import { OllamaProvider } from '../../core/llm/OllamaProvider.js';
-import { StreamHandler } from '../ui/stream.js';
 import { ConnectionError } from '../../utils/errors.js';
 import { validateProviderName } from '../../utils/validators.js';
 import { getContextManager } from './add.js';
+import { CodeChangeParser } from '../../core/parser/CodeChangeParser.js';
+import { FilePatcher } from '../../core/parser/FilePatcher.js';
+import { DiffDisplay } from '../ui/diff.js';
+import { createCodeChange } from '../../core/parser/CodeChange.js';
+import * as readline from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
 
 /**
  * Chat command handler.
@@ -60,10 +65,25 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
     console.warn(`⚠ ${warning}`);
   }
 
-  // Stream response with context
-  const streamHandler = new StreamHandler();
+  // Stream response with context and collect for parsing
+  let fullResponse = '';
+
   try {
-    await streamHandler.streamToStdout(provider.streamResponse(userPrompt, context));
+    // Collect full response for parsing
+    const responseStream = provider.streamResponse(userPrompt, context);
+    for await (const token of responseStream) {
+      process.stdout.write(token);
+      fullResponse += token;
+    }
+    process.stdout.write('\n');
+
+    // Parse code changes from response
+    const parser = new CodeChangeParser({ baseDir: process.cwd() });
+    const changes = parser.parse(fullResponse);
+
+    if (changes.length > 0) {
+      await handleCodeChanges(changes);
+    }
   } catch (error) {
     if (error instanceof ConnectionError) {
       console.error(`\nError: ${error.getUserMessage()}`);
@@ -71,4 +91,64 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
     }
     throw error;
   }
+}
+
+/**
+ * Handle code changes proposed by AI.
+ * Shows diff and prompts for approval.
+ *
+ * @param changes - Array of code changes to handle
+ */
+async function handleCodeChanges(
+  changes: Array<{ filePath: string; newContent: string; changeType: string }>
+): Promise<void> {
+  const patcher = new FilePatcher({ baseDir: process.cwd() });
+  const diffDisplay = new DiffDisplay();
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+
+  diffDisplay.displaySummary(changes.map((c) => c.filePath));
+
+  for (const change of changes) {
+    try {
+      // Load original content if file exists
+      let originalContent = '';
+      const fs = await import('node:fs/promises');
+      const path = await import('node:path');
+      const absolutePath = path.isAbsolute(change.filePath)
+        ? change.filePath
+        : path.resolve(process.cwd(), change.filePath);
+
+      try {
+        originalContent = await fs.readFile(absolutePath, 'utf-8');
+      } catch {
+        // File doesn't exist, will be created
+        originalContent = '';
+      }
+
+      const codeChange = createCodeChange(
+        change.filePath,
+        originalContent,
+        change.newContent,
+        change.changeType as 'add' | 'modify' | 'delete'
+      );
+
+      // Generate and display diff
+      const diff = patcher.generateDiff(codeChange);
+      diffDisplay.display(diff, change.filePath);
+
+      // Prompt for approval
+      const answer = await rl.question(`Apply this change to ${change.filePath}? (y/n): `);
+
+      if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+        await patcher.applyChange(codeChange);
+        console.log(`✓ Applied changes to ${change.filePath}`);
+      } else {
+        console.log(`✗ Skipped changes to ${change.filePath}`);
+      }
+    } catch (error) {
+      console.error(`Error processing ${change.filePath}:`, error);
+    }
+  }
+
+  rl.close();
 }

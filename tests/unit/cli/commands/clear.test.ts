@@ -53,12 +53,8 @@ describe('clear command', () => {
       handleClearCommand(false, contextManager);
 
       expect(contextManager.getContext()).toHaveLength(1);
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('This will remove')
-      );
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Use --yes flag')
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('This will remove'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Use --yes flag'));
 
       logSpy.mockRestore();
     });
@@ -91,4 +87,3 @@ describe('clear command', () => {
     });
   });
 });
-

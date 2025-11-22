@@ -286,10 +286,12 @@ describe('OllamaProvider', () => {
 
       const request = mockAdapter.history.post[0];
       const requestData = JSON.parse(request.data);
-      // Should only have user message, no system message
-      expect(requestData.messages.length).toBe(1);
-      expect(requestData.messages[0].role).toBe('user');
-      expect(requestData.messages[0].content).toBe(prompt);
+      // Should have system message (with format instructions) and user message
+      expect(requestData.messages.length).toBe(2);
+      expect(requestData.messages[0].role).toBe('system');
+      expect(requestData.messages[0].content).toContain('coding assistant');
+      expect(requestData.messages[1].role).toBe('user');
+      expect(requestData.messages[1].content).toBe(prompt);
     });
   });
 

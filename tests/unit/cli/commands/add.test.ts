@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { handleAddCommand, setContextManager, getContextManager } from '../../../../src/cli/commands/add.js';
+import {
+  handleAddCommand,
+  setContextManager,
+  getContextManager,
+} from '../../../../src/cli/commands/add.js';
 import { ContextManager } from '../../../../src/core/context/ContextManager.js';
 
 describe('add command', () => {
@@ -95,9 +99,7 @@ describe('add command', () => {
       // Mock contextManager.addFile to throw a generic error
       jest.spyOn(contextManager, 'addFile').mockRejectedValue(new Error('Generic error'));
 
-      await expect(handleAddCommand(testFile, contextManager)).rejects.toThrow(
-        'Generic error'
-      );
+      await expect(handleAddCommand(testFile, contextManager)).rejects.toThrow('Generic error');
     });
 
     it('should use global context manager when not provided', async () => {
@@ -127,4 +129,3 @@ describe('add command', () => {
     });
   });
 });
-

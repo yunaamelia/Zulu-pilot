@@ -163,11 +163,12 @@ export function multiply(a: number, b: number): number {
       const response = await provider.generateResponse(question, context);
 
       expect(response).toBeTruthy();
-      // Should only have user message, no system message
+      // Should have system message (with format instructions) and user message
       const request = mockAdapter.history.post[0];
       const requestData = JSON.parse(request.data);
-      expect(requestData.messages.length).toBe(1);
-      expect(requestData.messages[0].role).toBe('user');
+      expect(requestData.messages.length).toBe(2);
+      expect(requestData.messages[0].role).toBe('system');
+      expect(requestData.messages[1].role).toBe('user');
     });
   });
 
