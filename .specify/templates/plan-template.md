@@ -9,6 +9,33 @@
 
 [Extract from feature spec: primary requirement + technical approach from research]
 
+## Research Summary
+
+_MANDATORY: Every plan.md must include this section per Constitution - Research-Driven Planning_
+
+- **Technology Choices**: [List with versions and rationale]
+- **Alternatives Considered**: [What was evaluated and why rejected]
+- **Key Research Sources**: [Links to official docs, articles, case studies]
+- **Known Limitations**: [Trade-offs and constraints identified]
+- **Integration Patterns**: [How components work together based on research]
+- **Version Information**: [Specific versions researched and their stability/maturity]
+
+## Test & Coverage Strategy
+
+_MANDATORY: Every plan.md must include this section per Constitution - Testing Standards_
+
+- **Testing Framework**: [Tool and version, e.g., Jest 29.x, xUnit 2.5.x]
+- **Coverage Tool**: [Tool and version, e.g., Istanbul, Coverlet, JaCoCo]
+- **Coverage Targets**:
+  - Overall: 80% minimum, 90% target
+  - Unit tests: 85% minimum
+  - Integration tests: 75% minimum
+  - Critical paths: 100% (authentication, payment, etc.)
+- **Test File Structure**: [Naming convention, organization]
+- **Mocking Strategy**: [Tools and patterns for test isolation]
+- **CI Integration**: [Coverage reporting service, badge setup]
+- **Coverage Exemptions**: [Known gaps and justification]
+
 ## Technical Context
 
 <!--
@@ -29,37 +56,33 @@
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-**Code Quality (I)**: 
-- [ ] Linting and formatting tools configured
-- [ ] Type checking enabled (if applicable)
-- [ ] Code review process defined
+**Research Requirements** (from Constitution - Research-Driven Planning):
 
-**Testing with Coverage (II)**:
-- [ ] Test framework selected and configured
-- [ ] Coverage thresholds defined (minimum 80% global, 90% for new code)
-- [ ] Test types planned (unit, integration, contract, E2E as applicable)
+- [ ] At least 3 alternatives evaluated with pros/cons analysis
+- [ ] Current stable versions verified
+- [ ] Real-world usage examples found
+- [ ] Integration compatibility researched
+- [ ] Community health assessed
+- [ ] Research documented with sources and version numbers
 
-**User Experience Consistency (III)** (if applicable):
-- [ ] Design system/component library identified
-- [ ] Accessibility requirements defined (WCAG 2.1 AA minimum)
-- [ ] Responsive design approach planned
+**Test & Coverage Strategy** (from Constitution - Testing Standards):
 
-**Pre-commit Quality Gates (IV)**:
-- [ ] Pre-commit hooks configured (.pre-commit-config.yaml)
-- [ ] Hooks include: linting, formatting, type checking, test coverage, security scanning
-- [ ] Hooks verified to run in < 30s
+- [ ] Testing framework selected (Jest for TypeScript/JavaScript)
+- [ ] Coverage targets defined per component/layer
+- [ ] Test file structure and naming convention determined
+- [ ] Mocking strategy defined
+- [ ] CI integration plan for coverage reporting
 
-**Performance Requirements (V)**:
-- [ ] Performance targets defined (Web Vitals for web, response times for APIs)
-- [ ] Performance testing strategy planned
-- [ ] Monitoring/alerting approach identified
+**Quality Gates** (from Constitution - Automated Quality Gates):
 
-**Compliance Status**: ✅ All checks pass | ⚠️ Exceptions documented below
+- [ ] Pre-commit hooks configured
+- [ ] Coverage thresholds meet minimums (80% unit, 70% integration, 75% overall)
+- [ ] Critical paths identified for 100% coverage requirement
+- [ ] Security scanning tools selected
 
-**Exceptions** (if any):
-- [Exception description and justification]
+[Additional gates determined based on constitution file]
 
 ## Project Structure
 
@@ -76,6 +99,7 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
+
 <!--
   ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
   for this feature. Delete unused options and expand the chosen structure with
@@ -126,7 +150,7 @@ directories captured above]
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| Violation                  | Why Needed         | Simpler Alternative Rejected Because |
+| -------------------------- | ------------------ | ------------------------------------ |
+| [e.g., 4th project]        | [current need]     | [why 3 projects insufficient]        |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient]  |
