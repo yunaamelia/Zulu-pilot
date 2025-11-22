@@ -1,5 +1,6 @@
 import { ContextManager } from '../../core/context/ContextManager.js';
 import { ValidationError } from '../../utils/errors.js';
+import { withLoadingIndicator } from '../ui/indicators.js';
 
 let globalContextManager: ContextManager | null = null;
 
@@ -35,7 +36,9 @@ export async function handleAddCommand(
   const manager = contextManager ?? getContextManager();
 
   try {
-    await manager.addFile(filePathOrGlob);
+    await withLoadingIndicator(`Loading ${filePathOrGlob}`, async () => {
+      await manager.addFile(filePathOrGlob);
+    });
 
     const context = manager.getContext();
     const addedFile = context[context.length - 1];

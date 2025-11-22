@@ -4,13 +4,17 @@ import { GeminiProvider } from '../../core/llm/GeminiProvider.js';
 import { OpenAIProvider } from '../../core/llm/OpenAIProvider.js';
 import { GoogleCloudProvider } from '../../core/llm/GoogleCloudProvider.js';
 import type { IModelProvider } from '../../core/llm/IModelProvider.js';
-import { ConnectionError } from '../../utils/errors.js';
+import type { FileContext } from '../../core/context/FileContext.js';
+import { ConnectionError, RateLimitError } from '../../utils/errors.js';
 import { validateProviderName } from '../../utils/validators.js';
 import { getContextManager } from './add.js';
 import { CodeChangeParser } from '../../core/parser/CodeChangeParser.js';
 import { FilePatcher } from '../../core/parser/FilePatcher.js';
 import { DiffDisplay } from '../ui/diff.js';
 import { createCodeChange } from '../../core/parser/CodeChange.js';
+import { Spinner } from '../ui/spinner.js';
+import { StreamHandler } from '../ui/stream.js';
+import { withLoadingIndicator } from '../ui/indicators.js';
 import * as readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
@@ -35,8 +39,10 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
   // Get provider config
   const providerConfig = await configManager.getProviderConfig(providerName);
 
-  // Initialize provider based on provider name
-  const provider = await createProvider(providerName, providerConfig, configManager);
+  // Initialize provider based on provider name (with loading indicator)
+  const provider = await withLoadingIndicator('Initializing provider', async () => {
+    return createProvider(providerName, providerConfig, configManager);
+  });
 
   // Get prompt from user if not provided
   const userPrompt = prompt;
@@ -58,26 +64,73 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
   }
 
   // Stream response with context and collect for parsing
-  let fullResponse = '';
+  const fullResponse = await streamResponseWithSpinner(provider, userPrompt, context);
 
+  // Parse code changes from response
+  const parser = new CodeChangeParser({ baseDir: process.cwd() });
+  const changes = parser.parse(fullResponse);
+
+  if (changes.length > 0) {
+    await handleCodeChanges(changes);
+  }
+}
+
+/**
+ * Stream response with spinner and collect full response.
+ *
+ * @param provider - Model provider
+ * @param prompt - User prompt
+ * @param context - File context
+ * @returns Full response string
+ */
+async function streamResponseWithSpinner(
+  provider: IModelProvider,
+  prompt: string,
+  context: FileContext[]
+): Promise<string> {
   try {
-    // Collect full response for parsing
-    const responseStream = provider.streamResponse(userPrompt, context);
-    for await (const token of responseStream) {
-      process.stdout.write(token);
-      fullResponse += token;
-    }
-    process.stdout.write('\n');
+    // Show spinner while connecting and waiting for first token
+    const spinner = new Spinner('Connecting to AI model...');
+    spinner.start();
 
-    // Parse code changes from response
-    const parser = new CodeChangeParser({ baseDir: process.cwd() });
-    const changes = parser.parse(fullResponse);
+    try {
+      // Collect full response for parsing with improved streaming
+      const responseStream = provider.streamResponse(prompt, context);
+      const streamHandler = new StreamHandler();
 
-    if (changes.length > 0) {
-      await handleCodeChanges(changes);
+      // Wait for first token before stopping spinner
+      const tokenIterator = responseStream[Symbol.asyncIterator]();
+
+      const firstResult = await tokenIterator.next();
+      if (!firstResult.done) {
+        spinner.stop();
+        spinner.succeed('Connected');
+        // Write first token
+        process.stdout.write(firstResult.value);
+        let fullResponse = firstResult.value;
+
+        // Continue streaming remaining tokens
+        for await (const token of tokenIterator) {
+          process.stdout.write(token);
+          fullResponse += token;
+        }
+        process.stdout.write('\n');
+        return fullResponse;
+      } else {
+        spinner.stop();
+        // Use StreamHandler for full streaming if no first token
+        return await streamHandler.streamToStdout(responseStream);
+      }
+    } catch (streamError) {
+      spinner.stop();
+      throw streamError;
     }
   } catch (error) {
     if (error instanceof ConnectionError) {
+      console.error(`\nError: ${error.getUserMessage()}`);
+      process.exit(1);
+    }
+    if (error instanceof RateLimitError) {
       console.error(`\nError: ${error.getUserMessage()}`);
       process.exit(1);
     }

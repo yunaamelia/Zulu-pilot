@@ -75,16 +75,16 @@ async function main(): Promise<void> {
   program
     .command('context')
     .description('List all files in context')
-    .action(() => {
-      handleContextCommand(contextManager);
+    .action(async () => {
+      await handleContextCommand(contextManager);
     });
 
   program
     .command('clear')
     .description('Clear all files from context')
     .option('-y, --yes', 'Skip confirmation')
-    .action((options) => {
-      handleClearCommand(options.yes ?? false, contextManager);
+    .action(async (options) => {
+      await handleClearCommand(options.yes ?? false, contextManager);
     });
 
   // Parse command line arguments

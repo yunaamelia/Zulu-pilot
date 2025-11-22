@@ -373,42 +373,42 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T073 [P] [US5] Unit test for spinner in tests/unit/cli/ui/spinner.test.ts
+- [x] T073 [P] [US5] Unit test for spinner in tests/unit/cli/ui/spinner.test.ts
   - Test spinner display and cleanup
-- [ ] T074 [P] [US5] Unit test for error message formatting in tests/unit/utils/errors.test.ts
+- [x] T074 [P] [US5] Unit test for error message formatting in tests/unit/utils/errors.test.ts
   - Test user-friendly error messages
   - Test actionable guidance in errors
-- [ ] T075 [US5] Integration test for UX improvements in tests/integration/cli/ux-improvements.test.ts
+- [x] T075 [US5] Integration test for UX improvements in tests/integration/cli/ux-improvements.test.ts
   - Test loading indicators during API calls
   - Test error message display
   - Test streaming output smoothness
 
 ### Implementation for User Story 5
 
-- [ ] T076 [US5] Implement loading spinner in src/cli/ui/spinner.ts
+- [x] T076 [US5] Implement loading spinner in src/cli/ui/spinner.ts
   - Show spinner during API connections
   - Show spinner during response generation
   - Clean up on completion/error
-- [ ] T076a [US5] Implement loading indicators (distinct from spinner) in src/cli/ui/indicators.ts
+- [x] T076a [US5] Implement loading indicators (distinct from spinner) in src/cli/ui/indicators.ts
   - Show loading indicators for operations > 500ms (per Constitution III)
   - Visual feedback for file loading, context operations
-- [ ] T077 [US5] Enhance error messages in src/utils/errors.ts
+- [x] T077 [US5] Enhance error messages in src/utils/errors.ts
   - Connection errors with resolution steps
   - Rate limit errors with retry guidance
   - File not found errors with suggestions
-- [ ] T078 [US5] Improve streaming output in src/cli/ui/stream.ts
+- [x] T078 [US5] Improve streaming output in src/cli/ui/stream.ts
   - Smooth token-by-token display
   - Handle backpressure
   - Better formatting
-- [ ] T079 [US5] Add loading indicators to chat command
+- [x] T079 [US5] Add loading indicators to chat command
   - Show spinner while connecting
   - Show spinner while waiting for first token
   - Show loading indicators for all async operations
-- [ ] T080 [US5] Enhance error handling in all providers
+- [x] T080 [US5] Enhance error handling in all providers
   - Map HTTP errors to user-friendly messages
   - Provide actionable guidance
-- [ ] T081 [US5] Ensure code passes all pre-commit hooks
-- [ ] T082 [US5] Verify cyclomatic complexity < 15 per function
+- [x] T081 [US5] Ensure code passes all pre-commit hooks
+- [x] T082 [US5] Verify cyclomatic complexity < 15 per function
 
 **Checkpoint**: All user stories complete with polished UX. Ready for final polish phase.
 

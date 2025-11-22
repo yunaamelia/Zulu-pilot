@@ -1,5 +1,6 @@
 import { ContextManager } from '../../core/context/ContextManager.js';
 import { getContextManager } from './add.js';
+import { withLoadingIndicator } from '../ui/indicators.js';
 
 /**
  * Handle the /clear command.
@@ -8,10 +9,10 @@ import { getContextManager } from './add.js';
  * @param confirm - If true, skip confirmation prompt
  * @param contextManager - Optional context manager (uses global if not provided)
  */
-export function handleClearCommand(
+export async function handleClearCommand(
   confirm: boolean = false,
   contextManager?: ContextManager
-): void {
+): Promise<void> {
   const manager = contextManager ?? getContextManager();
   const context = manager.getContext();
 
@@ -26,6 +27,12 @@ export function handleClearCommand(
     return;
   }
 
-  manager.clear();
+  await withLoadingIndicator('Clearing context', async () => {
+    manager.clear();
+    // Success message is shown by withLoadingIndicator if duration > 500ms
+    // Otherwise, we show it here
+    return Promise.resolve();
+  });
+  // Show success message if not already shown by indicator
   console.log('✓ Context cleared.');
 }

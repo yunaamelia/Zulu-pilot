@@ -32,8 +32,49 @@ export class ConnectionError extends AppError {
     if (this.provider === 'ollama') {
       return `Failed to connect to Ollama. Please ensure:
 1. Ollama is running locally (http://localhost:11434)
+   - Check: curl http://localhost:11434/api/tags
+   - Start: ollama serve (if not running)
 2. The model is installed (e.g., ollama pull qwen2.5-coder)
+   - List models: ollama list
+   - Pull model: ollama pull <model-name>
 3. Your network connection is active
+   - Verify localhost is accessible
+
+Error: ${this.message}`;
+    }
+
+    if (this.provider === 'gemini') {
+      return `Failed to connect to Gemini. Please check:
+1. Your API key is valid and set in ~/.zulu-pilotrc
+   - Get key: https://makersuite.google.com/app/apikey
+2. Your internet connection is active
+3. API endpoint is accessible (aiplatform.googleapis.com)
+4. Firewall settings allow HTTPS connections
+
+Error: ${this.message}`;
+    }
+
+    if (this.provider === 'openai') {
+      return `Failed to connect to OpenAI. Please check:
+1. Your API key is valid and set in ~/.zulu-pilotrc
+   - Get key: https://platform.openai.com/api-keys
+2. Your internet connection is active
+3. API endpoint is accessible (api.openai.com)
+4. Firewall settings allow HTTPS connections
+5. Check your account quota and billing status
+
+Error: ${this.message}`;
+    }
+
+    if (this.provider === 'googleCloud') {
+      return `Failed to connect to Google Cloud AI Platform. Please check:
+1. gcloud CLI is installed and authenticated
+   - Install: https://cloud.google.com/sdk/docs/install
+   - Auth: gcloud auth login
+   - Verify: gcloud auth print-access-token
+2. Project ID and region are correctly configured
+3. API is enabled: gcloud services enable aiplatform.googleapis.com
+4. Your internet connection is active
 
 Error: ${this.message}`;
     }
@@ -42,6 +83,7 @@ Error: ${this.message}`;
 1. Your internet connection
 2. API endpoint is accessible
 3. Firewall settings
+4. API credentials are valid
 
 Error: ${this.message}`;
   }
@@ -67,6 +109,12 @@ export class RateLimitError extends AppError {
       ? ` Retry after ${this.retryAfter} seconds.`
       : ' Please retry in a few moments.';
     return `Rate limit exceeded.${retryInfo}
+
+To resolve:
+1. Wait for the retry period before making another request
+2. Consider upgrading your API plan for higher rate limits
+3. Reduce request frequency or batch requests
+4. Check your API usage dashboard for current limits
 
 Error: ${this.message}`;
   }
@@ -106,7 +154,17 @@ export class ValidationError extends AppError {
    */
   getUserMessage(): string {
     const fieldInfo = this.field ? ` (field: ${this.field})` : '';
-    return `Validation failed${fieldInfo}: ${this.message}`;
+    let suggestion = '';
+
+    if (this.field === 'filePath') {
+      suggestion =
+        '\n\nSuggestions:\n- Use relative paths from the project root\n- Ensure the file exists and is readable\n- Check for typos in the file path';
+    } else if (this.field === 'apiKey') {
+      suggestion =
+        '\n\nSuggestions:\n- Check your API key format\n- Verify the key is not expired\n- Use env:VAR_NAME format for environment variables';
+    }
+
+    return `Validation failed${fieldInfo}: ${this.message}${suggestion}`;
   }
 }
 
