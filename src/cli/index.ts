@@ -1,3 +1,16 @@
+// Load environment variables from .env file (if exists)
+// This is optional - environment variables can also be set directly
+// Only load in development (not in production where env vars are set by platform)
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    // Use dynamic import for dotenv (optional dependency)
+    const dotenv = await import('dotenv');
+    dotenv.config();
+  } catch {
+    // dotenv is optional - if not installed, continue without it
+  }
+}
+
 import { Command } from 'commander';
 import { validateProviderName } from '../utils/validators.js';
 import { ValidationError } from '../utils/errors.js';

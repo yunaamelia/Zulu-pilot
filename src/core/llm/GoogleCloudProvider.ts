@@ -52,11 +52,11 @@ const MODEL_CONFIGS: Record<string, ModelConfig> = {
     temperature: 0.4,
     topP: 0.95,
   },
-  'meta/llama-3.1-405b-instruct-maas': {
-    endpoint: 'v1beta1',
-    maxTokens: 4096, // Updated per vertex-config.md
-    temperature: 0.4,
-    topP: 0.95,
+  'intfloat/multilingual-e5-large-instruct-maas': {
+    endpoint: 'v1', // Embeddings model - uses /embeddings endpoint, not /chat/completions
+    maxTokens: 8192, // Not applicable for embeddings, but kept for consistency
+    temperature: 0.4, // Not applicable for embeddings
+    topP: 0.95, // Not applicable for embeddings
   },
 };
 

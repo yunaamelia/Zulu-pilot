@@ -33,6 +33,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^1.30.0",
     "axios": "^1.7.7",
     "commander": "^12.1.0",
     "diff": "^8.0.2",
@@ -46,6 +47,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.1",
     "axios-mock-adapter": "^2.1.0",
+    "dotenv": "^17.2.3",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
