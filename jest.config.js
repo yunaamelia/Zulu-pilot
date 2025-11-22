@@ -1,26 +1,38 @@
 export default {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-        tsconfig: {
-          module: 'ESNext',
-          moduleResolution: 'node',
-        },
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        module: 'commonjs',
+        moduleResolution: 'node',
+        target: 'ES2022',
+        lib: ['ES2022'],
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
       },
-    ],
+      isolatedModules: false,
+      diagnostics: {
+        ignoreCodes: [1343], // Ignore import.meta errors in tests
+      },
+    }],
+    '^.+\\.js$': 'babel-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!open)',
+  ],
   moduleNameMapper: {
+    '^@zulu-pilot/adapter$': '<rootDir>/packages/adapter/src',
+    '^@zulu-pilot/cli$': '<rootDir>/packages/cli/src',
+    '^@zulu-pilot/core$': '<rootDir>/packages/core/src',
+    '^@zulu-pilot/providers$': '<rootDir>/packages/providers/src',
+    '^open$': '<rootDir>/tests/__mocks__/open.cjs',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   collectCoverageFrom: [
-    'src/**/*.ts',
+    'packages/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/*.test.ts',
     '!src/**/*.spec.ts',
@@ -60,4 +72,3 @@ export default {
   testTimeout: 5000,
   verbose: true,
 };
-

@@ -5,9 +5,9 @@
  * @package @zulu-pilot/core
  */
 
-import fs from 'node:fs/promises';
+import * as fs from 'node:fs/promises';
 import type { Stats } from 'node:fs';
-import path from 'node:path';
+import * as path from 'node:path';
 import { glob } from 'glob';
 import type { FileContext } from './FileContext.js';
 import { createFileContext } from './FileContext.js';

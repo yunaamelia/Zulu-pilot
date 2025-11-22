@@ -16,7 +16,35 @@ import { BINARY_EXTENSIONS } from './ignorePatterns.js';
 import { createRequire as createModuleRequire } from 'node:module';
 import { debugLogger } from './debugLogger.js';
 
-const requireModule = createModuleRequire(import.meta.url);
+// Handle both ESM and CommonJS environments (Jest compatibility)
+const getMetaUrl = (): string => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - import.meta may not be available in all environments
+    if (typeof import.meta !== 'undefined' && import.meta.url) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return import.meta.url;
+    }
+  } catch {
+    // Ignore
+  }
+  // Fallback for CommonJS/Jest - create a dummy URL
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - __filename may not exist in ESM
+    if (typeof __filename !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return `file://${__filename}`;
+    }
+  } catch {
+    // Ignore
+  }
+  return `file://${process.cwd()}/fileUtils.ts`;
+};
+
+const requireModule = createModuleRequire(getMetaUrl());
 
 export async function readWasmBinaryFromDisk(specifier: string): Promise<Uint8Array> {
   const resolvedPath = requireModule.resolve(specifier);

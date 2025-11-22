@@ -7,11 +7,11 @@
 import type { Credentials, AuthClient, JWTInput } from 'google-auth-library';
 import { OAuth2Client, Compute, CodeChallengeMethod, GoogleAuth } from 'google-auth-library';
 import * as http from 'node:http';
-import url from 'node:url';
-import crypto from 'node:crypto';
+import * as url from 'node:url';
+import * as crypto from 'node:crypto';
 import * as net from 'node:net';
 import open from 'open';
-import path from 'node:path';
+import * as path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { Config } from '../config/config.js';
 import {
@@ -21,7 +21,7 @@ import {
 } from '../utils/errors.js';
 import { UserAccountManager } from '../utils/userAccountManager.js';
 import { AuthType } from '../core/contentGenerator.js';
-import readline from 'node:readline';
+import * as readline from 'node:readline';
 import { Storage } from '../config/storage.js';
 import { OAuthCredentialStorage } from './oauth-credential-storage.js';
 import { FORCE_ENCRYPTED_FILE_ENV_VAR } from '../mcp/token-storage/index.js';

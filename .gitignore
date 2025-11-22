@@ -63,3 +63,5 @@ request.json
 # Gemini CLI
 .gemini/
 GEMINI.md
+
+gha-creds-*.json

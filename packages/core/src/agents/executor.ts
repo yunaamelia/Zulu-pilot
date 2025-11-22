@@ -32,6 +32,7 @@ import { templateString } from './utils.js';
 import { parseThought } from '../utils/thoughtUtils.js';
 import { type z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { CodebaseInvestigationReportJsonSchema } from './codebase-investigator.js';
 import { debugLogger } from '../utils/debugLogger.js';
 import { getModelConfigAlias } from './registry.js';
 
@@ -905,9 +906,24 @@ export class AgentExecutor<TOutput extends z.ZodTypeAny> {
     };
 
     if (outputConfig) {
-      const jsonSchema = zodToJsonSchema(outputConfig.schema);
-      const { $schema: _$schema, definitions: _definitions, ...schema } = jsonSchema;
-      completeTool.parameters!.properties![outputConfig.outputName] = schema as Schema;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let jsonSchema: any;
+      if (this.definition.name === 'codebase_investigator') {
+        jsonSchema = CodebaseInvestigationReportJsonSchema;
+      } else {
+        // Use explicit any to avoid deep type instantiation error
+        // @ts-expect-error - Type instantiation is excessively deep (TS2589)
+        // This is a known issue with zodToJsonSchema type inference
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        jsonSchema = zodToJsonSchema(outputConfig.schema) as any;
+      }
+      // Extract schema without $schema and definitions to avoid deep type instantiation
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const schemaWithoutMeta = { ...jsonSchema } as any;
+      delete schemaWithoutMeta.$schema;
+      delete schemaWithoutMeta.definitions;
+
+      completeTool.parameters!.properties![outputConfig.outputName] = schemaWithoutMeta as Schema;
       completeTool.parameters!.required!.push(outputConfig.outputName);
     }
 

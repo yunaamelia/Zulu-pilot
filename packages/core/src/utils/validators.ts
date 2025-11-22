@@ -3,7 +3,7 @@
  * @package @zulu-pilot/core
  */
 
-import path from 'node:path';
+import * as path from 'node:path';
 import { ValidationError } from './contextErrors.js';
 
 /**

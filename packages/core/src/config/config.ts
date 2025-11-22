@@ -6,11 +6,8 @@
 
 import * as path from 'node:path';
 import { inspect } from 'node:util';
-import process from 'node:process';
-import type {
-  ContentGenerator,
-  ContentGeneratorConfig,
-} from '../core/contentGenerator.js';
+import * as process from 'node:process';
+import type { ContentGenerator, ContentGeneratorConfig } from '../core/contentGenerator.js';
 import {
   AuthType,
   createContentGenerator,
@@ -158,17 +155,11 @@ import {
   DEFAULT_MEMORY_FILE_FILTERING_OPTIONS,
 } from './constants.js';
 
-import {
-  type ExtensionLoader,
-  SimpleExtensionLoader,
-} from '../utils/extensionLoader.js';
+import { type ExtensionLoader, SimpleExtensionLoader } from '../utils/extensionLoader.js';
 import { McpClientManager } from '../tools/mcp-client-manager.js';
 
 export type { FileFilteringOptions };
-export {
-  DEFAULT_FILE_FILTERING_OPTIONS,
-  DEFAULT_MEMORY_FILE_FILTERING_OPTIONS,
-};
+export { DEFAULT_FILE_FILTERING_OPTIONS, DEFAULT_MEMORY_FILE_FILTERING_OPTIONS };
 
 export const DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD = 4_000_000;
 export const DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES = 1000;
@@ -202,7 +193,7 @@ export class MCPServerConfig {
     /* targetAudience format: CLIENT_ID.apps.googleusercontent.com */
     readonly targetAudience?: string,
     /* targetServiceAccount format: <service-account-name>@<project-num>.iam.gserviceaccount.com */
-    readonly targetServiceAccount?: string,
+    readonly targetServiceAccount?: string
   ) {}
 }
 
@@ -373,9 +364,7 @@ export class Config {
   private readonly enableExtensionReloading: boolean;
   fallbackModelHandler?: FallbackModelHandler;
   private quotaErrorOccurred: boolean = false;
-  private readonly summarizeToolOutput:
-    | Record<string, SummarizeToolOutputSettings>
-    | undefined;
+  private readonly summarizeToolOutput: Record<string, SummarizeToolOutputSettings> | undefined;
   private readonly experimentalZedIntegration: boolean = false;
   private readonly loadMemoryFromIncludeDirectories: boolean = false;
   private readonly importFormat: 'tree' | 'flat';
@@ -412,9 +401,7 @@ export class Config {
   private readonly disableYoloMode: boolean;
   private pendingIncludeDirectories: string[];
   private readonly enableHooks: boolean;
-  private readonly hooks:
-    | { [K in HookEventName]?: HookDefinition[] }
-    | undefined;
+  private readonly hooks: { [K in HookEventName]?: HookDefinition[] } | undefined;
   private experiments: Experiments | undefined;
   private experimentsPromise: Promise<void> | undefined;
 
@@ -423,8 +410,7 @@ export class Config {
 
   constructor(params: ConfigParameters) {
     this.sessionId = params.sessionId;
-    this.embeddingModel =
-      params.embeddingModel ?? DEFAULT_GEMINI_EMBEDDING_MODEL;
+    this.embeddingModel = params.embeddingModel ?? DEFAULT_GEMINI_EMBEDDING_MODEL;
     this.fileSystemService = new StandardFileSystemService();
     this.sandbox = params.sandbox;
     this.targetDir = path.resolve(params.targetDir);
@@ -462,13 +448,11 @@ export class Config {
 
     this.fileFiltering = {
       respectGitIgnore:
-        params.fileFiltering?.respectGitIgnore ??
-        DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
+        params.fileFiltering?.respectGitIgnore ?? DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
       respectGeminiIgnore:
         params.fileFiltering?.respectGeminiIgnore ??
         DEFAULT_FILE_FILTERING_OPTIONS.respectGeminiIgnore,
-      enableRecursiveFileSearch:
-        params.fileFiltering?.enableRecursiveFileSearch ?? true,
+      enableRecursiveFileSearch: params.fileFiltering?.enableRecursiveFileSearch ?? true,
       disableFuzzySearch: params.fileFiltering?.disableFuzzySearch ?? false,
     };
     this.checkpointing = params.checkpointing ?? false;
@@ -479,20 +463,17 @@ export class Config {
     this.model = params.model;
     this.previewFeatures = params.previewFeatures ?? undefined;
     this.maxSessionTurns = params.maxSessionTurns ?? -1;
-    this.experimentalZedIntegration =
-      params.experimentalZedIntegration ?? false;
+    this.experimentalZedIntegration = params.experimentalZedIntegration ?? false;
     this.listSessions = params.listSessions ?? false;
     this.deleteSession = params.deleteSession;
     this.listExtensions = params.listExtensions ?? false;
-    this._extensionLoader =
-      params.extensionLoader ?? new SimpleExtensionLoader([]);
+    this._extensionLoader = params.extensionLoader ?? new SimpleExtensionLoader([]);
     this._enabledExtensions = params.enabledExtensions ?? [];
     this.noBrowser = params.noBrowser ?? false;
     this.summarizeToolOutput = params.summarizeToolOutput;
     this.folderTrust = params.folderTrust ?? false;
     this.ideMode = params.ideMode ?? false;
-    this.loadMemoryFromIncludeDirectories =
-      params.loadMemoryFromIncludeDirectories ?? false;
+    this.loadMemoryFromIncludeDirectories = params.loadMemoryFromIncludeDirectories ?? false;
     this.importFormat = params.importFormat ?? 'tree';
     this.discoveryMaxDirs = params.discoveryMaxDirs ?? 200;
     this.compressionThreshold = params.compressionThreshold;
@@ -509,8 +490,7 @@ export class Config {
       pager: params.shellExecutionConfig?.pager ?? 'cat',
     };
     this.truncateToolOutputThreshold =
-      params.truncateToolOutputThreshold ??
-      DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD;
+      params.truncateToolOutputThreshold ?? DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD;
     this.truncateToolOutputLines =
       params.truncateToolOutputLines ?? DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES;
     this.enableToolOutputTruncation = params.enableToolOutputTruncation ?? true;
@@ -524,20 +504,16 @@ export class Config {
     const hasHooks = params.hooks && Object.keys(params.hooks).length > 0;
     const hooksNeedMessageBus = this.enableHooks && hasHooks;
     this.enableMessageBusIntegration =
-      params.enableMessageBusIntegration ??
-      (hooksNeedMessageBus ? true : false);
+      params.enableMessageBusIntegration ?? (hooksNeedMessageBus ? true : false);
     this.codebaseInvestigatorSettings = {
       enabled: params.codebaseInvestigatorSettings?.enabled ?? true,
       maxNumTurns: params.codebaseInvestigatorSettings?.maxNumTurns ?? 10,
       maxTimeMinutes: params.codebaseInvestigatorSettings?.maxTimeMinutes ?? 3,
-      thinkingBudget:
-        params.codebaseInvestigatorSettings?.thinkingBudget ??
-        DEFAULT_THINKING_MODE,
+      thinkingBudget: params.codebaseInvestigatorSettings?.thinkingBudget ?? DEFAULT_THINKING_MODE,
       model: params.codebaseInvestigatorSettings?.model ?? DEFAULT_GEMINI_MODEL,
     };
     this.continueOnFailedApiCall = params.continueOnFailedApiCall ?? true;
-    this.enableShellOutputEfficiency =
-      params.enableShellOutputEfficiency ?? true;
+    this.enableShellOutputEfficiency = params.enableShellOutputEfficiency ?? true;
     this.extensionManagement = params.extensionManagement ?? true;
     this.enableExtensionReloading = params.enableExtensionReloading ?? false;
     this.storage = new Storage(this.targetDir);
@@ -572,7 +548,7 @@ export class Config {
         coreEvents.emitFeedback(
           'error',
           'Invalid proxy configuration detected. Check debug drawer for more details (F12)',
-          error,
+          error
         );
       }
     }
@@ -595,7 +571,7 @@ export class Config {
     }
 
     this.modelConfigService = new ModelConfigService(
-      modelConfigServiceConfig ?? DEFAULT_MODEL_CONFIGS,
+      modelConfigServiceConfig ?? DEFAULT_MODEL_CONFIGS
     );
   }
 
@@ -619,11 +595,7 @@ export class Config {
     await this.agentRegistry.initialize();
 
     this.toolRegistry = await this.createToolRegistry();
-    this.mcpClientManager = new McpClientManager(
-      this.toolRegistry,
-      this,
-      this.eventEmitter,
-    );
+    this.mcpClientManager = new McpClientManager(this.toolRegistry, this, this.eventEmitter);
     await Promise.all([
       await this.mcpClientManager.startConfiguredMcpServers(),
       await this.getExtensionLoader().start(this),
@@ -665,15 +637,12 @@ export class Config {
       this.geminiClient.stripThoughtsFromHistory();
     }
 
-    const newContentGeneratorConfig = await createContentGeneratorConfig(
-      this,
-      authMethod,
-    );
+    const newContentGeneratorConfig = await createContentGeneratorConfig(this, authMethod);
     this.contentGenerator = await createContentGenerator(
       newContentGeneratorConfig,
       this,
       this.getSessionId(),
-      this.zuluPilotAdapter,
+      this.zuluPilotAdapter
     );
     // Only assign to instance properties after successful initialization
     this.contentGeneratorConfig = newContentGeneratorConfig;
@@ -732,13 +701,10 @@ export class Config {
     if (!this.baseLlmClient) {
       // Handle cases where initialization might be deferred or authentication failed
       if (this.contentGenerator) {
-        this.baseLlmClient = new BaseLlmClient(
-          this.getContentGenerator(),
-          this,
-        );
+        this.baseLlmClient = new BaseLlmClient(this.getContentGenerator(), this);
       } else {
         throw new Error(
-          'BaseLlmClient not initialized. Ensure authentication has occurred and ContentGenerator is ready.',
+          'BaseLlmClient not initialized. Ensure authentication has occurred and ContentGenerator is ready.'
         );
       }
     }
@@ -977,9 +943,7 @@ export class Config {
 
   setApprovalMode(mode: ApprovalMode): void {
     if (!this.isTrustedFolder() && mode !== ApprovalMode.DEFAULT) {
-      throw new Error(
-        'Cannot enable privileged approval modes in an untrusted folder.',
-      );
+      throw new Error('Cannot enable privileged approval modes in an untrusted folder.');
     }
     this.approvalMode = mode;
   }
@@ -1161,9 +1125,7 @@ export class Config {
     return this.getNoBrowser() || !shouldAttemptBrowserLaunch();
   }
 
-  getSummarizeToolOutputConfig():
-    | Record<string, SummarizeToolOutputSettings>
-    | undefined {
+  getSummarizeToolOutputConfig(): Record<string, SummarizeToolOutputSettings> | undefined {
     return this.summarizeToolOutput;
   }
 
@@ -1227,8 +1189,7 @@ export class Config {
     await this.ensureExperimentsLoaded();
 
     const remoteThreshold =
-      this.experiments?.flags[ExperimentFlags.CONTEXT_COMPRESSION_THRESHOLD]
-        ?.floatValue;
+      this.experiments?.flags[ExperimentFlags.CONTEXT_COMPRESSION_THRESHOLD]?.floatValue;
     if (remoteThreshold === 0) {
       return undefined;
     }
@@ -1244,17 +1205,13 @@ export class Config {
   async getBannerTextNoCapacityIssues(): Promise<string> {
     await this.ensureExperimentsLoaded();
     return (
-      this.experiments?.flags[ExperimentFlags.BANNER_TEXT_NO_CAPACITY_ISSUES]
-        ?.stringValue ?? ''
+      this.experiments?.flags[ExperimentFlags.BANNER_TEXT_NO_CAPACITY_ISSUES]?.stringValue ?? ''
     );
   }
 
   async getBannerTextCapacityIssues(): Promise<string> {
     await this.ensureExperimentsLoaded();
-    return (
-      this.experiments?.flags[ExperimentFlags.BANNER_TEXT_CAPACITY_ISSUES]
-        ?.stringValue ?? ''
-    );
+    return this.experiments?.flags[ExperimentFlags.BANNER_TEXT_CAPACITY_ISSUES]?.stringValue ?? '';
   }
 
   private async ensureExperimentsLoaded(): Promise<void> {
@@ -1269,11 +1226,7 @@ export class Config {
   }
 
   isInteractiveShellEnabled(): boolean {
-    return (
-      this.interactive &&
-      this.ptyInfo !== 'child_process' &&
-      this.enableInteractiveShell
-    );
+    return this.interactive && this.ptyInfo !== 'child_process' && this.enableInteractiveShell;
   }
 
   isInteractive(): boolean {
@@ -1310,10 +1263,8 @@ export class Config {
 
   setShellExecutionConfig(config: ShellExecutionConfig): void {
     this.shellExecutionConfig = {
-      terminalWidth:
-        config.terminalWidth ?? this.shellExecutionConfig.terminalWidth,
-      terminalHeight:
-        config.terminalHeight ?? this.shellExecutionConfig.terminalHeight,
+      terminalWidth: config.terminalWidth ?? this.shellExecutionConfig.terminalWidth,
+      terminalHeight: config.terminalHeight ?? this.shellExecutionConfig.terminalHeight,
       showColor: config.showColor ?? this.shellExecutionConfig.showColor,
       pager: config.pager ?? this.shellExecutionConfig.pager,
     };
@@ -1333,9 +1284,8 @@ export class Config {
   getTruncateToolOutputThreshold(): number {
     return Math.min(
       // Estimate remaining context window in characters (1 token ~= 4 chars).
-      4 *
-        (tokenLimit(this.model) - uiTelemetryService.getLastPromptTokenCount()),
-      this.truncateToolOutputThreshold,
+      4 * (tokenLimit(this.model) - uiTelemetryService.getLastPromptTokenCount()),
+      this.truncateToolOutputThreshold
     );
   }
 
@@ -1352,9 +1302,7 @@ export class Config {
   }
 
   getOutputFormat(): OutputFormat {
-    return this.outputSettings?.format
-      ? this.outputSettings.format
-      : OutputFormat.TEXT;
+    return this.outputSettings?.format ? this.outputSettings.format : OutputFormat.TEXT;
   }
 
   async getGitService(): Promise<GitService> {
@@ -1413,7 +1361,7 @@ export class Config {
             tool === toolName ||
             tool === normalizedClassName ||
             tool.startsWith(`${toolName}(`) ||
-            tool.startsWith(`${normalizedClassName}(`),
+            tool.startsWith(`${normalizedClassName}(`)
         );
       }
 
@@ -1423,9 +1371,7 @@ export class Config {
         // the tool registry.
         const messageBusEnabled = this.getEnableMessageBusIntegration();
 
-        const toolArgs = messageBusEnabled
-          ? [...args, this.getMessageBus()]
-          : args;
+        const toolArgs = messageBusEnabled ? [...args, this.getMessageBus()] : args;
 
         registry.registerTool(new ToolClass(...toolArgs));
       }
@@ -1469,22 +1415,19 @@ export class Config {
 
     // Register Subagents as Tools
     if (this.getCodebaseInvestigatorSettings().enabled) {
-      const definition = this.agentRegistry.getDefinition(
-        'codebase_investigator',
-      );
+      const definition = this.agentRegistry.getDefinition('codebase_investigator');
       if (definition) {
         // We must respect the main allowed/exclude lists for agents too.
         const allowedTools = this.getAllowedTools();
 
-        const isAllowed =
-          !allowedTools || allowedTools.includes(definition.name);
+        const isAllowed = !allowedTools || allowedTools.includes(definition.name);
 
         if (isAllowed) {
           const messageBusEnabled = this.getEnableMessageBusIntegration();
           const wrapper = new SubagentToolWrapper(
             definition,
             this,
-            messageBusEnabled ? this.getMessageBus() : undefined,
+            messageBusEnabled ? this.getMessageBus() : undefined
           );
           registry.registerTool(wrapper);
         }

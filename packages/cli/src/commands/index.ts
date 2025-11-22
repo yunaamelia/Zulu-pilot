@@ -12,3 +12,4 @@ export { extensionsCommand } from './extensions.js';
 export { addCommand, AddCommand } from './add.js';
 export { contextCommand, ContextCommand } from './context.js';
 export { clearCommand, ClearCommand } from './clear.js';
+export { providerCommand, ProviderCommand } from './provider.js';
