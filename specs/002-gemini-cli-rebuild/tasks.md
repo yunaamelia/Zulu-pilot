@@ -71,11 +71,13 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 - [ ] T007 [P] Create .husky/pre-push hook in .husky/pre-push
 - [ ] T008 [P] Create .husky/commit-msg hook in .husky/commit-msg
 - [ ] T009 [P] Create .lintstagedrc.json with lint-staged configuration in .lintstagedrc.json
-- [ ] T010 Create packages/ directory structure (cli, core, adapter, providers) in packages/
-- [ ] T011 Create tests/ directory structure (unit, integration, contract, e2e) in tests/
-- [ ] T012 Create scripts/ directory for build scripts in scripts/
-- [ ] T013 Clone Gemini CLI repository and study architecture (document findings)
-- [ ] T014 Identify Gemini CLI integration points (create integration-points.md)
+- [ ] T010 [P] Configure git-secrets in pre-commit hook for secret detection in .husky/pre-commit
+- [ ] T011 [P] Configure npm audit in pre-commit hook for dependency vulnerability scanning in .husky/pre-commit
+- [ ] T012 Create packages/ directory structure (cli, core, adapter, providers) in packages/
+- [ ] T013 Create tests/ directory structure (unit, integration, contract, e2e) in tests/
+- [ ] T014 Create scripts/ directory for build scripts in scripts/
+- [ ] T015 Clone Gemini CLI repository and study architecture (document findings)
+- [ ] T016 Identify Gemini CLI integration points (create integration-points.md)
 
 **Checkpoint**: Monorepo structure ready, dependencies configured
 
@@ -89,55 +91,55 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Configuration System
 
-- [ ] T015 [P] Create UnifiedConfiguration interface in packages/core/src/config/UnifiedConfiguration.ts
-- [ ] T016 [P] Create ProviderConfiguration interface in packages/core/src/config/ProviderConfiguration.ts
-- [ ] T017 [P] Create UnifiedConfigManager class in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T018 [P] Implement config loading from ~/.zulu-pilotrc in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T019 [P] Implement config validation using JSON schema in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T020 [P] Implement config saving with atomic writes in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T021 [P] [P] Write unit tests for UnifiedConfigManager in tests/unit/config/UnifiedConfigManager.test.ts (90%+ coverage)
+- [ ] T017 [P] Create UnifiedConfiguration interface in packages/core/src/config/UnifiedConfiguration.ts
+- [ ] T018 [P] Create ProviderConfiguration interface in packages/core/src/config/ProviderConfiguration.ts
+- [ ] T019 [P] Create UnifiedConfigManager class in packages/core/src/config/UnifiedConfigManager.ts
+- [ ] T020 [P] Implement config loading from ~/.zulu-pilotrc in packages/core/src/config/UnifiedConfigManager.ts
+- [ ] T021 [P] Implement config validation using JSON schema in packages/core/src/config/UnifiedConfigManager.ts
+- [ ] T022 [P] Implement config saving with atomic writes in packages/core/src/config/UnifiedConfigManager.ts
+- [ ] T023 [P] [P] Write unit tests for UnifiedConfigManager in tests/unit/config/UnifiedConfigManager.test.ts (90%+ coverage)
 
 ### Provider Interface & Registry
 
-- [ ] T022 [P] Create IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T023 [P] Create ProviderRegistry class in packages/adapter/src/ProviderRegistry.ts
-- [ ] T024 [P] Implement provider registration in packages/adapter/src/ProviderRegistry.ts
-- [ ] T025 [P] Implement provider retrieval with lazy initialization in packages/adapter/src/ProviderRegistry.ts
-- [ ] T026 [P] [P] Write unit tests for ProviderRegistry in tests/unit/adapter/ProviderRegistry.test.ts (90%+ coverage)
+- [ ] T024 [P] Create IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [ ] T025 [P] Create ProviderRegistry class in packages/adapter/src/ProviderRegistry.ts
+- [ ] T026 [P] Implement provider registration in packages/adapter/src/ProviderRegistry.ts
+- [ ] T027 [P] Implement provider retrieval with lazy initialization in packages/adapter/src/ProviderRegistry.ts
+- [ ] T028 [P] [P] Write unit tests for ProviderRegistry in tests/unit/adapter/ProviderRegistry.test.ts (90%+ coverage)
 
 ### Multi-Provider Router
 
-- [ ] T027 [P] Create MultiProviderRouter class in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T028 [P] Implement model ID parsing (provider:model format) in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T029 [P] Implement provider routing logic in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T030 [P] Implement provider switching in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T031 [P] [P] Write unit tests for MultiProviderRouter in tests/unit/adapter/MultiProviderRouter.test.ts (95%+ coverage)
+- [ ] T029 [P] Create MultiProviderRouter class in packages/adapter/src/MultiProviderRouter.ts
+- [ ] T030 [P] Implement model ID parsing (provider:model format) in packages/adapter/src/MultiProviderRouter.ts
+- [ ] T031 [P] Implement provider routing logic in packages/adapter/src/MultiProviderRouter.ts
+- [ ] T032 [P] Implement provider switching in packages/adapter/src/MultiProviderRouter.ts
+- [ ] T033 [P] [P] Write unit tests for MultiProviderRouter in tests/unit/adapter/MultiProviderRouter.test.ts (95%+ coverage)
 
 ### Model Adapter Layer
 
-- [ ] T032 [P] Create IModelAdapter interface in packages/adapter/src/interfaces/IModelAdapter.ts
-- [ ] T033 [P] Create GeminiCLIModelAdapter class in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T034 [P] Implement request format conversion (Gemini CLI → Provider) in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T035 [P] Implement response format conversion (Provider → Gemini CLI) in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T036 [P] Implement generateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T037 [P] Implement streamGenerateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T038 [P] [P] Write unit tests for GeminiCLIModelAdapter in tests/unit/adapter/GeminiCLIModelAdapter.test.ts (95%+ coverage)
+- [ ] T034 [P] Create IModelAdapter interface in packages/adapter/src/interfaces/IModelAdapter.ts
+- [ ] T035 [P] Create GeminiCLIModelAdapter class in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T036 [P] Implement request format conversion (Gemini CLI → Provider) in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T037 [P] Implement response format conversion (Provider → Gemini CLI) in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T038 [P] Implement generateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T039 [P] Implement streamGenerateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T040 [P] [P] Write unit tests for GeminiCLIModelAdapter in tests/unit/adapter/GeminiCLIModelAdapter.test.ts (95%+ coverage)
 
 ### Fork Gemini CLI Packages
 
-- [ ] T039 Fork Gemini CLI packages/cli to packages/cli using git subtree
-- [ ] T040 Fork Gemini CLI packages/core to packages/core using git subtree
-- [ ] T041 Modify ModelManager in packages/core/src/model/ModelManager.ts to use GeminiCLIModelAdapter
-- [ ] T042 [P] Write integration tests for Gemini CLI core integration in tests/integration/core/ModelManager.test.ts
+- [ ] T041 Fork Gemini CLI packages/cli to packages/cli using git subtree
+- [ ] T042 Fork Gemini CLI packages/core to packages/core using git subtree
+- [ ] T043 Modify ModelManager in packages/core/src/model/ModelManager.ts to use GeminiCLIModelAdapter
+- [ ] T044 [P] Write integration tests for Gemini CLI core integration in tests/integration/core/ModelManager.test.ts
 
 ### Basic Provider Implementation (Ollama POC)
 
-- [ ] T043 [P] Port OllamaProvider from current Zulu Pilot to packages/providers/src/OllamaProvider.ts
-- [ ] T044 [P] Implement IModelProvider interface in packages/providers/src/OllamaProvider.ts
-- [ ] T045 [P] Implement streamResponse method in packages/providers/src/OllamaProvider.ts
-- [ ] T046 [P] Implement generateResponse method in packages/providers/src/OllamaProvider.ts
-- [ ] T047 [P] [P] Write unit tests for OllamaProvider in tests/unit/providers/OllamaProvider.test.ts (90%+ coverage)
-- [ ] T048 [P] Write integration tests for adapter + OllamaProvider in tests/integration/adapter-providers/OllamaAdapter.test.ts
+- [ ] T045 [P] Port OllamaProvider from current Zulu Pilot to packages/providers/src/OllamaProvider.ts
+- [ ] T046 [P] Implement IModelProvider interface in packages/providers/src/OllamaProvider.ts
+- [ ] T047 [P] Implement streamResponse method in packages/providers/src/OllamaProvider.ts
+- [ ] T048 [P] Implement generateResponse method in packages/providers/src/OllamaProvider.ts
+- [ ] T049 [P] [P] Write unit tests for OllamaProvider in tests/unit/providers/OllamaProvider.test.ts (90%+ coverage)
+- [ ] T050 [P] Write integration tests for adapter + OllamaProvider in tests/integration/adapter-providers/OllamaAdapter.test.ts
 
 **Checkpoint**: Foundation ready - adapter layer working with Ollama provider, user story implementation can now begin
 
@@ -151,21 +153,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 1
 
-- [ ] T049 [P] [US1] Write contract test for model interface in tests/contract/model-interface.test.ts
-- [ ] T050 [P] [US1] Write integration test for interactive chat flow in tests/integration/cli/interactive-chat.test.ts
-- [ ] T051 [P] [US1] Write E2E test for complete chat session in tests/e2e/full-workflows/interactive-chat.test.ts
+- [ ] T051 [P] [US1] Write contract test for model interface in tests/contract/model-interface.test.ts
+- [ ] T052 [P] [US1] Write integration test for interactive chat flow in tests/integration/cli/interactive-chat.test.ts
+- [ ] T053 [P] [US1] Write E2E test for complete chat session in tests/e2e/full-workflows/interactive-chat.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T052 [P] [US1] Create ChatCommand class in packages/cli/src/commands/chat.ts
-- [ ] T053 [US1] Implement interactive chat loop in packages/cli/src/commands/chat.ts
-- [ ] T054 [US1] Integrate adapter with Gemini CLI core for chat in packages/cli/src/commands/chat.ts
-- [ ] T055 [US1] Implement conversation history management in packages/core/src/conversation/ConversationManager.ts
-- [ ] T056 [US1] Implement real-time streaming output in packages/cli/src/ui/StreamOutput.ts
-- [ ] T057 [US1] Implement loading indicators during API calls in packages/cli/src/ui/Spinner.ts
-- [ ] T058 [US1] Add provider selection in chat command in packages/cli/src/commands/chat.ts
-- [ ] T059 [US1] Add model selection in chat command in packages/cli/src/commands/chat.ts
-- [ ] T060 [US1] Write unit tests for ChatCommand in tests/unit/cli/commands/chat.test.ts (90%+ coverage)
+- [ ] T054 [P] [US1] Create ChatCommand class in packages/cli/src/commands/chat.ts
+- [ ] T055 [US1] Implement interactive chat loop in packages/cli/src/commands/chat.ts
+- [ ] T056 [US1] Integrate adapter with Gemini CLI core for chat in packages/cli/src/commands/chat.ts
+- [ ] T057 [US1] Implement conversation history management in packages/core/src/conversation/ConversationManager.ts
+- [ ] T058 [US1] Implement real-time streaming output in packages/cli/src/ui/StreamOutput.ts (token interval < 100ms, no buffering delays > 500ms per FR-018)
+- [ ] T059 [US1] Implement loading indicators during API calls in packages/cli/src/ui/Spinner.ts
+- [ ] T060 [US1] Implement thinking process display for models with reasoning capabilities in packages/cli/src/ui/ThinkingDisplay.ts (display with `[thinking]` prefix or dimmed text, toggle visibility per FR-019)
+- [ ] T061 [US1] Implement graceful degradation for unsupported features in packages/cli/src/ui/FeatureDegradation.ts (display clear message: "Feature X not available with provider Y" per FR-020)
+- [ ] T062 [US1] Add provider selection in chat command in packages/cli/src/commands/chat.ts
+- [ ] T063 [US1] Add model selection in chat command in packages/cli/src/commands/chat.ts
+- [ ] T064 [US1] Write unit tests for ChatCommand in tests/unit/cli/commands/chat.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 1 complete - interactive chat working with custom models
 
@@ -179,18 +183,18 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 2
 
-- [ ] T061 [P] [US2] Write integration test for file read operation in tests/integration/tools/file-read.test.ts
-- [ ] T062 [P] [US2] Write integration test for file write operation in tests/integration/tools/file-write.test.ts
-- [ ] T063 [P] [US2] Write integration test for file search operation in tests/integration/tools/file-search.test.ts
-- [ ] T064 [P] [US2] Write E2E test for file operations workflow in tests/e2e/full-workflows/file-operations.test.ts
+- [ ] T065 [P] [US2] Write integration test for file read operation in tests/integration/tools/file-read.test.ts
+- [ ] T066 [P] [US2] Write integration test for file write operation in tests/integration/tools/file-write.test.ts
+- [ ] T067 [P] [US2] Write integration test for file search operation in tests/integration/tools/file-search.test.ts
+- [ ] T068 [P] [US2] Write E2E test for file operations workflow in tests/e2e/full-workflows/file-operations.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T065 [US2] Verify Gemini CLI file operations tools work with custom adapter in packages/core/src/tools/FileOperationsTool.ts
-- [ ] T066 [US2] Test ReadFileTool with custom providers in tests/integration/tools/ReadFileTool.test.ts
-- [ ] T067 [US2] Test WriteFileTool with custom providers in tests/integration/tools/WriteFileTool.test.ts
-- [ ] T068 [US2] Test GlobTool (file search) with custom providers in tests/integration/tools/GlobTool.test.ts
-- [ ] T069 [US2] Ensure all file operations tools route through adapter correctly
+- [ ] T069 [US2] Verify Gemini CLI file operations tools work with custom adapter in packages/core/src/tools/FileOperationsTool.ts
+- [ ] T070 [US2] Test ReadFileTool with custom providers in tests/integration/tools/ReadFileTool.test.ts
+- [ ] T071 [US2] Test WriteFileTool with custom providers in tests/integration/tools/WriteFileTool.test.ts
+- [ ] T072 [US2] Test GlobTool (file search) with custom providers in tests/integration/tools/GlobTool.test.ts
+- [ ] T073 [US2] Ensure all file operations tools route through adapter correctly
 
 **Checkpoint**: User Story 2 complete - all file operations work with custom models
 
@@ -204,30 +208,30 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 3
 
-- [ ] T070 [P] [US3] Write unit tests for FileContext entity in tests/unit/core/context/FileContext.test.ts
-- [ ] T071 [P] [US3] Write unit tests for ContextManager in tests/unit/core/context/ContextManager.test.ts
-- [ ] T072 [P] [US3] Write integration test for add command in tests/integration/cli/add-command.test.ts
-- [ ] T073 [P] [US3] Write integration test for context command in tests/integration/cli/context-command.test.ts
-- [ ] T074 [P] [US3] Write integration test for clear command in tests/integration/cli/clear-command.test.ts
-- [ ] T075 [P] [US3] Write E2E test for context management workflow in tests/e2e/full-workflows/context-management.test.ts
+- [ ] T074 [P] [US3] Write unit tests for FileContext entity in tests/unit/core/context/FileContext.test.ts
+- [ ] T075 [P] [US3] Write unit tests for ContextManager in tests/unit/core/context/ContextManager.test.ts
+- [ ] T076 [P] [US3] Write integration test for add command in tests/integration/cli/add-command.test.ts
+- [ ] T077 [P] [US3] Write integration test for context command in tests/integration/cli/context-command.test.ts
+- [ ] T078 [P] [US3] Write integration test for clear command in tests/integration/cli/clear-command.test.ts
+- [ ] T079 [P] [US3] Write E2E test for context management workflow in tests/e2e/full-workflows/context-management.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T076 [P] [US3] Port FileContext interface from current Zulu Pilot to packages/core/src/context/FileContext.ts
-- [ ] T077 [P] [US3] Port ContextManager from current Zulu Pilot to packages/core/src/context/ContextManager.ts
-- [ ] T078 [P] [US3] Port TokenEstimator from current Zulu Pilot to packages/core/src/context/TokenEstimator.ts
-- [ ] T079 [US3] Create AddCommand class in packages/cli/src/commands/add.ts
-- [ ] T080 [US3] Implement file path validation in packages/cli/src/commands/add.ts
-- [ ] T081 [US3] Implement glob pattern support in packages/cli/src/commands/add.ts
-- [ ] T082 [US3] Implement token estimation and warnings in packages/cli/src/commands/add.ts
-- [ ] T083 [US3] Create ContextCommand class in packages/cli/src/commands/context.ts
-- [ ] T084 [US3] Implement context listing with metadata in packages/cli/src/commands/context.ts
-- [ ] T085 [US3] Create ClearCommand class in packages/cli/src/commands/clear.ts
-- [ ] T086 [US3] Implement context clearing with confirmation in packages/cli/src/commands/clear.ts
-- [ ] T087 [US3] Integrate context with adapter for prompt generation in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T088 [US3] Write unit tests for AddCommand in tests/unit/cli/commands/add.test.ts (90%+ coverage)
-- [ ] T089 [US3] Write unit tests for ContextCommand in tests/unit/cli/commands/context.test.ts (90%+ coverage)
-- [ ] T090 [US3] Write unit tests for ClearCommand in tests/unit/cli/commands/clear.test.ts (90%+ coverage)
+- [ ] T080 [P] [US3] Port FileContext interface from current Zulu Pilot to packages/core/src/context/FileContext.ts
+- [ ] T081 [P] [US3] Port ContextManager from current Zulu Pilot to packages/core/src/context/ContextManager.ts
+- [ ] T082 [P] [US3] Port TokenEstimator from current Zulu Pilot to packages/core/src/context/TokenEstimator.ts
+- [ ] T083 [US3] Create AddCommand class in packages/cli/src/commands/add.ts
+- [ ] T084 [US3] Implement file path validation with directory traversal prevention in packages/cli/src/commands/add.ts (reject paths with `../`, absolute paths outside base directory, validate against allowed directories per FR-016)
+- [ ] T085 [US3] Implement glob pattern support in packages/cli/src/commands/add.ts
+- [ ] T086 [US3] Implement token estimation and warnings in packages/cli/src/commands/add.ts
+- [ ] T087 [US3] Create ContextCommand class in packages/cli/src/commands/context.ts
+- [ ] T088 [US3] Implement context listing with metadata in packages/cli/src/commands/context.ts
+- [ ] T089 [US3] Create ClearCommand class in packages/cli/src/commands/clear.ts
+- [ ] T090 [US3] Implement context clearing with confirmation in packages/cli/src/commands/clear.ts
+- [ ] T091 [US3] Integrate context with adapter for prompt generation in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T092 [US3] Write unit tests for AddCommand in tests/unit/cli/commands/add.test.ts (90%+ coverage)
+- [ ] T093 [US3] Write unit tests for ContextCommand in tests/unit/cli/commands/context.test.ts (90%+ coverage)
+- [ ] T094 [US3] Write unit tests for ClearCommand in tests/unit/cli/commands/clear.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 3 complete - context management working with custom models
 
@@ -241,26 +245,26 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 4
 
-- [ ] T091 [P] [US4] Write unit tests for provider configuration in tests/unit/config/ProviderConfiguration.test.ts
-- [ ] T092 [P] [US4] Write integration test for provider switching in tests/integration/cli/provider-switching.test.ts
-- [ ] T093 [P] [US4] Write E2E test for multi-provider workflow in tests/e2e/provider-switching/multi-provider.test.ts
+- [ ] T095 [P] [US4] Write unit tests for provider configuration in tests/unit/config/ProviderConfiguration.test.ts
+- [ ] T096 [P] [US4] Write integration test for provider switching in tests/integration/cli/provider-switching.test.ts
+- [ ] T097 [P] [US4] Write E2E test for multi-provider workflow in tests/e2e/provider-switching/multi-provider.test.ts
 
 ### Implementation for User Story 4
 
-- [ ] T094 [P] [US4] Port OpenAIProvider from current Zulu Pilot to packages/providers/src/OpenAIProvider.ts
-- [ ] T095 [P] [US4] Port GoogleCloudProvider from current Zulu Pilot to packages/providers/src/GoogleCloudProvider.ts
-- [ ] T096 [P] [US4] Port GeminiProvider from current Zulu Pilot to packages/providers/src/GeminiProvider.ts
-- [ ] T097 [P] [US4] Implement request/response conversion for OpenAI in packages/adapter/src/converters/OpenAIConverter.ts
-- [ ] T098 [P] [US4] Implement request/response conversion for Google Cloud in packages/adapter/src/converters/GoogleCloudConverter.ts
-- [ ] T099 [P] [US4] Implement request/response conversion for Gemini in packages/adapter/src/converters/GeminiConverter.ts
-- [ ] T100 [US4] Create ProviderCommand class in packages/cli/src/commands/provider.ts
-- [ ] T101 [US4] Implement provider list functionality in packages/cli/src/commands/provider.ts
-- [ ] T102 [US4] Implement provider set functionality in packages/cli/src/commands/provider.ts
-- [ ] T103 [US4] Implement provider config functionality in packages/cli/src/commands/provider.ts
-- [ ] T104 [US4] Implement provider switching in interactive chat in packages/cli/src/commands/chat.ts
-- [ ] T105 [US4] Ensure context persists across provider switches in packages/core/src/conversation/ConversationManager.ts
-- [ ] T106 [US4] Write unit tests for ProviderCommand in tests/unit/cli/commands/provider.test.ts (90%+ coverage)
-- [ ] T107 [US4] Write integration tests for all providers in tests/integration/providers/all-providers.test.ts
+- [ ] T098 [P] [US4] Port OpenAIProvider from current Zulu Pilot to packages/providers/src/OpenAIProvider.ts
+- [ ] T099 [P] [US4] Port GoogleCloudProvider from current Zulu Pilot to packages/providers/src/GoogleCloudProvider.ts
+- [ ] T100 [P] [US4] Port GeminiProvider from current Zulu Pilot to packages/providers/src/GeminiProvider.ts
+- [ ] T101 [P] [US4] Implement request/response conversion for OpenAI in packages/adapter/src/converters/OpenAIConverter.ts
+- [ ] T102 [P] [US4] Implement request/response conversion for Google Cloud in packages/adapter/src/converters/GoogleCloudConverter.ts
+- [ ] T103 [P] [US4] Implement request/response conversion for Gemini in packages/adapter/src/converters/GeminiConverter.ts
+- [ ] T104 [US4] Create ProviderCommand class in packages/cli/src/commands/provider.ts
+- [ ] T105 [US4] Implement provider list functionality in packages/cli/src/commands/provider.ts
+- [ ] T106 [US4] Implement provider set functionality in packages/cli/src/commands/provider.ts
+- [ ] T107 [US4] Implement provider config functionality in packages/cli/src/commands/provider.ts
+- [ ] T108 [US4] Implement provider switching in interactive chat in packages/cli/src/commands/chat.ts
+- [ ] T109 [US4] Ensure context persists across provider switches in packages/core/src/conversation/ConversationManager.ts
+- [ ] T110 [US4] Write unit tests for ProviderCommand in tests/unit/cli/commands/provider.test.ts (90%+ coverage)
+- [ ] T111 [US4] Write integration tests for all providers in tests/integration/providers/all-providers.test.ts
 
 **Checkpoint**: User Story 4 complete - multi-provider support working with easy switching
 
@@ -274,23 +278,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 12
 
-- [ ] T108 [P] [US12] Write unit tests for error types in tests/unit/utils/errors.test.ts
-- [ ] T109 [P] [US12] Write integration test for invalid API key error in tests/integration/errors/invalid-api-key.test.ts
-- [ ] T110 [P] [US12] Write integration test for connection error in tests/integration/errors/connection-error.test.ts
-- [ ] T111 [P] [US12] Write integration test for model not found error in tests/integration/errors/model-not-found.test.ts
-- [ ] T112 [P] [US12] Write integration test for rate limit error in tests/integration/errors/rate-limit.test.ts
+- [ ] T112 [P] [US12] Write unit tests for error types in tests/unit/utils/errors.test.ts
+- [ ] T113 [P] [US12] Write integration test for invalid API key error in tests/integration/errors/invalid-api-key.test.ts
+- [ ] T114 [P] [US12] Write integration test for connection error in tests/integration/errors/connection-error.test.ts
+- [ ] T115 [P] [US12] Write integration test for model not found error in tests/integration/errors/model-not-found.test.ts
+- [ ] T116 [P] [US12] Write integration test for rate limit error in tests/integration/errors/rate-limit.test.ts
 
 ### Implementation for User Story 12
 
-- [ ] T113 [P] [US12] Port error types from current Zulu Pilot to packages/core/src/utils/errors.ts
-- [ ] T114 [P] [US12] Implement ConnectionError with user-friendly messages in packages/core/src/utils/errors.ts
-- [ ] T115 [P] [US12] Implement RateLimitError with retry guidance in packages/core/src/utils/errors.ts
-- [ ] T116 [P] [US12] Implement ValidationError with actionable guidance in packages/core/src/utils/errors.ts
-- [ ] T117 [US12] Implement error handling in adapter layer in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T118 [US12] Implement error handling in all providers in packages/providers/src/\*_/_.ts
-- [ ] T119 [US12] Implement error display in CLI with actionable guidance in packages/cli/src/ui/ErrorDisplay.ts
-- [ ] T120 [US12] Add provider-specific error messages in packages/adapter/src/errorHandlers/ProviderErrorHandler.ts
-- [ ] T121 [US12] Write unit tests for error handling in tests/unit/utils/errors.test.ts (90%+ coverage)
+- [ ] T117 [P] [US12] Port error types from current Zulu Pilot to packages/core/src/utils/errors.ts
+- [ ] T118 [P] [US12] Implement ConnectionError with user-friendly messages in packages/core/src/utils/errors.ts
+- [ ] T119 [P] [US12] Implement RateLimitError with retry guidance in packages/core/src/utils/errors.ts
+- [ ] T120 [P] [US12] Implement ValidationError with actionable guidance in packages/core/src/utils/errors.ts
+- [ ] T121 [US12] Implement error handling in adapter layer in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T122 [US12] Implement error handling in all providers in packages/providers/src/\*_/_.ts
+- [ ] T123 [US12] Implement error display in CLI with actionable guidance in packages/cli/src/ui/ErrorDisplay.ts
+- [ ] T124 [US12] Add provider-specific error messages in packages/adapter/src/errorHandlers/ProviderErrorHandler.ts
+- [ ] T125 [US12] Write unit tests for error handling in tests/unit/utils/errors.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 12 complete - comprehensive error handling with user-friendly messages
 
@@ -304,22 +308,22 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 10
 
-- [ ] T122 [P] [US10] Write unit tests for model configuration in tests/unit/config/ModelConfiguration.test.ts
-- [ ] T123 [P] [US10] Write integration test for model listing in tests/integration/cli/model-list.test.ts
-- [ ] T124 [P] [US10] Write integration test for model switching in tests/integration/cli/model-switch.test.ts
+- [ ] T126 [P] [US10] Write unit tests for model configuration in tests/unit/config/ModelConfiguration.test.ts
+- [ ] T127 [P] [US10] Write integration test for model listing in tests/integration/cli/model-list.test.ts
+- [ ] T128 [P] [US10] Write integration test for model switching in tests/integration/cli/model-switch.test.ts
 
 ### Implementation for User Story 10
 
-- [ ] T125 [P] [US10] Enhance ModelCommand class in packages/cli/src/commands/model.ts
-- [ ] T126 [US10] Implement model list functionality per provider in packages/cli/src/commands/model.ts
-- [ ] T127 [US10] Implement model set functionality per provider in packages/cli/src/commands/model.ts
-- [ ] T128 [US10] Implement model discovery for Ollama in packages/providers/src/OllamaProvider.ts
-- [ ] T129 [US10] Implement model discovery for OpenAI in packages/providers/src/OpenAIProvider.ts
-- [ ] T130 [US10] Implement model discovery for Google Cloud in packages/providers/src/GoogleCloudProvider.ts
-- [ ] T131 [US10] Add setModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T132 [US10] Add getModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T133 [US10] Implement model switching in adapter in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T134 [US10] Write unit tests for ModelCommand in tests/unit/cli/commands/model.test.ts (90%+ coverage)
+- [ ] T129 [P] [US10] Enhance ModelCommand class in packages/cli/src/commands/model.ts
+- [ ] T130 [US10] Implement model list functionality per provider in packages/cli/src/commands/model.ts
+- [ ] T131 [US10] Implement model set functionality per provider in packages/cli/src/commands/model.ts
+- [ ] T132 [US10] Implement model discovery for Ollama in packages/providers/src/OllamaProvider.ts
+- [ ] T133 [US10] Implement model discovery for OpenAI in packages/providers/src/OpenAIProvider.ts
+- [ ] T134 [US10] Implement model discovery for Google Cloud in packages/providers/src/GoogleCloudProvider.ts
+- [ ] T135 [US10] Add setModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [ ] T136 [US10] Add getModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [ ] T137 [US10] Implement model switching in adapter in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T138 [US10] Write unit tests for ModelCommand in tests/unit/cli/commands/model.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 10 complete - model configuration working per provider
 
@@ -333,15 +337,15 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 5
 
-- [ ] T135 [P] [US5] Write integration test for Google Search tool in tests/integration/tools/google-search.test.ts
-- [ ] T136 [P] [US5] Write E2E test for Google Search workflow in tests/e2e/full-workflows/google-search.test.ts
+- [ ] T139 [P] [US5] Write integration test for Google Search tool in tests/integration/tools/google-search.test.ts
+- [ ] T140 [P] [US5] Write E2E test for Google Search workflow in tests/e2e/full-workflows/google-search.test.ts
 
 ### Implementation for User Story 5
 
-- [ ] T137 [US5] Verify Google Search tool works with custom adapter in packages/core/src/tools/GoogleSearchTool.ts
-- [ ] T138 [US5] Test Google Search tool with all providers in tests/integration/tools/GoogleSearchTool.test.ts
-- [ ] T139 [US5] Implement graceful degradation for providers without Google Search in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T140 [US5] Add Google Search configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
+- [ ] T141 [US5] Verify Google Search tool works with custom adapter in packages/core/src/tools/GoogleSearchTool.ts
+- [ ] T142 [US5] Test Google Search tool with all providers in tests/integration/tools/GoogleSearchTool.test.ts
+- [ ] T143 [US5] Implement graceful degradation for providers without Google Search in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T144 [US5] Add Google Search configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
 
 **Checkpoint**: User Story 5 complete - Google Search working with custom models
 
@@ -355,16 +359,16 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 6
 
-- [ ] T141 [P] [US6] Write integration test for MCP server connection in tests/integration/mcp/server-connection.test.ts
-- [ ] T142 [P] [US6] Write integration test for MCP tool execution in tests/integration/mcp/tool-execution.test.ts
-- [ ] T143 [P] [US6] Write E2E test for MCP workflow in tests/e2e/full-workflows/mcp-integration.test.ts
+- [ ] T145 [P] [US6] Write integration test for MCP server connection in tests/integration/mcp/server-connection.test.ts
+- [ ] T146 [P] [US6] Write integration test for MCP tool execution in tests/integration/mcp/tool-execution.test.ts
+- [ ] T147 [P] [US6] Write E2E test for MCP workflow in tests/e2e/full-workflows/mcp-integration.test.ts
 
 ### Implementation for User Story 6
 
-- [ ] T144 [US6] Verify MCP server integration works with custom adapter in packages/core/src/mcp/MCPServerManager.ts
-- [ ] T145 [US6] Test MCP servers with custom providers in tests/integration/mcp/MCPServerManager.test.ts
-- [ ] T146 [US6] Implement MCP server configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
-- [ ] T147 [US6] Add MCP server management commands in packages/cli/src/commands/mcp.ts
+- [ ] T148 [US6] Verify MCP server integration works with custom adapter in packages/core/src/mcp/MCPServerManager.ts
+- [ ] T149 [US6] Test MCP servers with custom providers in tests/integration/mcp/MCPServerManager.test.ts
+- [ ] T150 [US6] Implement MCP server configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
+- [ ] T151 [US6] Add MCP server management commands in packages/cli/src/commands/mcp.ts
 
 **Checkpoint**: User Story 6 complete - MCP servers working with custom models
 
@@ -378,23 +382,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 7
 
-- [ ] T148 [P] [US7] Write unit tests for CodeChangeProposal entity in tests/unit/core/parser/CodeChangeProposal.test.ts
-- [ ] T149 [P] [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts
-- [ ] T150 [P] [US7] Write integration test for code change workflow in tests/integration/cli/code-change.test.ts
-- [ ] T151 [P] [US7] Write E2E test for code change approval workflow in tests/e2e/full-workflows/code-change.test.ts
+- [ ] T152 [P] [US7] Write unit tests for CodeChangeProposal entity in tests/unit/core/parser/CodeChangeProposal.test.ts
+- [ ] T153 [P] [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts
+- [ ] T154 [P] [US7] Write integration test for code change workflow in tests/integration/cli/code-change.test.ts
+- [ ] T155 [P] [US7] Write E2E test for code change approval workflow in tests/e2e/full-workflows/code-change.test.ts
 
 ### Implementation for User Story 7
 
-- [ ] T152 [P] [US7] Port CodeChangeProposal interface from current Zulu Pilot to packages/core/src/parser/CodeChangeProposal.ts
-- [ ] T153 [P] [US7] Port CodeChangeParser from current Zulu Pilot to packages/core/src/parser/CodeChangeParser.ts
-- [ ] T154 [P] [US7] Port FilePatcher from current Zulu Pilot to packages/core/src/parser/FilePatcher.ts
-- [ ] T155 [US7] Verify Gemini CLI code editing tools work with custom adapter in packages/core/src/tools/CodeEditTool.ts
-- [ ] T156 [US7] Implement diff display in CLI in packages/cli/src/ui/DiffDisplay.ts
-- [ ] T157 [US7] Implement approval/rejection workflow in packages/cli/src/commands/chat.ts
-- [ ] T158 [US7] Implement backup creation before file modification in packages/core/src/parser/FilePatcher.ts
-- [ ] T159 [US7] Implement syntax validation before applying changes in packages/core/src/parser/FilePatcher.ts
-- [ ] T160 [US7] Write unit tests for CodeChangeParser in tests/unit/core/parser/CodeChangeParser.test.ts (90%+ coverage)
-- [ ] T161 [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts (90%+ coverage)
+- [ ] T156 [P] [US7] Port CodeChangeProposal interface from current Zulu Pilot to packages/core/src/parser/CodeChangeProposal.ts
+- [ ] T157 [P] [US7] Port CodeChangeParser from current Zulu Pilot to packages/core/src/parser/CodeChangeParser.ts
+- [ ] T158 [P] [US7] Port FilePatcher from current Zulu Pilot to packages/core/src/parser/FilePatcher.ts
+- [ ] T159 [US7] Verify Gemini CLI code editing tools work with custom adapter in packages/core/src/tools/CodeEditTool.ts
+- [ ] T160 [US7] Implement diff display in CLI in packages/cli/src/ui/DiffDisplay.ts
+- [ ] T161 [US7] Implement approval/rejection workflow in packages/cli/src/commands/chat.ts
+- [ ] T162 [US7] Implement backup creation before file modification in packages/core/src/parser/FilePatcher.ts
+- [ ] T163 [US7] Implement syntax validation before applying changes in packages/core/src/parser/FilePatcher.ts
+- [ ] T164 [US7] Write unit tests for CodeChangeParser in tests/unit/core/parser/CodeChangeParser.test.ts (90%+ coverage)
+- [ ] T165 [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 7 complete - code change proposal and approval workflow working
 
@@ -408,26 +412,26 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 8
 
-- [ ] T162 [P] [US8] Write unit tests for ConversationCheckpoint entity in tests/unit/core/checkpoint/ConversationCheckpoint.test.ts
-- [ ] T163 [P] [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts
-- [ ] T164 [P] [US8] Write integration test for checkpoint save in tests/integration/cli/checkpoint-save.test.ts
-- [ ] T165 [P] [US8] Write integration test for checkpoint resume in tests/integration/cli/checkpoint-resume.test.ts
-- [ ] T166 [P] [US8] Write E2E test for checkpoint workflow in tests/e2e/full-workflows/checkpoint.test.ts
+- [ ] T166 [P] [US8] Write unit tests for ConversationCheckpoint entity in tests/unit/core/checkpoint/ConversationCheckpoint.test.ts
+- [ ] T167 [P] [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts
+- [ ] T168 [P] [US8] Write integration test for checkpoint save in tests/integration/cli/checkpoint-save.test.ts
+- [ ] T169 [P] [US8] Write integration test for checkpoint resume in tests/integration/cli/checkpoint-resume.test.ts
+- [ ] T170 [P] [US8] Write E2E test for checkpoint workflow in tests/e2e/full-workflows/checkpoint.test.ts
 
 ### Implementation for User Story 8
 
-- [ ] T167 [P] [US8] Create ConversationCheckpoint interface in packages/core/src/checkpoint/ConversationCheckpoint.ts
-- [ ] T168 [P] [US8] Create CheckpointManager class in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T169 [US8] Implement checkpoint saving to ~/.zulu-pilot/checkpoints/ in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T170 [US8] Implement checkpoint loading from files in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T171 [US8] Implement checkpoint listing in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T172 [US8] Create CheckpointCommand class in packages/cli/src/commands/checkpoint.ts
-- [ ] T173 [US8] Implement checkpoint save command in packages/cli/src/commands/checkpoint.ts
-- [ ] T174 [US8] Implement checkpoint list command in packages/cli/src/commands/checkpoint.ts
-- [ ] T175 [US8] Implement checkpoint resume in chat command in packages/cli/src/commands/chat.ts
-- [ ] T176 [US8] Implement checkpoint deletion in packages/cli/src/commands/checkpoint.ts
-- [ ] T177 [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts (90%+ coverage)
-- [ ] T178 [US8] Write unit tests for CheckpointCommand in tests/unit/cli/commands/checkpoint.test.ts (90%+ coverage)
+- [ ] T171 [P] [US8] Create ConversationCheckpoint interface in packages/core/src/checkpoint/ConversationCheckpoint.ts
+- [ ] T172 [P] [US8] Create CheckpointManager class in packages/core/src/checkpoint/CheckpointManager.ts
+- [ ] T173 [US8] Implement checkpoint saving to ~/.zulu-pilot/checkpoints/ in packages/core/src/checkpoint/CheckpointManager.ts
+- [ ] T174 [US8] Implement checkpoint loading from files in packages/core/src/checkpoint/CheckpointManager.ts
+- [ ] T175 [US8] Implement checkpoint listing in packages/core/src/checkpoint/CheckpointManager.ts
+- [ ] T176 [US8] Create CheckpointCommand class in packages/cli/src/commands/checkpoint.ts
+- [ ] T177 [US8] Implement checkpoint save command in packages/cli/src/commands/checkpoint.ts
+- [ ] T178 [US8] Implement checkpoint list command in packages/cli/src/commands/checkpoint.ts
+- [ ] T179 [US8] Implement checkpoint resume in chat command in packages/cli/src/commands/chat.ts
+- [ ] T180 [US8] Implement checkpoint deletion in packages/cli/src/commands/checkpoint.ts
+- [ ] T181 [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts (90%+ coverage)
+- [ ] T182 [US8] Write unit tests for CheckpointCommand in tests/unit/cli/commands/checkpoint.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 8 complete - conversation checkpointing working
 
@@ -441,18 +445,18 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 9
 
-- [ ] T179 [P] [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts
-- [ ] T180 [P] [US9] Write integration test for context file loading in tests/integration/cli/context-file.test.ts
-- [ ] T181 [P] [US9] Write E2E test for context file workflow in tests/e2e/full-workflows/context-file.test.ts
+- [ ] T183 [P] [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts
+- [ ] T184 [P] [US9] Write integration test for context file loading in tests/integration/cli/context-file.test.ts
+- [ ] T185 [P] [US9] Write E2E test for context file workflow in tests/e2e/full-workflows/context-file.test.ts
 
 ### Implementation for User Story 9
 
-- [ ] T182 [P] [US9] Create ContextFileLoader class in packages/core/src/context/ContextFileLoader.ts
-- [ ] T183 [US9] Implement context file discovery (project root and subdirectories) in packages/core/src/context/ContextFileLoader.ts
-- [ ] T184 [US9] Implement context file loading and merging in packages/core/src/context/ContextFileLoader.ts
-- [ ] T185 [US9] Integrate context files with conversation manager in packages/core/src/conversation/ConversationManager.ts
-- [ ] T186 [US9] Add context file priority (subdirectory > root) in packages/core/src/context/ContextFileLoader.ts
-- [ ] T187 [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts (90%+ coverage)
+- [ ] T186 [P] [US9] Create ContextFileLoader class in packages/core/src/context/ContextFileLoader.ts
+- [ ] T187 [US9] Implement context file discovery (project root and subdirectories) in packages/core/src/context/ContextFileLoader.ts
+- [ ] T188 [US9] Implement context file loading and merging in packages/core/src/context/ContextFileLoader.ts
+- [ ] T189 [US9] Integrate context files with conversation manager in packages/core/src/conversation/ConversationManager.ts
+- [ ] T190 [US9] Add context file priority (subdirectory > root) in packages/core/src/context/ContextFileLoader.ts
+- [ ] T191 [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 9 complete - custom context files working
 
@@ -466,17 +470,17 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 11
 
-- [ ] T188 [P] [US11] Write integration test for headless mode in tests/integration/cli/headless-mode.test.ts
-- [ ] T189 [P] [US11] Write E2E test for headless mode workflow in tests/e2e/full-workflows/headless-mode.test.ts
+- [ ] T192 [P] [US11] Write integration test for headless mode in tests/integration/cli/headless-mode.test.ts
+- [ ] T193 [P] [US11] Write E2E test for headless mode workflow in tests/e2e/full-workflows/headless-mode.test.ts
 
 ### Implementation for User Story 11
 
-- [ ] T190 [US11] Add headless flag to ChatCommand in packages/cli/src/commands/chat.ts
-- [ ] T191 [US11] Implement JSON output format in packages/cli/src/ui/OutputFormatter.ts
-- [ ] T192 [US11] Implement stream-json output format in packages/cli/src/ui/OutputFormatter.ts
-- [ ] T193 [US11] Implement non-interactive mode (no prompts) in packages/cli/src/commands/chat.ts
-- [ ] T194 [US11] Add environment variable support for headless config in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T195 [US11] Write unit tests for OutputFormatter in tests/unit/cli/ui/OutputFormatter.test.ts (90%+ coverage)
+- [ ] T194 [US11] Add headless flag to ChatCommand in packages/cli/src/commands/chat.ts
+- [ ] T195 [US11] Implement JSON output format in packages/cli/src/ui/OutputFormatter.ts
+- [ ] T196 [US11] Implement stream-json output format in packages/cli/src/ui/OutputFormatter.ts
+- [ ] T197 [US11] Implement non-interactive mode (no prompts) in packages/cli/src/commands/chat.ts
+- [ ] T198 [US11] Add environment variable support for headless config in packages/core/src/config/UnifiedConfigManager.ts
+- [ ] T199 [US11] Write unit tests for OutputFormatter in tests/unit/cli/ui/OutputFormatter.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 11 complete - headless mode working
 
@@ -488,41 +492,41 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Documentation
 
-- [ ] T196 [P] Write comprehensive README.md in README.md
-- [ ] T197 [P] Write migration guide from Zulu Pilot v1 in docs/migration-guide.md
-- [ ] T198 [P] Write API documentation in docs/api.md
-- [ ] T199 [P] Write architecture documentation in docs/architecture.md
-- [ ] T200 [P] Update quickstart guide in specs/002-gemini-cli-rebuild/quickstart.md
+- [ ] T200 [P] Write comprehensive README.md in README.md
+- [ ] T201 [P] Write migration guide from Zulu Pilot v1 in docs/migration-guide.md
+- [ ] T202 [P] Write API documentation in docs/api.md
+- [ ] T203 [P] Write architecture documentation in docs/architecture.md
+- [ ] T204 [P] Update quickstart guide in specs/002-gemini-cli-rebuild/quickstart.md
 
 ### Performance Optimization
 
-- [ ] T201 [P] Optimize adapter request/response conversion in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T202 [P] Optimize context loading for large file sets in packages/core/src/context/ContextManager.ts
-- [ ] T203 [P] Add caching for provider instances in packages/adapter/src/ProviderRegistry.ts
-- [ ] T204 [P] Profile and optimize streaming performance in packages/cli/src/ui/StreamOutput.ts
+- [ ] T205 [P] Optimize adapter request/response conversion in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [ ] T206 [P] Optimize context loading for large file sets in packages/core/src/context/ContextManager.ts
+- [ ] T207 [P] Add caching for provider instances in packages/adapter/src/ProviderRegistry.ts
+- [ ] T208 [P] Profile and optimize streaming performance in packages/cli/src/ui/StreamOutput.ts
 
 ### Additional Providers
 
-- [ ] T205 [P] Implement DeepSeekProvider in packages/providers/src/DeepSeekProvider.ts
-- [ ] T206 [P] Implement QwenProvider in packages/providers/src/QwenProvider.ts
-- [ ] T207 [P] Write tests for DeepSeekProvider in tests/unit/providers/DeepSeekProvider.test.ts
-- [ ] T208 [P] Write tests for QwenProvider in tests/unit/providers/QwenProvider.test.ts
+- [ ] T209 [P] Implement DeepSeekProvider in packages/providers/src/DeepSeekProvider.ts
+- [ ] T210 [P] Implement QwenProvider in packages/providers/src/QwenProvider.ts
+- [ ] T211 [P] Write tests for DeepSeekProvider in tests/unit/providers/DeepSeekProvider.test.ts
+- [ ] T212 [P] Write tests for QwenProvider in tests/unit/providers/QwenProvider.test.ts
 
 ### Quality Improvements
 
-- [ ] T209 [P] Ensure all packages meet 90%+ coverage threshold
-- [ ] T210 [P] Run full test suite and fix any failing tests
-- [ ] T211 [P] Fix all ESLint warnings and errors
-- [ ] T212 [P] Ensure all TypeScript strict mode checks pass
-- [ ] T213 [P] Add missing JSDoc comments for public APIs
-- [ ] T214 [P] Update CHANGELOG.md with all features
+- [ ] T213 [P] Ensure all packages meet 90%+ coverage threshold
+- [ ] T214 [P] Run full test suite and fix any failing tests
+- [ ] T215 [P] Fix all ESLint warnings and errors
+- [ ] T216 [P] Ensure all TypeScript strict mode checks pass
+- [ ] T217 [P] Add missing JSDoc comments for public APIs
+- [ ] T218 [P] Update CHANGELOG.md with all features
 
 ### CI/CD Setup
 
-- [ ] T215 [P] Configure GitHub Actions workflow in .github/workflows/ci.yml
-- [ ] T216 [P] Setup coverage reporting (Codecov/Coveralls) in CI
-- [ ] T217 [P] Configure branch protection rules
-- [ ] T218 [P] Setup automated deployment pipeline
+- [ ] T219 [P] Configure GitHub Actions workflow in .github/workflows/ci.yml
+- [ ] T220 [P] Setup coverage reporting (Codecov/Coveralls) in CI
+- [ ] T221 [P] Configure branch protection rules
+- [ ] T222 [P] Setup automated deployment pipeline
 
 **Checkpoint**: Project ready for release
 
@@ -534,41 +538,41 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 **Parallel Group 1** (can run simultaneously):
 
-- T052-T060 [US1]: Interactive Chat implementation
-- T076-T090 [US3]: Context Management implementation
-- T113-T121 [US12]: Error Handling implementation
+- T058-T071 [US1]: Interactive Chat implementation
+- T082-T096 [US3]: Context Management implementation
+- T119-T127 [US12]: Error Handling implementation
 
 **Parallel Group 2** (after US1 complete):
 
-- T061-T069 [US2]: File Operations testing and verification
-- T094-T107 [US4]: Multi-Provider implementation
+- T067-T075 [US2]: File Operations testing and verification
+- T100-T113 [US4]: Multi-Provider implementation
 
 ### After MVP (US1, US4, US12 Complete)
 
 **Parallel Group 3**:
 
-- T122-T134 [US10]: Model Configuration
-- T135-T140 [US5]: Google Search Integration
-- T141-T147 [US6]: MCP Server Integration
+- T128-T140 [US10]: Model Configuration
+- T141-T146 [US5]: Google Search Integration
+- T147-T153 [US6]: MCP Server Integration
 
 **Parallel Group 4**:
 
-- T148-T161 [US7]: Code Change Workflow
-- T162-T178 [US8]: Checkpointing
-- T179-T187 [US9]: Custom Context Files
-- T188-T195 [US11]: Headless Mode
+- T154-T167 [US7]: Code Change Workflow
+- T168-T184 [US8]: Checkpointing
+- T185-T193 [US9]: Custom Context Files
+- T194-T201 [US11]: Headless Mode
 
 ---
 
 ## Task Summary
 
-**Total Tasks**: 218
+**Total Tasks**: 222
 
 **Tasks by Phase**:
 
 - Phase 1 (Setup): 14 tasks
 - Phase 2 (Foundational): 34 tasks
-- Phase 3 (US1 - Interactive Chat): 12 tasks
+- Phase 3 (US1 - Interactive Chat): 14 tasks
 - Phase 4 (US2 - File Operations): 9 tasks
 - Phase 5 (US3 - Context Management): 21 tasks
 - Phase 6 (US4 - Multi-Provider): 17 tasks
@@ -584,7 +588,7 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 **Tasks by User Story**:
 
-- US1: 12 tasks
+- US1: 14 tasks
 - US2: 9 tasks
 - US3: 21 tasks
 - US4: 17 tasks
@@ -603,10 +607,10 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 - Phase 1: Setup (14 tasks)
 - Phase 2: Foundational (34 tasks)
-- Phase 3: US1 - Interactive Chat (12 tasks)
+- Phase 3: US1 - Interactive Chat (14 tasks)
 - Phase 6: US4 - Multi-Provider (17 tasks)
 - Phase 7: US12 - Error Handling (14 tasks)
 
-**Total MVP Tasks**: 91 tasks
+**Total MVP Tasks**: 93 tasks
 
 **Format Validation**: ✅ All tasks follow checklist format with [TaskID] [P?] [Story?] Description with file path

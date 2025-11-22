@@ -45,7 +45,7 @@ Developer bisa memulai interactive chat session dengan model pribadi mereka (Oll
 
 4. **Given** developer sudah menambahkan files ke context, **When** mereka bertanya tentang codebase, **Then** AI menggunakan context files tersebut untuk menjawab, sama seperti Gemini CLI.
 
-5. **Given** developer menggunakan model yang support thinking/reasoning (seperti DeepSeek R1), **When** mereka bertanya complex question, **Then** mereka bisa melihat thinking process jika model support itu, atau mendapatkan response langsung jika tidak.
+5. **Given** developer menggunakan model yang support thinking/reasoning (seperti DeepSeek R1), **When** mereka bertanya complex question, **Then** mereka bisa melihat thinking process dengan `[thinking]` prefix atau dimmed text, atau mendapatkan response langsung jika model tidak support thinking. User bisa toggle visibility thinking process.
 
 ---
 
@@ -111,7 +111,7 @@ Developer bisa configure multiple AI providers (Ollama, OpenAI, Google Cloud, Ge
 
 4. **Given** developer configure provider dengan invalid credentials, **When** mereka mencoba menggunakan provider tersebut, **Then** system menunjukkan error message yang jelas dengan actionable guidance (e.g., "Invalid API key. Please check your .env file or run 'zulu-pilot config --set-api-key openai'").
 
-5. **Given** developer menggunakan provider yang tidak support certain features (e.g., Google Search tool), **When** mereka mencoba menggunakan feature tersebut, **Then** system menunjukkan graceful degradation atau error message yang jelas bahwa feature tidak available untuk provider tersebut.
+5. **Given** developer menggunakan provider yang tidak support certain features (e.g., Google Search tool), **When** mereka mencoba menggunakan feature tersebut, **Then** system menunjukkan graceful degradation dengan clear message: "Feature X not available with provider Y. Using fallback Z." atau "Feature X requires provider Y. Current provider: Z."
 
 ---
 
@@ -326,8 +326,17 @@ Aplikasi harus handle errors gracefully dan provide user-friendly, actionable er
 - **FR-018**: System MUST support real-time token streaming with smooth output and loading indicators.
 
 - **FR-019**: System MUST support models that provide thinking/reasoning capabilities (like DeepSeek R1) and display thinking process when available.
+  - **Display Format**: Thinking process harus ditampilkan dengan visual indicator yang jelas:
+    - Prefix dengan `[thinking]` marker atau dimmed text
+    - Separate section atau stream dari regular output
+    - Distinguishable dari regular response (e.g., dimmed, italic, atau separate panel)
+  - **User Control**: User bisa toggle visibility thinking process (show/hide)
+  - **Fallback**: Jika model tidak support thinking, tampilkan response langsung tanpa thinking section
 
 - **FR-020**: System MUST support graceful degradation when provider does not support certain features (e.g., Google Search with local Ollama).
+  - **Measurable Criteria**: Display clear message: "Feature X not available with provider Y. Using fallback Z." atau "Feature X requires provider Y. Current provider: Z."
+  - **User Experience**: User harus tahu mengapa feature tidak available dan apa alternatifnya
+  - **Error Handling**: Tidak crash atau show cryptic error, tetapi provide actionable guidance
 
 ### Key Entities
 
@@ -360,6 +369,8 @@ Aplikasi harus handle errors gracefully dan provide user-friendly, actionable er
 - **SC-006**: First token latency is under 2 seconds for local models (Ollama) and under 5 seconds for cloud models (OpenAI, Google Cloud) in 95% of requests.
 
 - **SC-007**: Token streaming is smooth without buffering delays, with tokens appearing in real-time as they are generated.
+  - **Measurable**: Token interval < 100ms, no buffering delays > 500ms
+  - **User Experience**: Tokens muncul secara real-time tanpa blocking atau batching yang terlihat
 
 - **SC-008**: Context loading from multiple files (20+ files) completes within 3 seconds in 95% of cases.
 
@@ -384,6 +395,9 @@ Aplikasi harus handle errors gracefully dan provide user-friendly, actionable er
 1. **Response Time**: First token latency harus < 2 seconds untuk local models (Ollama) dan < 5 seconds untuk cloud models (OpenAI, Google Cloud).
 
 2. **Streaming**: Token streaming harus smooth tanpa buffering delays. User harus melihat tokens muncul secara real-time.
+   - **Measurable Criteria**: Token interval < 100ms antara tokens, tidak ada buffering delays > 500ms
+   - **Smooth Output**: Tokens muncul secara real-time tanpa blocking atau batching yang terlihat
+   - **Loading Indicators**: Spinner atau indicator harus muncul selama menunggu first token (< 2s local, < 5s cloud)
 
 3. **Context Loading**: Loading context dari multiple files (20+ files) harus complete dalam < 3 seconds.
 

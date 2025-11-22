@@ -60,12 +60,12 @@ _MANDATORY: Every plan.md must include this section per Constitution - Testing S
 
 - **Testing Framework**: Jest 29.7.0 dengan ts-jest 29.2.5 untuk TypeScript support
 - **Coverage Tool**: Istanbul (via Jest built-in coverage) dengan coverageReporters: ['text', 'lcov', 'json', 'html']
-- **Coverage Targets**:
-  - Overall: 80% minimum, 90% target
-  - Unit tests: 85% minimum (adapter layer: 95%+ critical path)
-  - Integration tests: 75% minimum
-  - Critical paths: 100% (adapter layer, provider routing, configuration management)
-  - New code: 90% minimum (stricter than legacy)
+- **Coverage Targets** (per Constitution - Testing Standards):
+  - **Unit tests**: 80% minimum (target: 90%+)
+  - **Integration tests**: 70% minimum (target: 80%+)
+  - **Critical paths**: 100% mandatory (adapter layer, provider routing, configuration management)
+  - **Overall**: 75% minimum (target: 80%+)
+  - **New code**: 90% minimum (stricter than legacy)
 - **Test File Structure**:
   - Naming: `*.test.ts` untuk test files (co-located dengan source atau di `tests/` directory)
   - Organization: Mirror source structure, separate directories untuk unit/integration/contract/e2e
@@ -143,11 +143,12 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 **Test & Coverage Strategy** (from Constitution - Testing Standards):
 
 - [x] Testing framework selected: Jest 29.7.0 with ts-jest 29.2.5
-- [x] Coverage targets defined per component/layer:
-  - Adapter layer: 95%+ (critical path)
-  - Providers: 90%+ per provider
-  - Integration: 85%+
-  - Overall: 80% minimum, 90% target
+- [x] Coverage targets defined per component/layer (per Constitution):
+  - **Unit tests**: 80% minimum (target: 90%+)
+  - **Integration tests**: 70% minimum (target: 80%+)
+  - **Critical paths**: 100% mandatory (adapter layer, provider routing, configuration management)
+  - **Overall**: 75% minimum (target: 80%+)
+  - **New code**: 90% minimum
 - [x] Test file structure and naming convention determined: `*.test.ts`, co-located or in `tests/` directory
 - [x] Mocking strategy defined: Jest mocks, axios-mock-adapter, manual mocks for Gemini CLI interfaces
 - [x] CI integration plan for coverage reporting: Codecov/Coveralls, PR comments, badges
@@ -155,7 +156,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 **Quality Gates** (from Constitution - Automated Quality Gates):
 
 - [x] Pre-commit hooks configured: Husky 9.1.7 + lint-staged 15.2.11 (already in project)
-- [x] Coverage thresholds meet minimums: 80% unit, 70% integration, 75% overall (exceeded with 90%+ targets)
+- [x] Coverage thresholds meet Constitution minimums: 80% unit (min), 70% integration (min), 100% critical paths (mandatory), 75% overall (min)
 - [x] Critical paths identified for 100% coverage requirement: Adapter layer, provider routing, configuration management
 - [x] Security scanning tools selected: npm audit, git-secrets (to be added to pre-commit)
 
@@ -640,9 +641,10 @@ tests/
 
 ### Coverage Requirements
 
-- **Adapter Layer**: 95%+ (critical path)
-- **Providers**: 90%+ per provider
-- **Integration**: 85%+ untuk integration tests
+- **Unit Tests**: 80% minimum (target: 90%+)
+- **Integration Tests**: 70% minimum (target: 80%+)
+- **Critical Paths**: 100% mandatory (adapter layer, provider routing, configuration management)
+- **Overall**: 75% minimum (target: 80%+)
 - **E2E**: All user stories covered
 
 ## Risk Mitigation
