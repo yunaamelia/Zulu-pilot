@@ -1,0 +1,63 @@
+{
+  "name": "zulu-pilot",
+  "version": "0.1.0",
+  "description": "CLI coding assistant with multi-provider AI model support",
+  "type": "module",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "zulu-pilot": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "coding-assistant",
+    "llm",
+    "ollama",
+    "gemini",
+    "openai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "commander": "^12.1.0",
+    "diff": "^8.0.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.17.0",
+    "@types/axios-mock-adapter": "^1.9.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
+    "axios-mock-adapter": "^2.1.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "glob": "^13.0.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
