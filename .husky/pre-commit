@@ -3,3 +3,11 @@ npx lint-staged
 
 # Type checking (fast, < 5s)
 npm run type-check || exit 1
+
+# Security scanning: git-secrets (if installed)
+if command -v git-secrets >/dev/null 2>&1; then
+  git-secrets --scan || exit 1
+fi
+
+# Security scanning: npm audit for vulnerabilities
+npm audit --audit-level=moderate || exit 1
