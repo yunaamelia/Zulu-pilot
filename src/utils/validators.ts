@@ -77,7 +77,7 @@ export interface Configuration {
  * @throws {ValidationError} If provider name is invalid
  */
 export function validateProviderName(provider: string): string {
-  const validProviders = ['ollama', 'gemini', 'openai', 'googleCloud'];
+  const validProviders = ['ollama', 'gemini', 'openai', 'googleCloud', 'googleClaude'];
   if (!validProviders.includes(provider)) {
     throw new ValidationError(
       `Invalid provider "${provider}". Must be one of: ${validProviders.join(', ')}`,

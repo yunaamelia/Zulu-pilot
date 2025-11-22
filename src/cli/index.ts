@@ -24,9 +24,10 @@ async function main(): Promise<void> {
     .version('0.1.0')
     .option(
       '--provider <provider>',
-      'Override default provider (ollama, gemini, openai, googleCloud)'
+      'Override default provider (ollama, gemini, openai, googleCloud, googleClaude)'
     )
-    .option('--config <path>', 'Path to configuration file', '~/.zulu-pilotrc');
+    .option('--config <path>', 'Path to configuration file', '~/.zulu-pilotrc')
+    .option('--debug', 'Enable debug mode (verbose logging)');
 
   // Chat command
   program
@@ -36,6 +37,14 @@ async function main(): Promise<void> {
     .action(async (prompt?: string) => {
       const opts = program.opts();
       const provider = opts.provider;
+      const debug = opts.debug ?? false;
+
+      // Enable debug mode if flag is set
+      if (debug) {
+        process.env.DEBUG = '1';
+        process.env.ZULU_PILOT_DEBUG = '1';
+        console.error('[DEBUG] Debug mode enabled');
+      }
 
       // Validate provider if provided
       if (provider) {
@@ -50,7 +59,7 @@ async function main(): Promise<void> {
         }
       }
 
-      await handleChatCommand(prompt, provider);
+      await handleChatCommand(prompt, provider, debug);
     });
 
   // Model command

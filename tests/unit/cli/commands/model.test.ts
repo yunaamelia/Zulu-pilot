@@ -37,11 +37,14 @@ describe('model command', () => {
     await handleModelCommand({ list: true });
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Available models by provider:');
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Default:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Default Provider:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Default Model:'));
     expect(consoleLogSpy).toHaveBeenCalledWith(
       expect.stringContaining('Configured provider models:')
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('All available models:'));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('All available models by provider:')
+    );
   });
 
   it('should set default model', async () => {
@@ -79,7 +82,10 @@ describe('model command', () => {
 
     await handleModelCommand({});
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Current default model: qwen2.5-coder');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Current default provider: ollama');
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Current default model: deepseek-ai/deepseek-v3.1-maas'
+    );
   });
 
   it('should list models with provider-specific configurations', async () => {

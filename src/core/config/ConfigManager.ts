@@ -14,11 +14,18 @@ const DEFAULT_CONFIG_PATH = path.join(os.homedir(), '.zulu-pilotrc');
  * Default configuration.
  */
 const DEFAULT_CONFIG: Configuration = {
-  provider: 'ollama',
-  model: 'qwen2.5-coder',
+  provider: 'googleClaude',
+  model: 'deepseek-ai/deepseek-v3.1-maas',
   tokenEstimation: {
     charsPerToken: 4,
     safetyMargin: 0.1,
+  },
+  providers: {
+    googleClaude: {
+      projectId: 'protean-tooling-476420-i8',
+      region: 'us-west2',
+      model: 'deepseek-ai/deepseek-v3.1-maas',
+    },
   },
 };
 

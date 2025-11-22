@@ -3,6 +3,9 @@ import { OllamaProvider } from '../../core/llm/OllamaProvider.js';
 import { GeminiProvider } from '../../core/llm/GeminiProvider.js';
 import { OpenAIProvider } from '../../core/llm/OpenAIProvider.js';
 import { GoogleCloudProvider } from '../../core/llm/GoogleCloudProvider.js';
+import { GoogleAuth } from 'google-auth-library';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import type { IModelProvider } from '../../core/llm/IModelProvider.js';
 import type { FileContext } from '../../core/context/FileContext.js';
 import { ConnectionError, RateLimitError } from '../../utils/errors.js';
@@ -19,14 +22,39 @@ import * as readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
 /**
+ * Debug logging utility.
+ */
+function debugLog(message: string, data?: unknown): void {
+  if (process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
+    console.error(`[DEBUG] ${message}`);
+    if (data !== undefined) {
+      console.error(`[DEBUG] Data:`, JSON.stringify(data, null, 2));
+    }
+  }
+}
+
+/**
  * Chat command handler.
  */
-export async function handleChatCommand(prompt?: string, providerOverride?: string): Promise<void> {
+export async function handleChatCommand(
+  prompt?: string,
+  providerOverride?: string,
+  debug?: boolean
+): Promise<void> {
+  if (debug || process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
+    process.env.DEBUG = '1';
+    process.env.ZULU_PILOT_DEBUG = '1';
+    debugLog('Debug mode enabled');
+  }
+
+  debugLog('Loading configuration');
   const configManager = new ConfigManager();
   const config = await configManager.load();
+  debugLog('Configuration loaded', { provider: config.provider, model: config.model });
 
   // Determine provider
   const providerName = providerOverride ?? config.provider;
+  debugLog('Provider determined', { providerName, override: providerOverride });
 
   // Validate provider
   try {
@@ -37,11 +65,16 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
   }
 
   // Get provider config
+  debugLog('Getting provider config', { providerName });
   const providerConfig = await configManager.getProviderConfig(providerName);
+  debugLog('Provider config loaded', providerConfig);
 
   // Initialize provider based on provider name (with loading indicator)
+  debugLog('Creating provider instance');
   const provider = await withLoadingIndicator('Initializing provider', async () => {
-    return createProvider(providerName, providerConfig, configManager);
+    const p = await createProvider(providerName, providerConfig, configManager);
+    debugLog('Provider created', { providerType: p.constructor.name });
+    return p;
   });
 
   // Get prompt from user if not provided
@@ -56,22 +89,37 @@ export async function handleChatCommand(prompt?: string, providerOverride?: stri
   // Get context from context manager
   const contextManager = getContextManager();
   const context = contextManager.getContext();
+  debugLog('Context loaded', {
+    fileCount: context.length,
+    files: context.map((f) => ({ path: f.path, tokens: f.estimatedTokens })),
+  });
 
   // Check token limit and warn if approaching
   const warning = contextManager.checkTokenLimit(32000); // Default 32k limit
   if (warning) {
     console.warn(`⚠ ${warning}`);
   }
+  debugLog('Token limit check', { warning: warning ?? 'OK' });
 
   // Stream response with context and collect for parsing
+  debugLog('Starting stream response', { prompt: userPrompt, contextFiles: context.length });
   const fullResponse = await streamResponseWithSpinner(provider, userPrompt, context);
+  debugLog('Response received', { length: fullResponse.length });
 
   // Parse code changes from response
+  debugLog('Parsing code changes from response');
   const parser = new CodeChangeParser({ baseDir: process.cwd() });
   const changes = parser.parse(fullResponse);
+  debugLog('Code changes parsed', {
+    changeCount: changes.length,
+    files: changes.map((c) => c.filePath),
+  });
 
   if (changes.length > 0) {
+    debugLog('Handling code changes');
     await handleCodeChanges(changes);
+  } else {
+    debugLog('No code changes detected in response');
   }
 }
 
@@ -94,9 +142,14 @@ async function streamResponseWithSpinner(
     spinner.start();
 
     try {
+      debugLog('Calling provider.streamResponse', {
+        promptLength: prompt.length,
+        contextCount: context.length,
+      });
       // Collect full response for parsing with improved streaming
       const responseStream = provider.streamResponse(prompt, context);
       const streamHandler = new StreamHandler();
+      debugLog('Response stream created');
 
       // Wait for first token before stopping spinner
       const tokenIterator = responseStream[Symbol.asyncIterator]();
@@ -123,9 +176,18 @@ async function streamResponseWithSpinner(
       }
     } catch (streamError) {
       spinner.stop();
+      debugLog('Stream error occurred', {
+        error: streamError instanceof Error ? streamError.message : String(streamError),
+        errorType: streamError?.constructor?.name,
+      });
       throw streamError;
     }
   } catch (error) {
+    debugLog('Error in streamResponseWithSpinner', {
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error?.constructor?.name,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     if (error instanceof ConnectionError) {
       console.error(`\nError: ${error.getUserMessage()}`);
       process.exit(1);
@@ -229,6 +291,9 @@ async function createProvider(
       return createOpenAIProvider(providerConfig, configManager);
     case 'googleCloud':
       return createGoogleCloudProvider(providerConfig);
+    case 'googleClaude':
+      // googleClaude uses GoogleCloudProvider with all models registered
+      return createGoogleCloudProvider(providerConfig);
     default:
       throw new ConnectionError(`Unsupported provider: ${providerName}`, providerName);
   }
@@ -311,6 +376,65 @@ function createOpenAIProvider(
 /**
  * Create Google Cloud provider.
  */
+/**
+ * Create access token getter using service account key file if available,
+ * otherwise fallback to gcloud auth.
+ */
+async function createAccessTokenGetter(): Promise<() => Promise<string>> {
+  // Try to use service account key file (request.json) first
+  const serviceAccountPath = join(process.cwd(), 'request.json');
+  try {
+    const serviceAccountKey = await readFile(serviceAccountPath, 'utf-8');
+    const serviceAccount = JSON.parse(serviceAccountKey);
+
+    // Validate service account structure
+    if (
+      serviceAccount.type === 'service_account' &&
+      serviceAccount.project_id &&
+      serviceAccount.private_key &&
+      serviceAccount.client_email
+    ) {
+      const auth = new GoogleAuth({
+        credentials: serviceAccount,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+      });
+
+      return async (): Promise<string> => {
+        const client = await auth.getClient();
+        const accessToken = await client.getAccessToken();
+        if (!accessToken.token) {
+          throw new Error('Failed to get access token from service account');
+        }
+        return accessToken.token;
+      };
+    }
+  } catch (error) {
+    // If service account file doesn't exist or is invalid, fallback to gcloud
+    if (process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
+      console.error(
+        `[DEBUG] Service account auth failed, using gcloud: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  // Fallback to gcloud auth print-access-token
+  const { exec } = await import('node:child_process');
+  const { promisify } = await import('node:util');
+  const execAsync = promisify(exec);
+
+  return async (): Promise<string> => {
+    try {
+      const { stdout } = await execAsync('gcloud auth print-access-token');
+      return stdout.trim();
+    } catch (error) {
+      throw new ConnectionError(
+        `Failed to get access token: ${error instanceof Error ? error.message : String(error)}. Please run 'gcloud auth login' or provide request.json service account key file.`,
+        'googleCloud'
+      );
+    }
+  };
+}
+
 function createGoogleCloudProvider(
   providerConfig:
     | {
@@ -333,6 +457,26 @@ function createGoogleCloudProvider(
       'googleCloud'
     );
   }
+
+  // Create access token getter (will be resolved asynchronously)
+  let accessTokenGetter: (() => Promise<string>) | undefined;
+  const getAccessTokenPromise = createAccessTokenGetter().then((getter) => {
+    accessTokenGetter = getter;
+  });
+
+  // For now, create provider with a wrapper that will use the getter once ready
+  // We'll need to handle this asynchronously, but GoogleCloudProvider expects
+  // getAccessToken to be provided synchronously. Let's create a lazy getter.
+  const lazyGetAccessToken = async (): Promise<string> => {
+    if (!accessTokenGetter) {
+      await getAccessTokenPromise;
+    }
+    if (!accessTokenGetter) {
+      throw new ConnectionError('Failed to initialize access token getter', 'googleCloud');
+    }
+    return accessTokenGetter();
+  };
+
   return new GoogleCloudProvider({
     projectId,
     region,
@@ -341,5 +485,6 @@ function createGoogleCloudProvider(
     maxTokens: providerConfig?.maxTokens as number | undefined,
     temperature: providerConfig?.temperature as number | undefined,
     topP: providerConfig?.topP as number | undefined,
+    getAccessToken: lazyGetAccessToken,
   });
 }

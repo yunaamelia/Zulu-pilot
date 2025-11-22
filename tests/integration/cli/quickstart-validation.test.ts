@@ -216,8 +216,8 @@ function add(a: number, b: number): number {
       const configManager = new ConfigManager();
       const config = await configManager.load();
 
-      expect(config.provider).toBe('ollama');
-      expect(config.model).toBe('qwen2.5-coder');
+      expect(config.provider).toBe('googleClaude');
+      expect(config.model).toBe('deepseek-ai/deepseek-v3.1-maas');
     });
   });
 });

@@ -1,0 +1,3323 @@
+---
+alwaysApply: true
+---
+## OBJECTIVE
+
+Create a robust constitution document that defines clear, actionable principles for:
+
+1. Code quality standards
+2. Testing methodologies and coverage requirements
+3. User experience consistency guidelines
+4. Performance benchmarks and optimization requirements
+5. Research-driven planning methodology
+6. Automated quality gates and pre-commit standards
+7. Mandatory test coverage and coverage reporting
+
+## RESEARCH REQUIREMENTS
+
+Before drafting the constitution:
+
+- Conduct in-depth research using the context7 MCP Server
+- Search for industry best practices in software architecture, testing pyramids, UX design systems, and performance engineering
+- Identify relevant standards from authoritative sources (e.g., WCAG for accessibility, SOLID principles, 12-factor app methodology)
+- Research enterprise-grade pre-commit hook implementations and CI/CD pipeline best practices
+- Research test coverage tools, configuration, and best practices for the chosen tech stack
+- Find examples of comprehensive test coverage strategies from enterprise projects
+- Find real-world examples from similar projects or tech stacks we'll be using
+
+## CONSTITUTION STRUCTURE
+
+The constitution must include:
+
+### 1. Core Principles (The "Why")
+
+- Define the philosophical foundation for each principle
+- Explain how these principles align with project success metrics
+- Establish priority hierarchy when principles conflict
+- Emphasize "shift-left" approach: catch issues before they enter version control
+- Emphasize "test-first" mindset: tests are not afterthoughts but first-class citizens
+
+### 2. Measurable Standards (The "What")
+
+#### Code Quality
+
+- Define specific metrics (e.g., cyclomatic complexity limits, code coverage thresholds, linting rules)
+- Establish coding conventions and style guide references
+- Set architectural patterns and anti-patterns
+- Define code review requirements and approval criteria
+
+#### Testing Standards & Mandatory Coverage
+
+**Philosophy**: "Untested code is broken code. Coverage is not a metric—it's a requirement."
+
+##### Test-Driven Development (TDD) Mandate
+
+- **MANDATORY TDD for all new features**:
+  - Write tests BEFORE implementation (Red-Green-Refactor cycle)
+  - No production code without corresponding tests
+  - Tests must fail first, then pass after implementation
+- **Test-first workflow**:
+  1. Write failing test that defines desired behavior
+  2. Implement minimum code to make test pass
+  3. Refactor while keeping tests green
+  4. Generate and verify coverage report
+  5. Add tests for edge cases until coverage threshold met
+
+##### Coverage Requirements (MANDATORY - NO EXCEPTIONS)
+
+**Minimum Coverage Thresholds** (enforced automatically):
+
+- **Unit Tests**: 80% minimum coverage (target: 90%+)
+- **Integration Tests**: 70% minimum coverage (target: 80%+)
+- **Overall Project Coverage**: 75% minimum (target: 85%+)
+- **Critical Business Logic**: 100% coverage (no exceptions)
+- **Public APIs**: 100% coverage (all endpoints, all status codes)
+- **Database Operations**: 90% coverage (all CRUD operations)
+- **Security Functions**: 100% coverage (authentication, authorization, encryption)
+- **Error Handling**: 100% coverage (all catch blocks, error paths)
+
+**Coverage Types (ALL must be measured)**:
+
+1. **Line Coverage**: Percentage of code lines executed
+2. **Branch Coverage**: Percentage of decision branches taken (if/else, switch cases)
+3. **Function Coverage**: Percentage of functions called
+4. **Statement Coverage**: Percentage of statements executed
+5. **Condition Coverage**: Percentage of boolean sub-expressions tested
+6. **Path Coverage**: Percentage of execution paths tested (for critical functions)
+
+**New Code Coverage Standards**:
+
+- New code must have **85% minimum coverage** (stricter than legacy)
+- New files must have **90% minimum coverage**
+- No new code can reduce overall project coverage
+- Coverage trend must be upward (tracked in CI dashboard)
+
+##### Test File Structure & Organization
+
+**MANDATORY Test File Creation Rules**:
+
+1. **File Naming Convention** (STRICTLY ENFORCED):
+
+```
+   Source file: UserService.cs
+   Test file:   UserService.test.cs (or UserServiceTests.cs)
+   Coverage:    Automatically generated
+
+   Source file: user-service.ts
+   Test file:   user-service.test.ts (or user-service.spec.ts)
+   Coverage:    Automatically generated
+
+   Source file: user_service.py
+   Test file:   test_user_service.py
+   Coverage:    Automatically generated
+```
+
+2. **Test File Co-location** (project structure dependent):
+   - **Option A (Separate test directory)**: Mirror source structure
+
+```
+     src/
+       services/
+         UserService.cs
+     tests/
+       services/
+         UserService.test.cs
+```
+
+- **Option B (Co-located)**: Keep tests near source
+
+```
+     src/
+       services/
+         UserService.cs
+         UserService.test.cs
+```
+
+3. **Test Class/Suite Organization**:
+
+```typescript
+// MANDATORY STRUCTURE for each test file
+
+describe('UserService', () => {
+  // Setup and teardown
+  beforeAll(() => {
+    /* global setup */
+  });
+  afterAll(() => {
+    /* global cleanup */
+  });
+  beforeEach(() => {
+    /* per-test setup */
+  });
+  afterEach(() => {
+    /* per-test cleanup */
+  });
+
+  // Group by method/function
+  describe('createUser()', () => {
+    it('should create user with valid data', () => {
+      /* test */
+    });
+    it('should throw error for invalid email', () => {
+      /* test */
+    });
+    it('should hash password before saving', () => {
+      /* test */
+    });
+    // ... more test cases
+  });
+
+  describe('getUserById()', () => {
+    it('should return user when exists', () => {
+      /* test */
+    });
+    it('should return null when not found', () => {
+      /* test */
+    });
+    it('should throw error for invalid ID format', () => {
+      /* test */
+    });
+    // ... more test cases
+  });
+
+  // Edge cases and integration scenarios
+  describe('edge cases', () => {
+    /* ... */
+  });
+  describe('integration scenarios', () => {
+    /* ... */
+  });
+});
+```
+
+4. **Test Coverage File Generation** (AUTOMATIC):
+   - Coverage reports MUST be generated with every test run
+   - Coverage files must be git-ignored (e.g., `coverage/`, `.coverage`, `htmlcov/`)
+   - Coverage reports must be uploaded to CI dashboard
+
+##### Coverage Reporting Configuration (MANDATORY)
+
+**Coverage Tools by Tech Stack**:
+
+**JavaScript/TypeScript**:
+
+```json
+// package.json
+{
+  "scripts": {
+    "test": "jest --coverage --coverageReporters=text --coverageReporters=lcov --coverageReporters=html",
+    "test:watch": "jest --watch --coverage",
+    "test:coverage": "jest --coverage && open coverage/index.html"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/**/*.stories.{js,jsx,ts,tsx}",
+      "!src/index.tsx"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "coverageReporters": ["text", "lcov", "html", "json-summary"],
+    "coverageDirectory": "coverage"
+  }
+}
+```
+
+**.NET/C#**:
+
+```xml
+<!-- Directory.Build.props -->
+<Project>
+  <PropertyGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,json,lcov,opencover</CoverletOutputFormat>
+    <CoverletOutput>./coverage/</CoverletOutput>
+    <Threshold>80</Threshold>
+    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdStat>minimum</ThresholdStat>
+  </PropertyGroup>
+</Project>
+```
+
+```bash
+# Run tests with coverage
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=80
+# Generate HTML report
+reportgenerator -reports:coverage/coverage.cobertura.xml -targetdir:coverage/html -reporttypes:Html
+```
+
+**Python**:
+
+```ini
+# .coveragerc
+[run]
+source = src
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */site-packages/*
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
+
+# Minimum coverage thresholds
+fail_under = 80
+```
+
+```bash
+# Run tests with coverage
+pytest --cov=src --cov-report=html --cov-report=term --cov-report=xml --cov-fail-under=80
+```
+
+**Java**:
+
+```xml
+<!-- pom.xml - JaCoCo plugin -->
+<plugin>
+  <groupId>org.jacoco</groupId>
+  <artifactId>jacoco-maven-plugin</artifactId>
+  <version>0.8.11</version>
+  <executions>
+    <execution>
+      <goals>
+        <goal>prepare-agent</goal>
+      </goals>
+    </execution>
+    <execution>
+      <id>report</id>
+      <phase>test</phase>
+      <goals>
+        <goal>report</goal>
+      </goals>
+    </execution>
+    <execution>
+      <id>check</id>
+      <goals>
+        <goal>check</goal>
+      </goals>
+      <configuration>
+        <rules>
+          <rule>
+            <element>BUNDLE</element>
+            <limits>
+              <limit>
+                <counter>LINE</counter>
+                <value>COVEREDRATIO</value>
+                <minimum>0.80</minimum>
+              </limit>
+              <limit>
+                <counter>BRANCH</counter>
+                <value>COVEREDRATIO</value>
+                <minimum>0.75</minimum>
+              </limit>
+            </limits>
+          </rule>
+        </rules>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+```
+
+**Go**:
+
+```bash
+# Run tests with coverage
+go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./...
+
+# Generate HTML report
+go tool cover -html=coverage.out -o coverage.html
+
+# Check coverage threshold
+go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//' | awk '{if ($1 < 80) exit 1}'
+```
+
+##### Coverage Report Requirements
+
+**MANDATORY Coverage Outputs** (must be generated for every test run):
+
+1. **Terminal/Console Report** (immediate feedback):
+   - Summary with overall percentages
+   - Per-file breakdown
+   - Highlighted uncovered lines
+   - Color-coded (green: >80%, yellow: 60-80%, red: <60%)
+
+2. **HTML Report** (detailed inspection):
+   - Interactive line-by-line coverage visualization
+   - Branch coverage highlighting
+   - Filterable by directory/file
+   - Sortable by coverage percentage
+   - Generated in `coverage/html/` or `htmlcov/`
+
+3. **LCOV/Cobertura Format** (CI integration):
+   - Machine-readable format for CI tools
+   - SonarQube/Code Climate integration
+   - Coverage trend tracking
+   - Generated in `coverage/lcov.info` or `coverage.xml`
+
+4. **JSON Summary** (dashboard integration):
+   - Programmatic access to metrics
+   - Badge generation
+   - Historical tracking
+   - Generated in `coverage/coverage-summary.json`
+
+5. **Badge Generation** (README visibility):
+   - Coverage percentage badge in README.md
+   - Auto-updated on each CI run
+   - Green (>80%), yellow (60-80%), red (<60%)
+
+##### Pre-Commit Coverage Enforcement
+
+**Coverage Check in Pre-Commit Hook** (BLOCKING):
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit (or via husky/pre-commit framework)
+
+echo "🧪 Running tests with coverage..."
+
+# Run tests with coverage
+npm test -- --coverage --silent || exit 1
+# OR: dotnet test /p:CollectCoverage=true /p:Threshold=80 || exit 1
+# OR: pytest --cov=src --cov-fail-under=80 --quiet || exit 1
+
+# Parse coverage and check thresholds
+COVERAGE=$(grep -oP 'All files.*?\|\s+\K[\d.]+' coverage/coverage-summary.txt)
+
+if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+  echo "❌ Coverage check FAILED: $COVERAGE% (minimum: 80%)"
+  echo "📊 View detailed report: open coverage/index.html"
+  exit 1
+fi
+
+echo "✅ Coverage check PASSED: $COVERAGE%"
+```
+
+**Coverage Diff Check** (for changed files only):
+
+- Only modified files must meet coverage threshold
+- Prevents coverage regression
+- Faster feedback for incremental development
+
+```bash
+# Check coverage only for changed files
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|py|cs|java|go)$')
+
+for file in $CHANGED_FILES; do
+  # Check if test file exists
+  TEST_FILE=$(find_test_file "$file")
+  if [ -z "$TEST_FILE" ]; then
+    echo "❌ No test file found for $file"
+    exit 1
+  fi
+
+  # Check coverage for this file
+  FILE_COVERAGE=$(get_file_coverage "$file")
+  if (( $(echo "$FILE_COVERAGE < 85" | bc -l) )); then
+    echo "❌ Insufficient coverage for $file: $FILE_COVERAGE%"
+    exit 1
+  fi
+done
+```
+
+##### CI/CD Coverage Integration
+
+**Continuous Integration Coverage Requirements**:
+
+1. **Coverage Report Upload**:
+   - Upload coverage to Codecov, Coveralls, or Code Climate
+   - PR comments with coverage diff
+   - Fail PR if coverage decreases
+
+2. **Coverage Trend Tracking**:
+   - Store coverage history
+   - Dashboard with coverage over time
+   - Alert on downward trends
+
+3. **Coverage Gate in CI Pipeline**:
+
+```yaml
+# GitHub Actions example
+- name: Run tests with coverage
+  run: npm test -- --coverage
+
+- name: Check coverage thresholds
+  run: |
+    COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+    if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+      echo "Coverage below threshold: $COVERAGE%"
+      exit 1
+    fi
+
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v3
+  with:
+    files: ./coverage/coverage-final.json
+    fail_ci_if_error: true
+
+- name: Comment PR with coverage
+  uses: romeovs/lcov-reporter-action@v0.3.1
+  with:
+    lcov-file: ./coverage/lcov.info
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+4. **SonarQube Integration**:
+   - Automatic coverage import
+   - Quality gate enforcement
+   - Technical debt tracking
+   - Security hotspot coverage
+
+##### Test File Generation Automation
+
+**MANDATORY**: When creating source files, AI agent MUST automatically:
+
+1. **Generate corresponding test file**:
+
+```
+   Create: src/services/PaymentService.ts
+   Auto-create: src/services/PaymentService.test.ts (or tests/services/PaymentService.test.ts)
+```
+
+2. **Generate test skeleton** with:
+   - Import statements for testing framework
+   - Describe block with service/class name
+   - Test cases for each public method
+   - Setup/teardown boilerplate
+   - Mock/stub templates for dependencies
+   - Coverage configuration reference
+
+3. **Generate coverage command** in code comments:
+
+```typescript
+/**
+ * @test-command npm test -- PaymentService.test.ts --coverage
+ * @coverage-target 90%
+ * @critical-path true (requires 100% coverage)
+ */
+```
+
+**Test File Template (Auto-generated)**:
+
+```typescript
+// PaymentService.test.ts - AUTO-GENERATED TEST SKELETON
+// TODO: Implement test cases - COVERAGE TARGET: 90%
+
+import { PaymentService } from './PaymentService';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+describe('PaymentService', () => {
+  let paymentService: PaymentService;
+  let mockDependency: jest.Mocked<DependencyType>;
+
+  beforeEach(() => {
+    // Setup: Initialize service and mocks
+    mockDependency = {
+      method: jest.fn(),
+    };
+    paymentService = new PaymentService(mockDependency);
+  });
+
+  afterEach(() => {
+    // Cleanup: Clear mocks and reset state
+    jest.clearAllMocks();
+  });
+
+  describe('processPayment()', () => {
+    it('should process valid payment successfully', async () => {
+      // Arrange
+      const paymentData = { amount: 100, currency: 'USD' };
+      mockDependency.method.mockResolvedValue({ success: true });
+
+      // Act
+      const result = await paymentService.processPayment(paymentData);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(mockDependency.method).toHaveBeenCalledWith(paymentData);
+      expect(mockDependency.method).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error for invalid amount', async () => {
+      // Arrange
+      const paymentData = { amount: -100, currency: 'USD' };
+
+      // Act & Assert
+      await expect(paymentService.processPayment(paymentData)).rejects.toThrow(
+        'Amount must be positive'
+      );
+    });
+
+    it('should handle payment gateway failures', async () => {
+      // TODO: Implement test for gateway failures
+      // Coverage: Error handling path
+    });
+
+    it('should retry failed payments', async () => {
+      // TODO: Implement test for retry logic
+      // Coverage: Retry mechanism
+    });
+  });
+
+  describe('refundPayment()', () => {
+    it('should refund existing payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should throw error for non-existent payment', async () => {
+      // TODO: Implement test
+    });
+  });
+
+  // TODO: Add tests for remaining methods to achieve 90% coverage
+  // Run: npm test -- PaymentService.test.ts --coverage
+  // View report: open coverage/index.html
+});
+```
+
+##### Coverage Documentation Requirements
+
+**MANDATORY Documentation** (in README.md or TESTING.md):
+
+````markdown
+## Test Coverage
+
+### Current Coverage Status
+
+[![Coverage](https://img.shields.io/codecov/c/github/org/repo)](https://codecov.io/gh/org/repo)
+
+- **Overall**: 87% ✅ (target: 75%, goal: 85%)
+- **Unit Tests**: 92% ✅ (target: 80%)
+- **Integration Tests**: 78% ✅ (target: 70%)
+
+### Running Tests with Coverage
+
+#### Run all tests with coverage
+
+```bash
+npm test -- --coverage
+# OR: dotnet test /p:CollectCoverage=true
+# OR: pytest --cov=src --cov-report=html
+# OR: go test ./... -coverprofile=coverage.out
+```
+
+#### View coverage report
+
+```bash
+# HTML report (interactive)
+open coverage/index.html
+# OR: open coverage/html/index.html
+# OR: open htmlcov/index.html
+
+# Terminal report
+npm test -- --coverage --coverageReporters=text
+```
+
+#### Check specific file coverage
+
+```bash
+npm test -- src/services/PaymentService.test.ts --coverage
+```
+
+### Coverage Requirements
+
+- All new code: **85% minimum** ✅
+- Critical business logic: **100%** ⚠️
+- Public APIs: **100%** ⚠️
+- Overall project: **75% minimum** ✅
+
+### Coverage Enforcement
+
+Coverage is automatically checked:
+
+- ✅ Pre-commit hook (staged files only)
+- ✅ Pre-push hook (full test suite)
+- ✅ CI pipeline (PR builds)
+- ✅ Quality gate (before merge)
+
+### Uncovered Code
+
+View uncovered lines in HTML report:
+
+1. Run `npm test -- --coverage`
+2. Open `coverage/index.html`
+3. Red highlighting = uncovered code
+4. Add tests for red lines to increase coverage
+
+### Coverage Exemptions
+
+To exclude code from coverage (use sparingly):
+
+```typescript
+/* istanbul ignore next */
+function debugOnlyFunction() { ... }
+```
+
+Exemptions require:
+
+- Technical lead approval
+- Comment explaining why
+- Tracked in technical debt backlog
+````
+
+##### Coverage Monitoring & Alerts
+
+**Automated Coverage Monitoring**:
+
+1. **Coverage Dashboard**:
+   - Real-time coverage metrics
+   - Historical trends (coverage over time)
+   - Per-module/package breakdown
+   - Contributor coverage leaderboard
+
+2. **Coverage Alerts**:
+   - Slack/Teams notification on coverage drop
+   - Email alerts for coverage below threshold
+   - PR comments with coverage diff
+   - Weekly coverage reports
+
+3. **Coverage Badges**:
+   - README badge showing current coverage
+   - Per-module badges in documentation
+   - Auto-updating on each CI run
+
+4. **Coverage Regression Prevention**:
+   - Block merge if coverage decreases
+   - Allow minor decrease with justification
+   - Track coverage debt over time
+
+##### Test Coverage Best Practices
+
+**What to Test** (coverage strategy):
+
+1. **Must Have 100% Coverage**:
+   - Authentication and authorization logic
+   - Payment processing
+   - Data encryption/decryption
+   - Security validation
+   - Critical business rules
+   - Public API endpoints
+   - Error handling in critical paths
+
+2. **Target 90%+ Coverage**:
+   - Business logic services
+   - Data access layer
+   - State management
+   - Form validation
+   - API clients
+
+3. **Target 80%+ Coverage**:
+   - UI components (behavior, not styling)
+   - Utility functions
+   - Configuration loaders
+   - Data transformers
+
+4. **Acceptable Lower Coverage** (document why):
+   - Auto-generated code (with annotation)
+   - Deprecated code (scheduled for removal)
+   - Third-party integrations (with integration tests)
+   - Trivial getters/setters (if truly trivial)
+
+**What NOT to Test** (exclude from coverage):
+
+- Framework boilerplate
+- Third-party library code
+- Auto-generated files
+- Configuration files
+- Type definitions
+- Styling (CSS/SCSS)
+
+#### UX Consistency
+
+- Document design tokens, accessibility standards (WCAG level), responsive breakpoints, interaction patterns
+- Define component reusability standards
+- Specify user feedback and validation requirements
+- Establish visual regression testing requirements
+
+#### Performance Requirements
+
+- Set concrete targets (e.g., Time to Interactive < 3s, Core Web Vitals thresholds, API response times)
+- Define monitoring and observability standards
+- Establish performance budget for assets and bundles
+- Set lighthouse score minimums (Performance: 90+, Accessibility: 100, Best Practices: 100, SEO: 90+)
+
+#### Research-Driven Planning
+
+- **Mandatory research depth**: Every technical decision in the planning phase MUST be backed by research findings
+- **Research scope requirements**:
+  - Technology stack evaluation: Compare at least 3 alternatives with pros/cons analysis
+  - Version-specific research: Always verify current stable versions, breaking changes, and migration paths
+  - Production readiness assessment: Find real-world usage examples, case studies, and known limitations
+  - Integration compatibility: Research how chosen technologies work together, common pitfalls
+  - Community and ecosystem health: Check activity, maintenance status, available libraries/tooling
+- **Research sources hierarchy**:
+  1. Official documentation (latest version)
+  2. Authoritative sources via context7 MCP Server
+  3. Production case studies and post-mortems
+  4. Community best practices and design patterns
+  5. Performance benchmarks and comparative studies
+- **Research documentation standard**:
+  - Every plan.md must reference specific research sources
+  - Include version numbers, dates, and links to authoritative materials
+  - Document rejected alternatives with reasoning
+  - Capture trade-offs and assumptions explicitly
+- **Parallel research execution**: For complex features, spawn multiple targeted research tasks simultaneously rather than broad general research
+- **Research validation checkpoints**:
+  - Before finalizing tech stack selection
+  - Before committing to architectural patterns
+  - Before defining data models and APIs
+  - When facing rapidly-evolving technologies (frameworks, platforms)
+
+#### Automated Quality Gates & Pre-Commit Standards
+
+**Philosophy**: "If it's not automated, it won't be consistent." Every quality check must run automatically before code enters the repository.
+
+##### Pre-Commit Hook Requirements (Git Hooks)
+
+**MANDATORY PRE-COMMIT CHECKS** - Code CANNOT be committed unless ALL checks pass:
+
+1. **Code Formatting & Style**
+   - Auto-format code using project formatter (e.g., Prettier, Black, gofmt, dotnet format)
+   - Lint code for style violations (ESLint, Pylint, StyleCop, RuboCop)
+   - Check for consistent indentation, line endings (LF vs CRLF), trailing whitespace
+   - Validate import/using statements ordering
+   - Maximum file length enforcement (e.g., 500 lines)
+
+2. **Code Quality Analysis**
+   - Static code analysis (SonarLint, ReSharper CLI, PMD)
+   - Cyclomatic complexity check (max complexity: 10 per method)
+   - Code duplication detection (max 3% duplication)
+   - Cognitive complexity scoring
+   - Dead code detection
+   - Unused variable/import detection
+
+3. **Security Scanning**
+   - Secret detection (API keys, passwords, tokens using tools like git-secrets, truffleHog)
+   - Dependency vulnerability scanning (npm audit, dotnet list package --vulnerable, OWASP Dependency-Check)
+   - SAST (Static Application Security Testing) for common vulnerabilities
+   - License compliance check for dependencies
+   - Hardcoded credentials detection
+
+4. **Test Execution with Coverage** ⭐ **MANDATORY**
+   - **Run ALL unit tests for changed files with coverage enabled**
+   - **Generate coverage report automatically**
+   - **Verify test file exists for every changed source file**
+   - **Enforce minimum coverage threshold (80% for existing, 85% for new code)**
+   - **Block commit if coverage decreases**
+   - Run integration tests if service layer modified
+   - Minimum code coverage enforcement (fail if below threshold)
+   - Test performance check (fail if tests take > 5 minutes)
+   - Mutation testing for critical business logic
+   - No skipped/ignored tests allowed without documented justification
+   - **Coverage report paths must be validated (coverage/, htmlcov/, etc.)**
+   - **Coverage summary displayed in terminal**
+
+5. **Type Safety & Compilation**
+   - TypeScript/type checking (strict mode)
+   - Compile checks for compiled languages
+   - Schema validation for JSON/YAML/config files
+   - API contract validation (OpenAPI/Swagger spec)
+   - Database migration validation
+
+6. **Documentation Requirements**
+   - JSDoc/XML documentation for public APIs
+   - README.md updates if public interface changed
+   - CHANGELOG.md entry for user-facing changes
+   - API documentation generation and validation
+   - Architecture decision records (ADR) for significant changes
+   - **Test documentation: coverage target, critical paths documented**
+
+7. **Commit Message Standards**
+   - Conventional commits format enforcement (feat:, fix:, docs:, test:, etc.)
+   - Minimum commit message length (e.g., 20 characters)
+   - Issue/ticket number reference requirement
+   - No profanity or inappropriate language
+   - Commit message spell-check
+
+8. **File & Structure Validation**
+   - No large files (> 1MB) without LFS
+   - No binary files in source control (except approved types)
+   - Filename convention compliance
+   - Directory structure validation
+   - No TODO/FIXME comments without linked issues
+   - **Test files naming convention validation**
+   - **Coverage files properly git-ignored**
+
+9. **Performance Checks**
+   - Bundle size analysis (fail if increase > 10% without justification)
+   - Image optimization verification
+   - CSS/JS minification check for production builds
+   - Lighthouse CI for UI changes (score threshold enforcement)
+
+10. **Accessibility Checks**
+    - Automated a11y testing (axe-core, pa11y)
+    - Alt text validation for images
+    - ARIA attributes validation
+    - Color contrast ratio checks
+    - Keyboard navigation verification
+
+##### Pre-Push Hook Requirements
+
+**Additional checks before pushing to remote** (heavier operations):
+
+1. **Full Test Suite Execution with Coverage** ⭐ **MANDATORY**
+   - **Run complete unit test suite with coverage (all projects/modules)**
+   - **Run integration test suite with coverage**
+   - **Generate comprehensive coverage report (HTML + LCOV + JSON)**
+   - **Upload coverage to CI dashboard (Codecov, Coveralls, etc.)**
+   - **Verify overall project coverage meets minimum threshold (75%)**
+   - **Check coverage trend (must not decrease)**
+   - Run end-to-end tests for affected features
+   - Cross-browser/cross-platform tests if UI changed
+   - Load testing for performance-critical changes
+
+2. **Build Verification**
+   - Full production build succeeds
+   - All build warnings treated as errors
+   - Build artifact size within budget
+   - Docker image builds successfully (if applicable)
+   - Multi-platform build verification
+
+3. **Advanced Security Scanning**
+   - Dynamic dependency analysis
+   - Container image scanning (if using Docker)
+   - Infrastructure-as-Code security scanning
+   - API security testing
+
+4. **Code Coverage Analysis** ⭐ **MANDATORY**
+   - **Overall coverage meets/exceeds baseline (75%)**
+   - **No coverage regression in modified files**
+   - **New code has minimum 85% coverage**
+   - **Branch coverage meets requirements (75%)**
+   - **Critical paths have 100% coverage**
+   - **Coverage report uploaded and badges updated**
+
+##### Commit-msg Hook Requirements
+
+1. **Message Format Validation**
+   - Enforce conventional commits: `type(scope): description`
+   - Valid types: feat, fix, docs, style, refactor, perf, test, chore, ci
+   - Maximum subject length (72 characters)
+   - Body wrapping at 72 characters
+   - Reference to issue/ticket required for feat/fix
+
+##### Hook Implementation Standards
+
+**Configuration Management**:
+
+- Use Husky, lint-staged, pre-commit framework, or native Git hooks
+- Store hook configurations in repository (.husky/, .pre-commit-config.yaml)
+- Version control all hook scripts and configurations
+- Document hook setup in CONTRIBUTING.md
+- **Include coverage tool configuration in repository**
+
+**Performance Optimization**:
+
+- Run checks only on staged files (not entire codebase)
+- Cache test results and coverage data where possible
+- Parallel execution of independent checks
+- Fail fast: stop on first critical error
+- Progressive checks: fast checks first, slow checks last
+- **Cache coverage data for unchanged files**
+
+**Developer Experience**:
+
+- Clear, actionable error messages with coverage details
+- Auto-fix capability where possible (formatters, linters)
+- Easy bypass for emergencies (with justification required)
+- Hook installation automation (npm install, project setup script)
+- Local vs. CI parity (same checks in both environments)
+- **Coverage report automatically opened in browser on failure**
+- **Show coverage diff in terminal (before/after)**
+
+**Bypass Policy**:
+
+- Emergency bypass: `git commit --no-verify` allowed ONLY for:
+  - Hotfixes during production incidents
+  - Reverting broken commits
+  - Must be followed by cleanup commit within 24 hours
+- Document bypass usage in commit message
+- Bypass commits flagged in CI for mandatory review
+- **Coverage bypass requires explicit approval + technical debt ticket**
+
+##### CI/CD Pipeline Integration
+
+**Branch Protection Rules**:
+
+- Main/master branch: require all status checks to pass
+- No direct pushes to protected branches
+- Require pull request reviews (minimum 2 approvers)
+- Require up-to-date branches before merge
+- Dismiss stale reviews on new commits
+- **Require coverage checks to pass**
+- **Block merge if coverage decreases without approval**
+
+**Continuous Integration Checks** (runs on PR):
+
+1. **Comprehensive Testing with Coverage** ⭐ **MANDATORY**
+   - **Unit tests with coverage (all platforms/browsers if applicable)**
+   - **Integration tests with coverage**
+   - **End-to-end tests**
+   - **Coverage report generation (multiple formats)**
+   - **Coverage upload to dashboard (Codecov, Coveralls, Code Climate)**
+   - **Coverage trend analysis and comparison**
+   - **Coverage badge generation and update**
+   - **PR comment with coverage diff and summary**
+   - Visual regression tests
+   - Performance benchmarks
+   - Load/stress testing
+
+2. **Quality Gates with Coverage Enforcement** ⭐ **MANDATORY**
+   - SonarQube quality gate (A rating required)
+   - **Code coverage > 80% (configurable per project) - BLOCKING**
+   - **New code coverage > 85% - BLOCKING**
+   - **Coverage trend must not decrease - BLOCKING**
+   - No critical/blocker issues
+   - Technical debt ratio < 5%
+   - Maintainability rating: A
+   - **Coverage metrics displayed in PR dashboard**
+
+3. **Security & Compliance**
+   - SAST (Static Application Security Testing)
+   - DAST (Dynamic Application Security Testing)
+   - Container scanning
+   - License compliance verification
+   - SBOM (Software Bill of Materials) generation
+   - **Security-critical code requires 100% test coverage**
+
+4. **Documentation & Standards**
+   - API documentation build succeeds
+   - Architecture diagrams up-to-date
+   - Breaking change detection
+   - Semantic versioning compliance
+   - **Test documentation completeness check**
+   - **Coverage documentation up-to-date**
+
+5. **Deployment Readiness**
+   - Production build succeeds
+   - Database migrations validated
+   - Environment configurations validated
+   - Rollback plan documented
+   - **All tests pass with required coverage**
+
+**Continuous Deployment Pipeline**:
+
+- Automated deployment to staging on PR merge
+- Smoke tests on staging environment
+- Manual approval gate for production
+- Blue-green or canary deployment strategy
+- Automatic rollback on health check failures
+- **Coverage monitoring in production (error tracking correlation)**
+
+##### Tool Recommendations by Tech Stack
+
+**JavaScript/TypeScript**:
+
+- **Testing**: Jest, Vitest, Mocha + Chai
+- **Coverage**: Istanbul (nyc), c8
+- **Git Hooks**: Husky + lint-staged
+- **Linting**: ESLint + Prettier
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```json
+{
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": ["src/**/*.{js,ts,jsx,tsx}"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "coverageReporters": ["text", "text-summary", "lcov", "html", "json-summary"],
+    "coverageDirectory": "coverage"
+  }
+}
+```
+
+**.NET/C#**:
+
+- **Testing**: xUnit, NUnit, MSTest
+- **Coverage**: Coverlet, dotCover, OpenCover
+- **Git Hooks**: Husky.Net, GitHooks.NET
+- **Linting**: StyleCop + Roslyn Analyzers, dotnet format
+- **CI Integration**: Codecov, ReportGenerator
+- **Configuration**:
+
+```xml
+  <PropertyGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,json,lcov,opencover</CoverletOutputFormat>
+    <Threshold>80</Threshold>
+    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdStat>minimum</ThresholdStat>
+    <CoverletOutput>./coverage/</CoverletOutput>
+  </PropertyGroup>
+```
+
+```bash
+  dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=80
+  reportgenerator -reports:coverage/*.xml -targetdir:coverage/html -reporttypes:Html
+```
+
+**Python**:
+
+- **Testing**: pytest, unittest
+- **Coverage**: coverage.py, pytest-cov
+- **Git Hooks**: pre-commit framework
+- **Linting**: Black + isort, Pylint + Flake8 + mypy
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```ini
+  # .coveragerc
+  [run]
+  source = src
+  branch = True
+
+  [report]
+  precision = 2
+  show_missing = True
+  fail_under = 80
+
+  [html]
+  directory = htmlcov
+
+  [xml]
+  output = coverage.xml
+```
+
+```bash
+  pytest --cov=src --cov-branch --cov-report=html --cov-report=term --cov-report=xml --cov-fail-under=80
+```
+
+**Java**:
+
+- **Testing**: JUnit 5, TestNG
+- **Coverage**: JaCoCo, Cobertura
+- **Git Hooks**: Maven/Gradle Git hooks plugin
+- **Linting**: Checkstyle + PMD + SpotBugs
+- **CI Integration**: Codecov, SonarQube
+- **Configuration**:
+
+```xml
+  <plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <configuration>
+      <rules>
+        <rule>
+          <element>BUNDLE</element>
+          <limits>
+            <limit>
+              <counter>LINE</counter>
+              <value>COVEREDRATIO</value>
+              <minimum>0.80</minimum>
+            </limit>
+            <limit>
+              <counter>BRANCH</counter>
+              <value>COVEREDRATIO</value>
+              <minimum>0.75</minimum>
+            </limit>
+          </limits>
+        </rule>
+      </rules>
+    </configuration>
+  </plugin>
+```
+
+**Go**:
+
+- **Testing**: testing package, Testify
+- **Coverage**: go test -cover, gocov
+- **Git Hooks**: pre-commit or native Git hooks
+- **Linting**: golangci-lint
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```bash
+  go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./...
+  go tool cover -html=coverage.out -o coverage.html
+  go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}' | awk '{if ($1 < 80) exit 1}'
+```
+
+**Ruby**:
+
+- **Testing**: RSpec, Minitest
+- **Coverage**: SimpleCov
+- **Git Hooks**: Overcommit, Lefthook
+- **Linting**: RuboCop
+- **CI Integration**: Codecov, Code Climate
+- **Configuration**:
+
+```ruby
+  # spec/spec_helper.rb
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/spec/'
+    add_filter '/vendor/'
+    minimum_coverage 80
+    minimum_coverage_by_file 70
+  end
+```
+
+**PHP**:
+
+- **Testing**: PHPUnit
+- **Coverage**: PHPUnit with Xdebug/PCOV
+- **Git Hooks**: GrumPHP, pre-commit
+- **Linting**: PHP_CodeSniffer, PHPStan
+- **CI Integration**: Codecov, Scrutinizer
+- **Configuration**:
+
+```xml
+  <!-- phpunit.xml -->
+  <coverage>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <report>
+      <html outputDirectory="coverage/html"/>
+      <clover outputFile="coverage/clover.xml"/>
+    </report>
+  </coverage>
+```
+
+### 3. Governance Framework (The "How")
+
+#### Decision-Making Process
+
+- How should engineers apply these principles when faced with technical choices?
+- Require research evidence for all non-trivial technical decisions
+- Mandate documentation of decision rationale with research citations
+- All architectural decisions must pass automated quality gates
+- **All new features must include tests with coverage before implementation**
+
+#### Trade-off Resolution
+
+- What's the process when principles conflict (e.g., performance vs. code maintainability)?
+- How to balance "research depth" vs. "analysis paralysis"?
+- Define acceptable risk levels for different decision types
+- Quality gates can be adjusted per project phase (stricter for production code)
+- **Coverage requirements can be relaxed for prototypes (minimum 60%) with explicit time-boxed exemption**
+
+#### Research Quality Gates
+
+- **Planning phase cannot proceed to implementation without**:
+  - Documented research for all major technical choices
+  - Validation of chosen stack against latest stable versions
+  - Identification of potential integration issues through research
+  - Clear evidence that alternatives were evaluated
+  - **Test strategy defined with coverage targets per component**
+- **Research inadequacy indicators** (triggers for additional research):
+  - Generic technology overviews instead of specific version details
+  - Missing comparison with alternatives
+  - Lack of real-world production examples
+  - Uncertainty about integration patterns or best practices
+  - Rapidly-changing technology without recent research
+  - **No testing/coverage strategy for chosen tech stack**
+
+#### Quality Gate Enforcement with Coverage
+
+- **Pre-commit checks are MANDATORY** - no commits without passing tests and coverage
+- **CI checks are BLOCKING** - no merges without passing coverage gates
+- **Quality gate bypass requires**:
+  - Technical lead approval
+  - Documented justification in commit/PR
+  - Technical debt ticket created
+  - Remediation plan within 1 sprint
+  - **Coverage exemption explicitly documented**
+- **Quality metrics trends monitored**:
+  - Weekly quality dashboards
+  - **Coverage trend analysis (must be upward or stable)**
+  - Technical debt accumulation tracking
+  - **Uncovered code hotspots identified**
+- **Coverage-specific enforcement**:
+  - Coverage cannot decrease between commits
+  - New files must have 90%+ coverage
+  - Critical paths must have 100% coverage
+  - Coverage reports reviewed in PR
+  - Coverage badges must be green before merge
+
+#### Exception Handling
+
+- When can principles be temporarily violated and what's the approval process?
+- How to handle time-sensitive prototypes or spikes with reduced quality gates
+- Emergency hotfix process with post-fix quality remediation
+- Document technical debt with research needed for future improvement
+- Bypass audit trail maintained for compliance
+- **Coverage exemptions**:
+  - Prototype/spike: 60% minimum (time-boxed to 2 weeks)
+  - Legacy code refactor: gradual increase plan required
+  - Third-party wrapper: integration tests may substitute unit tests
+  - Auto-generated code: marked with coverage exemption comments
+  - **All exemptions require technical lead sign-off and tracking ticket**
+
+#### Review Checkpoints
+
+- At what stages should compliance be validated?
+- Research audit before plan approval
+- Implementation review to ensure plan research was sufficient
+- **Quality gate review points**:
+  - Every commit (pre-commit hooks with coverage)
+  - Every push (pre-push hooks with full coverage)
+  - Every PR (CI pipeline with coverage reporting)
+  - Before merge (branch protection with coverage gate)
+  - Before deployment (staging validation with coverage verification)
+  - Post-deployment (production monitoring)
+  - **Weekly coverage review meeting**
+  - **Monthly coverage trend analysis**
+
+### 4. Implementation Guidelines
+
+#### Research Best Practices
+
+- **Targeted over broad**: Research specific implementation questions, not general technology overviews
+- **Parallel research tasks**: Spawn multiple focused research threads for complex features
+- **Version-aware**: Always include version numbers and release dates in research findings
+- **Practical focus**: Prioritize "how to implement X with Y" over "what is X"
+- **Example-driven**: Seek code examples, implementation patterns, configuration samples
+- **Test-aware**: Research testing strategies and coverage tools for chosen technologies
+
+#### Code Quality Practices
+
+- Provide concrete examples of good vs. bad practices for each principle
+- Define enforcement mechanisms (automated linting, code review checklists, CI/CD gates)
+- Specify documentation requirements for architectural decisions
+- **Zero tolerance for quality gate violations** in protected branches
+- **Test-first development: write tests before implementation**
+- **Coverage-first mindset: target 90%+, accept 80%+ minimum**
+
+#### Automated Quality Gates Setup with Coverage
+
+**Phase 1: Project Initialization** (must be completed before first commit)
+
+1. Install and configure pre-commit framework/tool
+2. Set up commit message validation
+3. Configure code formatters and linters
+4. **Install and configure test framework with coverage**
+5. **Configure coverage thresholds in project config**
+6. **Set up coverage report generation (HTML + LCOV + JSON)**
+7. **Configure coverage badge generation**
+8. Integrate security scanners
+9. **Test hooks locally with sample violations and coverage failures**
+10. **Document coverage commands in README**
+
+**Phase 2: CI/CD Integration** (before first PR)
+
+1. Configure CI pipeline (GitHub Actions, GitLab CI, Jenkins, Azure DevOps)
+2. Set up quality reporting (SonarQube, Code Climate)
+3. **Integrate coverage reporting service (Codecov, Coveralls, Code Climate)**
+4. **Configure coverage PR comments and badges**
+5. Configure branch protection rules with coverage gates
+6. Set up automated deployment pipelines
+7. Integrate monitoring and alerting
+8. **Set up coverage trend tracking dashboard**
+
+**Phase 3: Continuous Improvement**
+
+1. Monitor quality metrics and adjust thresholds
+2. **Review coverage reports weekly, identify gaps**
+3. Add new checks as project matures
+4. Optimize check performance
+5. Gather developer feedback
+6. Update documentation
+7. **Increase coverage targets gradually (80% → 85% → 90%)**
+8. **Gamify coverage: leaderboard, achievements**
+
+#### Quality Gates Configuration Template with Coverage
+
+Create `.quality-gates.yml` in repository root:
+
+```yaml
+quality_gates:
+  pre_commit:
+    - name: "Code Formatting"
+      tools: [prettier, black, gofmt, dotnet-format]
+      auto_fix: true
+      blocking: true
+
+    - name: "Linting"
+      tools: [eslint, pylint, golangci-lint, stylecop]
+      blocking: true
+      max_warnings: 0
+
+    - name: "Unit Tests with Coverage" ⭐
+      scope: changed_files
+      min_coverage: 80
+      min_new_code_coverage: 85
+      max_duration: 60s
+      blocking: true
+      fail_on_coverage_decrease: true
+      reports:
+        - terminal
+        - html
+        - lcov
+      badge: true
+
+    - name: "Security Scan"
+      tools: [git-secrets, trufflehog]
+      blocking: true
+
+    - name: "Type Checking"
+      tools: [typescript, mypy]
+      blocking: true
+
+    - name: "Test File Validation" ⭐
+      check_test_file_exists: true
+      naming_convention: true
+      blocking: true
+
+  pre_push:
+    - name: "Full Test Suite with Coverage" ⭐
+      types: [unit, integration]
+      min_coverage:
+        overall: 75
+        unit: 80
+        integration: 70
+        new_code: 85
+      branch_coverage: 75
+      blocking: true
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+      upload_to: [codecov, coveralls]
+
+    - name: "Build Verification"
+      environments: [development, production]
+      blocking: true
+
+    - name: "Code Quality with Coverage" ⭐
+      tool: sonarqube
+      min_rating: B
+      min_coverage: 80
+      max_coverage_decrease: 0
+      blocking: true
+
+  ci_pipeline:
+    - name: "Comprehensive Testing with Coverage" ⭐
+      types: [unit, integration, e2e]
+      browsers: [chrome, firefox, safari]
+      min_coverage:
+        overall: 80
+        unit: 85
+        integration: 75
+        new_code: 90
+      coverage_trend: must_not_decrease
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+        - text-summary
+      upload_to:
+        - codecov
+        - coveralls
+        - code_climate
+        - sonarqube
+      pr_comment: true
+      badge_update: true
+
+    - name: "Security Analysis"
+      tools: [sonarqube, snyk, trivy]
+      fail_on: critical
+      require_100_percent_coverage_for: [auth, payment, encryption]
+
+    - name: "Performance Testing"
+      lighthouse_min: 90
+      load_test_duration: 5m
+
+    - name: "Accessibility"
+      wcag_level: AA
+      min_score: 95
+
+    - name: "Coverage Report Publication" ⭐
+      generate_badge: true
+      update_readme: true
+      trend_analysis: true
+      alert_on_decrease: true
+
+thresholds:
+  code_coverage: ⭐
+    # Minimum thresholds (BLOCKING)
+    overall_min: 75
+    unit_min: 80
+    integration_min: 70
+    new_code_min: 85
+    branch_coverage_min: 75
+
+    # Target thresholds (WARNING)
+    overall_target: 85
+    unit_target: 90
+    integration_target: 80
+    new_code_target: 95
+
+    # Critical code (MUST BE 100%)
+    critical_paths:
+      - authentication
+      - authorization
+      - payment_processing
+      - data_encryption
+      - security_validation
+      - public_api_endpoints
+
+    # Coverage per layer
+    layers:
+      models: 85
+      services: 90
+      controllers: 80
+      repositories: 85
+      utilities: 85
+      validators: 95
+
+    # Exemptions
+    exclude_from_coverage:
+      - "**/*.d.ts"
+      - "**/*.stories.*"
+      - "**/index.{js,ts}"
+      - "**/__mocks__/**"
+      - "**/dist/**"
+      - "**/build/**"
+      - "**/node_modules/**"
+
+  complexity:
+    cyclomatic: 10
+    cognitive: 15
+
+  duplication:
+    max_percentage: 3
+
+  maintainability:
+    min_rating: B
+
+  security:
+    max_critical: 0
+    max_high: 0
+
+  performance:
+    lighthouse_performance: 90
+    lighthouse_accessibility: 100
+    bundle_size_kb: 500
+
+coverage_reporting: ⭐
+  format:
+    - html         # For local viewing
+    - lcov         # For IDE integration
+    - json         # For programmatic access
+    - cobertura    # For Azure DevOps, Jenkins
+    - text         # For terminal output
+    - text-summary # For quick overview
+
+  output_directory: "coverage"
+
+  badge:
+    enabled: true
+    style: flat
+    colors:
+      excellent: brightgreen  # >90%
+      good: green             # 80-90%
+      acceptable: yellow      # 70-80%
+      warning: orange         # 60-70%
+      poor: red               # <60%
+
+  pr_comments:
+    enabled: true
+    show_diff: true
+    show_files_changed: true
+    fail_on_decrease: true
+
+  dashboard:
+    enabled: true
+    service: codecov  # or coveralls, code_climate
+    upload_on: [push, pull_request]
+
+  alerts:
+    slack:
+      enabled: true
+      webhook: ${SLACK_WEBHOOK_URL}
+      notify_on:
+        - coverage_decrease
+        - below_threshold
+        - critical_path_uncovered
+
+    email:
+      enabled: true
+      recipients: [tech-leads@company.com]
+      notify_on:
+        - coverage_decrease
+        - below_threshold
+
+test_file_generation: ⭐
+  auto_generate: true  # Automatically create test file skeleton
+
+  templates:
+    javascript: ".templates/test.js.template"
+    typescript: ".templates/test.ts.template"
+    csharp: ".templates/test.cs.template"
+    python: ".templates/test.py.template"
+    java: ".templates/test.java.template"
+    go: ".templates/test.go.template"
+
+  naming_convention:
+    javascript: "{filename}.test.js"
+    typescript: "{filename}.test.ts"
+    csharp: "{filename}Tests.cs"
+    python: "test_{filename}.py"
+    java: "{filename}Test.java"
+    go: "{filename}_test.go"
+
+  structure:
+    include_imports: true
+    include_setup_teardown: true
+    include_method_stubs: true
+    include_coverage_comment: true
+    include_todo_comments: true
+
+  coverage_target_comment: true  # Add coverage target in test file header
+```
+
+#### Test File Auto-Generation Workflow ⭐
+
+**MANDATORY: When AI creates source file, it MUST immediately create test file**
+
+**Workflow Steps**:
+
+1. **Create source file** (e.g., `PaymentService.ts`)
+2. **Automatically create test file** (`PaymentService.test.ts`)
+3. **Generate test skeleton** with:
+   - Imports and setup
+   - Describe block for class/module
+   - Test stubs for each public method
+   - Mock setup examples
+   - Coverage target comment
+   - TODO list for achieving coverage
+4. **Add coverage command** to file header
+5. **Commit both files together**
+
+**Example Auto-Generated Test File**:
+
+```typescript
+/**
+ * Test Suite: PaymentService
+ *
+ * @coverage-target 90%
+ * @critical-path true (requires 100% coverage)
+ * @test-command npm test -- PaymentService.test.ts --coverage
+ * @coverage-report open coverage/index.html
+ *
+ * Coverage Requirements:
+ * - All public methods: 100%
+ * - Error handling: 100%
+ * - Edge cases: 90%
+ * - Integration scenarios: 80%
+ */
+
+import { PaymentService } from './PaymentService';
+import { PaymentGateway } from './PaymentGateway';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+describe('PaymentService', () => {
+  let paymentService: PaymentService;
+  let mockGateway: jest.Mocked<PaymentGateway>;
+
+  beforeEach(() => {
+    // Setup: Initialize service and mocks
+    mockGateway = {
+      processPayment: jest.fn(),
+      refundPayment: jest.fn(),
+      validateCard: jest.fn(),
+    } as any;
+
+    paymentService = new PaymentService(mockGateway);
+  });
+
+  afterEach(() => {
+    // Cleanup: Clear all mocks
+    jest.clearAllMocks();
+  });
+
+  /**
+   * COVERAGE CHECKLIST:
+   * [ ] All public methods tested
+   * [ ] Happy path scenarios
+   * [ ] Error handling paths
+   * [ ] Edge cases (null, empty, invalid)
+   * [ ] Async operations
+   * [ ] Side effects verified
+   * [ ] Integration scenarios
+   *
+   * Run coverage: npm test -- PaymentService.test.ts --coverage
+   * View report: open coverage/index.html
+   */
+
+  describe('processPayment()', () => {
+    it('should process valid payment successfully', async () => {
+      // Arrange
+      const paymentData = {
+        amount: 100,
+        currency: 'USD',
+        cardNumber: '4111111111111111',
+      };
+      mockGateway.processPayment.mockResolvedValue({
+        success: true,
+        transactionId: 'txn_123',
+      });
+
+      // Act
+      const result = await paymentService.processPayment(paymentData);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.transactionId).toBe('txn_123');
+      expect(mockGateway.processPayment).toHaveBeenCalledWith(paymentData);
+      expect(mockGateway.processPayment).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error for negative amount', async () => {
+      // Arrange
+      const paymentData = { amount: -100, currency: 'USD' };
+
+      // Act & Assert
+      await expect(paymentService.processPayment(paymentData)).rejects.toThrow(
+        'Amount must be positive'
+      );
+    });
+
+    it('should throw error for invalid currency', async () => {
+      // TODO: Implement test
+      // Coverage: Input validation
+    });
+
+    it('should handle payment gateway timeout', async () => {
+      // TODO: Implement test
+      // Coverage: Error handling - timeout
+    });
+
+    it('should retry failed payments up to 3 times', async () => {
+      // TODO: Implement test
+      // Coverage: Retry logic
+    });
+
+    it('should log payment attempt', async () => {
+      // TODO: Implement test
+      // Coverage: Side effects - logging
+    });
+  });
+
+  describe('refundPayment()', () => {
+    it('should refund existing payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should throw error for non-existent payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should throw error for already refunded payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle partial refunds', async () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('validateCard()', () => {
+    it('should validate correct card number', () => {
+      // TODO: Implement test
+    });
+
+    it('should reject invalid card number', () => {
+      // TODO: Implement test
+    });
+
+    it('should validate expiry date', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle null payment data', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle empty string in fields', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle very large amounts', async () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('integration scenarios', () => {
+    it('should process payment end-to-end', async () => {
+      // TODO: Implement comprehensive integration test
+    });
+  });
+
+  /**
+   * NEXT STEPS TO ACHIEVE 90% COVERAGE:
+   * 1. Implement all TODO test cases above
+   * 2. Add tests for error scenarios (network, validation, etc.)
+   * 3. Add tests for edge cases (boundaries, null, empty)
+   * 4. Verify all branches are covered (if/else, switch, ternary)
+   * 5. Run: npm test -- PaymentService.test.ts --coverage
+   * 6. Open: coverage/index.html
+   * 7. Identify red (uncovered) lines and add tests
+   * 8. Verify coverage meets 90% threshold
+   */
+});
+```
+
+#### Developer Onboarding Checklist with Coverage
+
+Every new developer must:
+
+- [ ] Install Git hooks (automated in setup script)
+- [ ] **Install coverage tools and configure IDE integration**
+- [ ] **Review coverage requirements and thresholds**
+- [ ] Run quality checks locally and verify all pass
+- [ ] **Run tests with coverage and verify reports generate**
+- [ ] **Practice TDD: write failing test → implement → verify coverage**
+- [ ] Review quality gates documentation
+- [ ] Understand bypass policy and consequences
+- [ ] Set up IDE integration for linters/formatters
+- [ ] **Set up IDE coverage highlighting (VS Code, IntelliJ, etc.)**
+- [ ] Complete commit message format training
+- [ ] Review security scanning results interpretation
+- [ ] **Complete test coverage training module**
+- [ ] **Review coverage dashboard and understand metrics**
+
+#### Research Documentation Template
+
+Every plan.md should include:
+
+```markdown
+## Research Summary
+
+- **Technology Choices**: [List with versions and rationale]
+- **Alternatives Considered**: [What was evaluated and why rejected]
+- **Key Research Sources**: [Links to official docs, articles, case studies]
+- **Known Limitations**: [Trade-offs and constraints identified]
+- **Integration Patterns**: [How components work together based on research]
+- **Version Information**: [Specific versions researched and their stability/maturity]
+
+## Test & Coverage Strategy ⭐
+
+- **Testing Framework**: [Tool and version, e.g., Jest 29.x, xUnit 2.5.x]
+- **Coverage Tool**: [Tool and version, e.g., Istanbul, Coverlet, JaCoCo]
+- **Coverage Targets**:
+  - Overall: 80% minimum, 90% target
+  - Unit tests: 85% minimum
+  - Integration tests: 75% minimum
+  - Critical paths: 100% (authentication, payment, etc.)
+- **Test File Structure**: [Naming convention, organization]
+- **Mocking Strategy**: [Tools and patterns for test isolation]
+- **CI Integration**: [Coverage reporting service, badge setup]
+- **Coverage Exemptions**: [Known gaps and justification]
+
+## Quality Gates Configuration
+
+- **Pre-commit checks configured**: [List including coverage]
+- **CI/CD pipeline stages**: [List including coverage reporting]
+- **Quality thresholds**: [Coverage %, complexity limits, etc.]
+- **Monitoring setup**: [Tools and dashboards including coverage trends]
+- **Coverage Dashboard**: [Link to Codecov/Coveralls/Code Climate]
+```
+
+## EXECUTION INSTRUCTIONS
+
+1. First, search context7 MCP Server for best practices documents related to each principle area, including:
+   - Research methodologies for technical planning
+   - Enterprise Git hooks implementations
+   - CI/CD pipeline security best practices
+   - Quality gates configuration examples
+   - Industry-standard code quality metrics
+   - **Test coverage best practices and tools**
+   - **Coverage reporting and visualization strategies**
+   - **TDD/BDD methodologies**
+   - **Mutation testing approaches**
+2. Search for examples of well-researched technical plans and decision-making frameworks
+3. Find case studies demonstrating the impact of insufficient research on project outcomes
+4. Research pre-commit hook frameworks and tools for the chosen tech stack
+5. Find examples of comprehensive quality gates from similar projects or industries
+6. **Research coverage tools specific to the tech stack (Jest, Coverlet, JaCoCo, coverage.py, etc.)**
+7. **Find examples of high-coverage projects and their testing strategies**
+8. **Research coverage visualization and reporting tools**
+9. Synthesize findings into a coherent framework that's specific to our project context
+10. Make principles actionable with clear acceptance criteria
+11. Ensure the constitution is concise enough to be memorable but comprehensive enough to guide decisions
+12. Include specific examples of "good research" vs "insufficient research" in planning
+13. Provide concrete pre-commit hook configuration examples
+14. **Provide concrete coverage configuration examples for the chosen tech stack**
+15. **Include test file templates with coverage targets**
+16. Define clear triggers for when additional research is required
+17. Create implementation runbook for quality gates setup
+18. **Create coverage setup and monitoring runbook**
+
+## OUTPUT FORMAT
+
+Structure the constitution.md file with:
+
+- Table of contents
+- Executive summary (1-2 paragraphs highlighting research-driven, quality-first, and test-coverage-first approach)
+- Detailed sections for each principle area
+- **Dedicated "Research-Driven Planning" section with**:
+  - Research requirements checklist
+  - Research quality indicators
+  - Common research pitfalls to avoid
+  - Template for documenting research findings
+- **Dedicated "Automated Quality Gates" section with**:
+  - Complete pre-commit checklist
+  - Pre-push requirements
+  - CI/CD pipeline stages
+  - Tool recommendations by tech stack
+  - Configuration templates
+  - Setup instructions
+  - Bypass policy and audit trail
+  - Monitoring and continuous improvement
+- **Dedicated "Mandatory Test Coverage" section with**: ⭐
+  - TDD workflow and requirements
+  - Coverage thresholds (overall, unit, integration, critical paths)
+  - Coverage types explained (line, branch, function, statement, condition, path)
+  - Test file structure and naming conventions
+  - Coverage reporting configuration by tech stack
+  - Coverage report formats (HTML, LCOV, JSON, Cobertura)
+  - Pre-commit coverage enforcement
+  - CI/CD coverage integration
+  - Test file auto-generation templates
+  - Coverage monitoring and alerts
+  - Coverage best practices (what to test, what not to test)
+  - Coverage exemptions policy
+  - Coverage dashboard setup
+  - Developer onboarding for coverage
+- Quick reference checklist for daily use
+- **Coverage quick reference card** (printable/pinnable)
+  - ✅ Write test first (TDD)
+  - ✅ Run with coverage: `[command]`
+  - ✅ Check coverage: open `coverage/index.html`
+  - ✅ Target: 90%+, Minimum: 80%
+  - ✅ Critical paths: 100%
+  - ✅ Fix uncovered (red) lines
+  - ✅ Commit when coverage passes
+- Quality gatesov, Coveralls, Code Climate)\*\*
+  - **Coverage trend analysis and comparison**
+  - **Coverage badge generation and update**
+  - **PR comment with coverage diff and summary**
+  - Visual regression tests
+  - Performance benchmarks
+  - Load/stress testing
+
+2. **Quality Gates with Coverage Enforcement** ⭐ **MANDATORY**
+   - SonarQube quality gate (A rating required)
+   - **Code coverage > 80% (configurable per project) - BLOCKING**
+   - **New code coverage > 85% - BLOCKING**
+   - **Coverage trend must not decrease - BLOCKING**
+   - No critical/blocker issues
+   - Technical debt ratio < 5%
+   - Maintainability rating: A
+   - **Coverage metrics displayed in PR dashboard**
+
+3. **Security & Compliance**
+   - SAST (Static Application Security Testing)
+   - DAST (Dynamic Application Security Testing)
+   - Container scanning
+   - License compliance verification
+   - SBOM (Software Bill of Materials) generation
+   - **Security-critical code requires 100% test coverage**
+
+4. **Documentation & Standards**
+   - API documentation build succeeds
+   - Architecture diagrams up-to-date
+   - Breaking change detection
+   - Semantic versioning compliance
+   - **Test documentation completeness check**
+   - **Coverage documentation up-to-date**
+
+5. **Deployment Readiness**
+   - Production build succeeds
+   - Database migrations validated
+   - Environment configurations validated
+   - Rollback plan documented
+   - **All tests pass with required coverage**
+
+**Continuous Deployment Pipeline**:
+
+- Automated deployment to staging on PR merge
+- Smoke tests on staging environment
+- Manual approval gate for production
+- Blue-green or canary deployment strategy
+- Automatic rollback on health check failures
+- **Coverage monitoring in production (error tracking correlation)**
+
+##### Tool Recommendations by Tech Stack
+
+**JavaScript/TypeScript**:
+
+- **Testing**: Jest, Vitest, Mocha + Chai
+- **Coverage**: Istanbul (nyc), c8
+- **Git Hooks**: Husky + lint-staged
+- **Linting**: ESLint + Prettier
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```json
+{
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": ["src/**/*.{js,ts,jsx,tsx}"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "coverageReporters": ["text", "text-summary", "lcov", "html", "json-summary"],
+    "coverageDirectory": "coverage"
+  }
+}
+```
+
+**.NET/C#**:
+
+- **Testing**: xUnit, NUnit, MSTest
+- **Coverage**: Coverlet, dotCover, OpenCover
+- **Git Hooks**: Husky.Net, GitHooks.NET
+- **Linting**: StyleCop + Roslyn Analyzers, dotnet format
+- **CI Integration**: Codecov, ReportGenerator
+- **Configuration**:
+
+```xml
+  <PropertyGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,json,lcov,opencover</CoverletOutputFormat>
+    <Threshold>80</Threshold>
+    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdStat>minimum</ThresholdStat>
+    <CoverletOutput>./coverage/</CoverletOutput>
+  </PropertyGroup>
+```
+
+```bash
+  dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=80
+  reportgenerator -reports:coverage/*.xml -targetdir:coverage/html -reporttypes:Html
+```
+
+**Python**:
+
+- **Testing**: pytest, unittest
+- **Coverage**: coverage.py, pytest-cov
+- **Git Hooks**: pre-commit framework
+- **Linting**: Black + isort, Pylint + Flake8 + mypy
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```ini
+  # .coveragerc
+  [run]
+  source = src
+  branch = True
+
+  [report]
+  precision = 2
+  show_missing = True
+  fail_under = 80
+
+  [html]
+  directory = htmlcov
+
+  [xml]
+  output = coverage.xml
+```
+
+```bash
+  pytest --cov=src --cov-branch --cov-report=html --cov-report=term --cov-report=xml --cov-fail-under=80
+```
+
+**Java**:
+
+- **Testing**: JUnit 5, TestNG
+- **Coverage**: JaCoCo, Cobertura
+- **Git Hooks**: Maven/Gradle Git hooks plugin
+- **Linting**: Checkstyle + PMD + SpotBugs
+- **CI Integration**: Codecov, SonarQube
+- **Configuration**:
+
+```xml
+  <plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <configuration>
+      <rules>
+        <rule>
+          <element>BUNDLE</element>
+          <limits>
+            <limit>
+              <counter>LINE</counter>
+              <value>COVEREDRATIO</value>
+              <minimum>0.80</minimum>
+            </limit>
+            <limit>
+              <counter>BRANCH</counter>
+              <value>COVEREDRATIO</value>
+              <minimum>0.75</minimum>
+            </limit>
+          </limits>
+        </rule>
+      </rules>
+    </configuration>
+  </plugin>
+```
+
+**Go**:
+
+- **Testing**: testing package, Testify
+- **Coverage**: go test -cover, gocov
+- **Git Hooks**: pre-commit or native Git hooks
+- **Linting**: golangci-lint
+- **CI Integration**: Codecov, Coveralls
+- **Configuration**:
+
+```bash
+  go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./...
+  go tool cover -html=coverage.out -o coverage.html
+  go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}' | awk '{if ($1 < 80) exit 1}'
+```
+
+**Ruby**:
+
+- **Testing**: RSpec, Minitest
+- **Coverage**: SimpleCov
+- **Git Hooks**: Overcommit, Lefthook
+- **Linting**: RuboCop
+- **CI Integration**: Codecov, Code Climate
+- **Configuration**:
+
+```ruby
+  # spec/spec_helper.rb
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/spec/'
+    add_filter '/vendor/'
+    minimum_coverage 80
+    minimum_coverage_by_file 70
+  end
+```
+
+**PHP**:
+
+- **Testing**: PHPUnit
+- **Coverage**: PHPUnit with Xdebug/PCOV
+- **Git Hooks**: GrumPHP, pre-commit
+- **Linting**: PHP_CodeSniffer, PHPStan
+- **CI Integration**: Codecov, Scrutinizer
+- **Configuration**:
+
+```xml
+  <!-- phpunit.xml -->
+  <coverage>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <report>
+      <html outputDirectory="coverage/html"/>
+      <clover outputFile="coverage/clover.xml"/>
+    </report>
+  </coverage>
+```
+
+### 3. Governance Framework (The "How")
+
+#### Decision-Making Process
+
+- How should engineers apply these principles when faced with technical choices?
+- Require research evidence for all non-trivial technical decisions
+- Mandate documentation of decision rationale with research citations
+- All architectural decisions must pass automated quality gates
+- **All new features must include tests with coverage before implementation**
+
+#### Trade-off Resolution
+
+- What's the process when principles conflict (e.g., performance vs. code maintainability)?
+- How to balance "research depth" vs. "analysis paralysis"?
+- Define acceptable risk levels for different decision types
+- Quality gates can be adjusted per project phase (stricter for production code)
+- **Coverage requirements can be relaxed for prototypes (minimum 60%) with explicit time-boxed exemption**
+
+#### Research Quality Gates
+
+- **Planning phase cannot proceed to implementation without**:
+  - Documented research for all major technical choices
+  - Validation of chosen stack against latest stable versions
+  - Identification of potential integration issues through research
+  - Clear evidence that alternatives were evaluated
+  - **Test strategy defined with coverage targets per component**
+- **Research inadequacy indicators** (triggers for additional research):
+  - Generic technology overviews instead of specific version details
+  - Missing comparison with alternatives
+  - Lack of real-world production examples
+  - Uncertainty about integration patterns or best practices
+  - Rapidly-changing technology without recent research
+  - **No testing/coverage strategy for chosen tech stack**
+
+#### Quality Gate Enforcement with Coverage
+
+- **Pre-commit checks are MANDATORY** - no commits without passing tests and coverage
+- **CI checks are BLOCKING** - no merges without passing coverage gates
+- **Quality gate bypass requires**:
+  - Technical lead approval
+  - Documented justification in commit/PR
+  - Technical debt ticket created
+  - Remediation plan within 1 sprint
+  - **Coverage exemption explicitly documented**
+- **Quality metrics trends monitored**:
+  - Weekly quality dashboards
+  - **Coverage trend analysis (must be upward or stable)**
+  - Technical debt accumulation tracking
+  - **Uncovered code hotspots identified**
+- **Coverage-specific enforcement**:
+  - Coverage cannot decrease between commits
+  - New files must have 90%+ coverage
+  - Critical paths must have 100% coverage
+  - Coverage reports reviewed in PR
+  - Coverage badges must be green before merge
+
+#### Exception Handling
+
+- When can principles be temporarily violated and what's the approval process?
+- How to handle time-sensitive prototypes or spikes with reduced quality gates
+- Emergency hotfix process with post-fix quality remediation
+- Document technical debt with research needed for future improvement
+- Bypass audit trail maintained for compliance
+- **Coverage exemptions**:
+  - Prototype/spike: 60% minimum (time-boxed to 2 weeks)
+  - Legacy code refactor: gradual increase plan required
+  - Third-party wrapper: integration tests may substitute unit tests
+  - Auto-generated code: marked with coverage exemption comments
+  - **All exemptions require technical lead sign-off and tracking ticket**
+
+#### Review Checkpoints
+
+- At what stages should compliance be validated?
+- Research audit before plan approval
+- Implementation review to ensure plan research was sufficient
+- **Quality gate review points**:
+  - Every commit (pre-commit hooks with coverage)
+  - Every push (pre-push hooks with full coverage)
+  - Every PR (CI pipeline with coverage reporting)
+  - Before merge (branch protection with coverage gate)
+  - Before deployment (staging validation with coverage verification)
+  - Post-deployment (production monitoring)
+  - **Weekly coverage review meeting**
+  - **Monthly coverage trend analysis**
+
+### 4. Implementation Guidelines
+
+#### Research Best Practices
+
+- **Targeted over broad**: Research specific implementation questions, not general technology overviews
+- **Parallel research tasks**: Spawn multiple focused research threads for complex features
+- **Version-aware**: Always include version numbers and release dates in research findings
+- **Practical focus**: Prioritize "how to implement X with Y" over "what is X"
+- **Example-driven**: Seek code examples, implementation patterns, configuration samples
+- **Test-aware**: Research testing strategies and coverage tools for chosen technologies
+
+#### Code Quality Practices
+
+- Provide concrete examples of good vs. bad practices for each principle
+- Define enforcement mechanisms (automated linting, code review checklists, CI/CD gates)
+- Specify documentation requirements for architectural decisions
+- **Zero tolerance for quality gate violations** in protected branches
+- **Test-first development: write tests before implementation**
+- **Coverage-first mindset: target 90%+, accept 80%+ minimum**
+
+#### Automated Quality Gates Setup with Coverage
+
+**Phase 1: Project Initialization** (must be completed before first commit)
+
+1. Install and configure pre-commit framework/tool
+2. Set up commit message validation
+3. Configure code formatters and linters
+4. **Install and configure test framework with coverage**
+5. **Configure coverage thresholds in project config**
+6. **Set up coverage report generation (HTML + LCOV + JSON)**
+7. **Configure coverage badge generation**
+8. Integrate security scanners
+9. **Test hooks locally with sample violations and coverage failures**
+10. **Document coverage commands in README**
+
+**Phase 2: CI/CD Integration** (before first PR)
+
+1. Configure CI pipeline (GitHub Actions, GitLab CI, Jenkins, Azure DevOps)
+2. Set up quality reporting (SonarQube, Code Climate)
+3. **Integrate coverage reporting service (Codecov, Coveralls, Code Climate)**
+4. **Configure coverage PR comments and badges**
+5. Configure branch protection rules with coverage gates
+6. Set up automated deployment pipelines
+7. Integrate monitoring and alerting
+8. **Set up coverage trend tracking dashboard**
+
+**Phase 3: Continuous Improvement**
+
+1. Monitor quality metrics and adjust thresholds
+2. **Review coverage reports weekly, identify gaps**
+3. Add new checks as project matures
+4. Optimize check performance
+5. Gather developer feedback
+6. Update documentation
+7. **Increase coverage targets gradually (80% → 85% → 90%)**
+8. **Gamify coverage: leaderboard, achievements**
+
+#### Quality Gates Configuration Template with Coverage
+
+Create `.quality-gates.yml` in repository root:
+
+```yaml
+quality_gates:
+  pre_commit:
+    - name: "Code Formatting"
+      tools: [prettier, black, gofmt, dotnet-format]
+      auto_fix: true
+      blocking: true
+
+    - name: "Linting"
+      tools: [eslint, pylint, golangci-lint, stylecop]
+      blocking: true
+      max_warnings: 0
+
+    - name: "Unit Tests with Coverage" ⭐
+      scope: changed_files
+      min_coverage: 80
+      min_new_code_coverage: 85
+      max_duration: 60s
+      blocking: true
+      fail_on_coverage_decrease: true
+      reports:
+        - terminal
+        - html
+        - lcov
+      badge: true
+
+    - name: "Security Scan"
+      tools: [git-secrets, trufflehog]
+      blocking: true
+
+    - name: "Type Checking"
+      tools: [typescript, mypy]
+      blocking: true
+
+    - name: "Test File Validation" ⭐
+      check_test_file_exists: true
+      naming_convention: true
+      blocking: true
+
+  pre_push:
+    - name: "Full Test Suite with Coverage" ⭐
+      types: [unit, integration]
+      min_coverage:
+        overall: 75
+        unit: 80
+        integration: 70
+        new_code: 85
+      branch_coverage: 75
+      blocking: true
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+      upload_to: [codecov, coveralls]
+
+    - name: "Build Verification"
+      environments: [development, production]
+      blocking: true
+
+    - name: "Code Quality with Coverage" ⭐
+      tool: sonarqube
+      min_rating: B
+      min_coverage: 80
+      max_coverage_decrease: 0
+      blocking: true
+
+  ci_pipeline:
+    - name: "Comprehensive Testing with Coverage" ⭐
+      types: [unit, integration, e2e]
+      browsers: [chrome, firefox, safari]
+      min_coverage:
+        overall: 80
+        unit: 85
+        integration: 75
+        new_code: 90
+      coverage_trend: must_not_decrease
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+        - text-summary
+      upload_to:
+        - codecov
+        - coveralls
+        - code_climate
+        - sonarqube
+      pr_comment: true
+      badge_update: true
+
+    - name: "Security Analysis"
+      tools: [sonarqube, snyk, trivy]
+      fail_on: critical
+      require_100_percent_coverage_for: [auth, payment, encryption]
+
+    - name: "Performance Testing"
+      lighthouse_min: 90
+      load_test_duration: 5m
+
+    - name: "Accessibility"
+      wcag_level: AA
+      min_score: 95
+
+    - name: "Coverage Report Publication" ⭐
+      generate_badge: true
+      update_readme: true
+      trend_analysis: true
+      alert_on_decrease: true
+
+thresholds:
+  code_coverage: ⭐
+    # Minimum thresholds (BLOCKING)
+    overall_min: 75
+    unit_min: 80
+    integration_min: 70
+    new_code_min: 85
+    branch_coverage_min: 75
+
+    # Target thresholds (WARNING)
+    overall_target: 85
+    unit_target: 90
+    integration_target: 80
+    new_code_target: 95
+
+    # Critical code (MUST BE 100%)
+    critical_paths:
+      - authentication
+      - authorization
+      - payment_processing
+      - data_encryption
+      - security_validation
+      - public_api_endpoints
+
+    # Coverage per layer
+    layers:
+      models: 85
+      services: 90
+      controllers: 80
+      repositories: 85
+      utilities: 85
+      validators: 95
+
+    # Exemptions
+    exclude_from_coverage:
+      - "**/*.d.ts"
+      - "**/*.stories.*"
+      - "**/index.{js,ts}"
+      - "**/__mocks__/**"
+      - "**/dist/**"
+      - "**/build/**"
+      - "**/node_modules/**"
+
+  complexity:
+    cyclomatic: 10
+    cognitive: 15
+
+  duplication:
+    max_percentage: 3
+
+  maintainability:
+    min_rating: B
+
+  security:
+    max_critical: 0
+    max_high: 0
+
+  performance:
+    lighthouse_performance: 90
+    lighthouse_accessibility: 100
+    bundle_size_kb: 500
+
+coverage_reporting: ⭐
+  format:
+    - html         # For local viewing
+    - lcov         # For IDE integration
+    - json         # For programmatic access
+    - cobertura    # For Azure DevOps, Jenkins
+    - text         # For terminal output
+    - text-summary # For quick overview
+
+  output_directory: "coverage"
+
+  badge:
+    enabled: true
+    style: flat
+    colors:
+      excellent: brightgreen  # >90%
+      good: green             # 80-90%
+      acceptable: yellow      # 70-80%
+      warning: orange         # 60-70%
+      poor: red               # <60%
+
+  pr_comments:
+    enabled: true
+    show_diff: true
+    show_files_changed: true
+    fail_on_decrease: true
+
+  dashboard:
+    enabled: true
+    service: codecov  # or coveralls, code_climate
+    upload_on: [push, pull_request]
+
+  alerts:
+    slack:
+      enabled: true
+      webhook: ${SLACK_WEBHOOK_URL}
+      notify_on:
+        - coverage_decrease
+        - below_threshold
+        - critical_path_uncovered
+
+    email:
+      enabled: true
+      recipients: [tech-leads@company.com]
+      notify_on:
+        - coverage_decrease
+        - below_threshold
+
+test_file_generation: ⭐
+  auto_generate: true  # Automatically create test file skeleton
+
+  templates:
+    javascript: ".templates/test.js.template"
+    typescript: ".templates/test.ts.template"
+    csharp: ".templates/test.cs.template"
+    python: ".templates/test.py.template"
+    java: ".templates/test.java.template"
+    go: ".templates/test.go.template"
+
+  naming_convention:
+    javascript: "{filename}.test.js"
+    typescript: "{filename}.test.ts"
+    csharp: "{filename}Tests.cs"
+    python: "test_{filename}.py"
+    java: "{filename}Test.java"
+    go: "{filename}_test.go"
+
+  structure:
+    include_imports: true
+    include_setup_teardown: true
+    include_method_stubs: true
+    include_coverage_comment: true
+    include_todo_comments: true
+
+  coverage_target_comment: true  # Add coverage target in test file header
+```
+
+#### Test File Auto-Generation Workflow ⭐
+
+**MANDATORY: When AI creates source file, it MUST immediately create test file**
+
+**Workflow Steps**:
+
+1. **Create source file** (e.g., `PaymentService.ts`)
+2. **Automatically create test file** (`PaymentService.test.ts`)
+3. **Generate test skeleton** with:
+   - Imports and setup
+   - Describe block for class/module
+   - Test stubs for each public method
+   - Mock setup examples
+   - Coverage target comment
+   - TODO list for achieving coverage
+4. **Add coverage command** to file header
+5. **Commit both files together**
+
+**Example Auto-Generated Test File**:
+
+```typescript
+/**
+ * Test Suite: PaymentService
+ *
+ * @coverage-target 90%
+ * @critical-path true (requires 100% coverage)
+ * @test-command npm test -- PaymentService.test.ts --coverage
+ * @coverage-report open coverage/index.html
+ *
+ * Coverage Requirements:
+ * - All public methods: 100%
+ * - Error handling: 100%
+ * - Edge cases: 90%
+ * - Integration scenarios: 80%
+ */
+
+import { PaymentService } from './PaymentService';
+import { PaymentGateway } from './PaymentGateway';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+
+describe('PaymentService', () => {
+  let paymentService: PaymentService;
+  let mockGateway: jest.Mocked<PaymentGateway>;
+
+  beforeEach(() => {
+    // Setup: Initialize service and mocks
+    mockGateway = {
+      processPayment: jest.fn(),
+      refundPayment: jest.fn(),
+      validateCard: jest.fn(),
+    } as any;
+
+    paymentService = new PaymentService(mockGateway);
+  });
+
+  afterEach(() => {
+    // Cleanup: Clear all mocks
+    jest.clearAllMocks();
+  });
+
+  /**
+   * COVERAGE CHECKLIST:
+   * [ ] All public methods tested
+   * [ ] Happy path scenarios
+   * [ ] Error handling paths
+   * [ ] Edge cases (null, empty, invalid)
+   * [ ] Async operations
+   * [ ] Side effects verified
+   * [ ] Integration scenarios
+   *
+   * Run coverage: npm test -- PaymentService.test.ts --coverage
+   * View report: open coverage/index.html
+   */
+
+  describe('processPayment()', () => {
+    it('should process valid payment successfully', async () => {
+      // Arrange
+      const paymentData = {
+        amount: 100,
+        currency: 'USD',
+        cardNumber: '4111111111111111',
+      };
+      mockGateway.processPayment.mockResolvedValue({
+        success: true,
+        transactionId: 'txn_123',
+      });
+
+      // Act
+      const result = await paymentService.processPayment(paymentData);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.transactionId).toBe('txn_123');
+      expect(mockGateway.processPayment).toHaveBeenCalledWith(paymentData);
+      expect(mockGateway.processPayment).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error for negative amount', async () => {
+      // Arrange
+      const paymentData = { amount: -100, currency: 'USD' };
+
+      // Act & Assert
+      await expect(paymentService.processPayment(paymentData)).rejects.toThrow(
+        'Amount must be positive'
+      );
+    });
+
+    it('should throw error for invalid currency', async () => {
+      // TODO: Implement test
+      // Coverage: Input validation
+    });
+
+    it('should handle payment gateway timeout', async () => {
+      // TODO: Implement test
+      // Coverage: Error handling - timeout
+    });
+
+    it('should retry failed payments up to 3 times', async () => {
+      // TODO: Implement test
+      // Coverage: Retry logic
+    });
+
+    it('should log payment attempt', async () => {
+      // TODO: Implement test
+      // Coverage: Side effects - logging
+    });
+  });
+
+  describe('refundPayment()', () => {
+    it('should refund existing payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should throw error for non-existent payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should throw error for already refunded payment', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle partial refunds', async () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('validateCard()', () => {
+    it('should validate correct card number', () => {
+      // TODO: Implement test
+    });
+
+    it('should reject invalid card number', () => {
+      // TODO: Implement test
+    });
+
+    it('should validate expiry date', () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle null payment data', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle empty string in fields', async () => {
+      // TODO: Implement test
+    });
+
+    it('should handle very large amounts', async () => {
+      // TODO: Implement test
+    });
+  });
+
+  describe('integration scenarios', () => {
+    it('should process payment end-to-end', async () => {
+      // TODO: Implement comprehensive integration test
+    });
+  });
+
+  /**
+   * NEXT STEPS TO ACHIEVE 90% COVERAGE:
+   * 1. Implement all TODO test cases above
+   * 2. Add tests for error scenarios (network, validation, etc.)
+   * 3. Add tests for edge cases (boundaries, null, empty)
+   * 4. Verify all branches are covered (if/else, switch, ternary)
+   * 5. Run: npm test -- PaymentService.test.ts --coverage
+   * 6. Open: coverage/index.html
+   * 7. Identify red (uncovered) lines and add tests
+   * 8. Verify coverage meets 90% threshold
+   */
+});
+```
+
+#### Developer Onboarding Checklist with Coverage
+
+Every new developer must:
+
+- [ ] Install Git hooks (automated in setup script)
+- [ ] **Install coverage tools and configure IDE integration**
+- [ ] **Review coverage requirements and thresholds**
+- [ ] Run quality checks locally and verify all pass
+- [ ] **Run tests with coverage and verify reports generate**
+- [ ] **Practice TDD: write failing test → implement → verify coverage**
+- [ ] Review quality gates documentation
+- [ ] Understand bypass policy and consequences
+- [ ] Set up IDE integration for linters/formatters
+- [ ] **Set up IDE coverage highlighting (VS Code, IntelliJ, etc.)**
+- [ ] Complete commit message format training
+- [ ] Review security scanning results interpretation
+- [ ] **Complete test coverage training module**
+- [ ] **Review coverage dashboard and understand metrics**
+
+#### Research Documentation Template
+
+Every plan.md should include:
+
+```markdown
+## Research Summary
+
+- **Technology Choices**: [List with versions and rationale]
+- **Alternatives Considered**: [What was evaluated and why rejected]
+- **Key Research Sources**: [Links to official docs, articles, case studies]
+- **Known Limitations**: [Trade-offs and constraints identified]
+- **Integration Patterns**: [How components work together based on research]
+- **Version Information**: [Specific versions researched and their stability/maturity]
+
+## Test & Coverage Strategy ⭐
+
+- **Testing Framework**: [Tool and version, e.g., Jest 29.x, xUnit 2.5.x]
+- **Coverage Tool**: [Tool and version, e.g., Istanbul, Coverlet, JaCoCo]
+- **Coverage Targets**:
+  - Overall: 80% minimum, 90% target
+  - Unit tests: 85% minimum
+  - Integration tests: 75% minimum
+  - Critical paths: 100% (authentication, payment, etc.)
+- **Test File Structure**: [Naming convention, organization]
+- **Mocking Strategy**: [Tools and patterns for test isolation]
+- **CI Integration**: [Coverage reporting service, badge setup]
+- **Coverage Exemptions**: [Known gaps and justification]
+
+## Quality Gates Configuration
+
+- **Pre-commit checks configured**: [List including coverage]
+- **CI/CD pipeline stages**: [List including coverage reporting]
+- **Quality thresholds**: [Coverage %, complexity limits, etc.]
+- **Monitoring setup**: [Tools and dashboards including coverage trends]
+- **Coverage Dashboard**: [Link to Codecov/Coveralls/Code Climate]
+```
+
+## EXECUTION INSTRUCTIONS
+
+1. First, search context7 MCP Server for best practices documents related to each principle area, including:
+   - Research methodologies for technical planning
+   - Enterprise Git hooks implementations
+   - CI/CD pipeline security best practices
+   - Quality gates configuration examples
+   - Industry-standard code quality metrics
+   - **Test coverage best practices and tools**
+   - **Coverage reporting and visualization strategies**
+   - **TDD/BDD methodologies**
+   - **Mutation testing approaches**
+2. Search for examples of well-researched technical plans and decision-making frameworks
+3. Find case studies demonstrating the impact of insufficient research on project outcomes
+4. Research pre-commit hook frameworks and tools for the chosen tech stack
+5. Find examples of comprehensive quality gates from similar projects or industries
+6. **Research coverage tools specific to the tech stack (Jest, Coverlet, JaCoCo, coverage.py, etc.)**
+7. **Find examples of high-coverage projects and their testing strategies**
+8. **Research coverage visualization and reporting tools**
+9. Synthesize findings into a coherent framework that's specific to our project context
+10. Make principles actionable with clear acceptance criteria
+11. Ensure the constitution is concise enough to be memorable but comprehensive enough to guide decisions
+12. Include specific examples of "good research" vs "insufficient research" in planning
+13. Provide concrete pre-commit hook configuration examples
+14. **Provide concrete coverage configuration examples for the chosen tech stack**
+15. **Include test file templates with coverage targets**
+16. Define clear triggers for when additional research is required
+17. Create implementation runbook for quality gates setup
+18. **Create coverage setup and monitoring runbook**
+
+## OUTPUT FORMAT
+
+Structure the constitution.md file with:
+
+- Table of contents
+- Executive summary (1-2 paragraphs highlighting research-driven, quality-first, and test-coverage-first approach)
+- Detailed sections for each principle area
+- **Dedicated "Research-Driven Planning" section with**:
+  - Research requirements checklist
+  - Research quality indicators
+  - Common research pitfalls to avoid
+  - Template for documenting research findings
+- **Dedicated "Automated Quality Gates" section with**:
+  - Complete pre-commit checklist
+  - Pre-push requirements
+  - CI/CD pipeline stages
+  - Tool recommendations by tech stack
+  - Configuration templates
+  - Setup instructions
+  - Bypass policy and audit trail
+  - Monitoring and continuous improvement
+- **Dedicated "Mandatory Test Coverage" section with**: ⭐
+  - TDD workflow and requirements
+  - Coverage thresholds (overall, unit, integration, critical paths)
+  - Coverage types explained (line, branch, function, statement, condition, path)
+  - Test file structure and naming conventions
+  - Coverage reporting configuration by tech stack
+  - Coverage report formats (HTML, LCOV, JSON, Cobertura)
+  - Pre-commit coverage enforcement
+  - CI/CD coverage integration
+  - Test file auto-generation templates
+  - Coverage monitoring and alerts
+  - Coverage best practices (what to test, what not to test)
+  - Coverage exemptions policy
+  - Coverage dashboard setup
+  - Developer onboarding for coverage
+- Quick reference checklist for daily use
+- **Coverage quick reference card** (printable/pinnable)
+  - ✅ Write test first (TDD)
+  - ✅ Run with coverage: `[command]`
+  - ✅ Check coverage: open `coverage/index.html`
+  - ✅ Target: 90%+, Minimum: 80%
+  - ✅ Critical paths: 100%
+  - ✅ Fix uncovered (red) lines
+  - ✅ Commit when coverage passes
+- Quality gatesquick reference card (printable/pinnable)
+- Appendix with research sources and additional reading
+- Examples of well-researched vs. poorly-researched plans
+- Quality gates troubleshooting guide
+- **Coverage troubleshooting guide** ⭐
+  - Common coverage issues and solutions
+  - How to interpret coverage reports
+  - How to increase coverage effectively
+  - Coverage vs. quality balance
+
+## RESEARCH-FIRST, QUALITY-FIRST & COVERAGE-MANDATORY MINDSET
+
+The constitution should emphasize that:
+
+**Thorough research is not optional overhead—it's foundational to quality**. Planning without adequate research leads to:
+
+- Choosing outdated or deprecated technologies
+- Missing critical integration issues until implementation
+- Over-engineering due to lack of understanding of simpler solutions
+- Under-engineering due to unawareness of complexity
+- **Selecting testing frameworks that don't support comprehensive coverage reporting**
+
+**Automated quality gates are not bureaucracy—they're protection**. Manual quality checks lead to:
+
+- Inconsistent enforcement of standards
+- Technical debt accumulation
+- Production bugs that could have been caught earlier
+- Team friction over subjective code quality debates
+- Increased code review burden
+- **Untested code merged into production**
+
+**Test coverage is not a vanity metric—it's a safety net**. Code without tests is: ⭐
+
+- **Untested and therefore broken** (you just don't know it yet)
+- **Impossible to refactor safely** (no regression detection)
+- **Difficult to maintain** (unclear behavior and edge cases)
+- **Prone to production bugs** (errors discovered by users, not tests)
+- **Technical debt** that compounds over time
+- **Expensive to fix** (late bug detection costs 10-100x more)
+
+Every principle in this constitution should be derived from or validated by research, not just theoretical ideals. Every quality standard should be automatically enforced, not hoped for. **Every line of code should be covered by tests, not assumed to work.**
+
+The constitution should be a living document that can evolve, but changes must be deliberate, well-justified, and research-backed. Quality gates should be continuously monitored and improved based on metrics and team feedback. **Coverage targets should increase gradually as the codebase matures.**
+
+## ENTERPRISE COMPLIANCE REQUIREMENTS
+
+The constitution must address:
+
+- Audit trail for all code changes (commit history integrity)
+- Compliance with industry standards (ISO 27001, SOC 2, PCI-DSS if applicable)
+- Security baseline enforcement (OWASP Top 10 coverage)
+- Data privacy protection (GDPR, CCPA compliance checks)
+- Intellectual property protection (license scanning, attribution)
+- Regulatory requirements specific to the industry
+- Change management and approval workflows
+- Incident response and rollback procedures
+- **Test coverage audit trail** (coverage history for compliance) ⭐
+- **Critical code certification** (100% coverage proof for security-sensitive code)
+
+## CRITICAL SUCCESS FACTORS ⭐
+
+The constitution MUST make crystal clear that:
+
+### 1. Test-First is Non-Negotiable
+
+- **NO production code without tests**
+- Tests are written BEFORE implementation (TDD)
+- Tests define the contract and behavior
+- Coverage is verified before commit
+
+### 2. Coverage is Mandatory, Not Optional
+
+- **80% minimum coverage is a HARD requirement** (CI blocks merge below this)
+- **85% for new code** (stricter standard for new development)
+- **100% for critical paths** (zero tolerance for untested security/payment/auth code)
+- Coverage reports generated automatically with every test run
+- Coverage trends monitored continuously
+
+### 3. Test Files Are First-Class Citizens
+
+- Test files created simultaneously with source files
+- Test files follow strict naming conventions
+- Test files organized to mirror source structure
+- Test files versioned and reviewed like production code
+- Test files documented with coverage targets
+
+### 4. Coverage Tools Are Part of the Stack
+
+- Coverage tools installed and configured from day one
+- Coverage configuration version-controlled
+- Coverage reports integrated into CI/CD
+- Coverage dashboards accessible to all team members
+- Coverage badges visible in README
+
+### 5. Coverage Failures Are Build Failures
+
+- Pre-commit blocks commits below coverage threshold
+- Pre-push blocks pushes that decrease coverage
+- CI blocks PRs below coverage threshold
+- Quality gate blocks merges with coverage regressions
+- Production deployments require coverage verification
+
+### 6. Coverage is Everyone's Responsibility
+
+- Developers write tests and verify coverage
+- Code reviewers check test quality and coverage
+- Tech leads monitor coverage trends
+- Product owners understand coverage importance
+- Management supports time for test writing
+
+### 7. Coverage Exemptions Are Rare and Tracked
+
+- Every exemption requires written justification
+- Every exemption has an owner and deadline
+- Every exemption tracked as technical debt
+- Exemptions reviewed quarterly for removal
+- Repeated exemptions trigger process review
+
+## IMPLEMENTATION PRIORITIES ⭐
+
+When implementing this constitution, follow this sequence:
+
+### Week 1: Foundation
+
+1. Install coverage tools for the tech stack
+2. Configure coverage thresholds in project config
+3. Set up coverage report generation (HTML + LCOV)
+4. Create test file templates
+5. Document coverage commands in README
+
+### Week 2: Automation
+
+1. Configure pre-commit hooks with coverage checks
+2. Configure pre-push hooks with full coverage
+3. Set up CI pipeline with coverage reporting
+4. Integrate coverage service (Codecov/Coveralls)
+5. Configure coverage PR comments
+
+### Week 3: Enforcement
+
+1. Enable branch protection with coverage gates
+2. Configure quality gates (SonarQube with coverage)
+3. Set up coverage badges
+4. Configure coverage alerts (Slack/email)
+5. Create coverage dashboard
+
+### Week 4: Culture
+
+1. Conduct team training on TDD and coverage
+2. Review coverage targets with team
+3. Establish coverage review meetings
+4. Celebrate coverage milestones
+5. Share coverage best practices
+
+### Ongoing: Continuous Improvement
+
+- Monitor coverage trends weekly
+- Review coverage reports in retrospectives
+- Increase coverage targets gradually (5% per quarter)
+- Identify and address coverage gaps
+- Share high-quality test examples
+- Gamify coverage (leaderboards, badges)
+
+## COVERAGE ANTI-PATTERNS TO AVOID ⭐
+
+The constitution should explicitly warn against:
+
+### 1. "Coverage for Coverage's Sake"
+
+- ❌ Writing tests that don't assert anything meaningful
+- ❌ Testing getters/setters without business logic
+- ❌ Testing framework code or third-party libraries
+- ✅ Focus on behavior, not implementation details
+- ✅ Test business logic, edge cases, error handling
+
+### 2. "Gaming the Metrics"
+
+- ❌ Excluding critical code from coverage
+- ❌ Writing tests that execute code but don't verify behavior
+- ❌ Marking everything as coverage-exempt
+- ✅ Write meaningful tests that catch real bugs
+- ✅ Use coverage to find gaps, not to reach a number
+
+### 3. "Testing Through the UI Only"
+
+- ❌ Only e2e tests, no unit or integration tests
+- ❌ Slow, brittle tests that break frequently
+- ❌ Long feedback loops (tests take minutes/hours)
+- ✅ Follow testing pyramid (many unit, some integration, few e2e)
+- ✅ Fast unit tests with high coverage
+- ✅ Integration tests for component interactions
+
+### 4. "No Mocking Ever" or "Mock Everything"
+
+- ❌ Never using mocks (slow, brittle tests)
+- ❌ Mocking everything (tests don't catch integration issues)
+- ✅ Mock external dependencies (APIs, databases, file system)
+- ✅ Don't mock internal components (test real interactions)
+- ✅ Use test doubles appropriately (mocks, stubs, fakes)
+
+### 5. "100% Coverage is the Goal"
+
+- ❌ Pursuing 100% coverage at any cost
+- ❌ Testing trivial code to hit 100%
+- ❌ Ignoring test quality for coverage percentage
+- ✅ Target 80-90% with high-quality tests
+- ✅ 100% only for critical paths
+- ✅ Focus on meaningful coverage, not arbitrary numbers
+
+### 6. "Tests Are Someone Else's Job"
+
+- ❌ "QA will test it"
+- ❌ "I'll write tests later"
+- ❌ "Tests slow me down"
+- ✅ Developers write tests for their code
+- ✅ Tests written before/during implementation
+- ✅ Tests save time by catching bugs early
+
+### 7. "Coverage Reports Are Ignored"
+
+- ❌ Generating reports but never reviewing them
+- ❌ No action taken on low coverage
+- ❌ Coverage trends not monitored
+- ✅ Review coverage in every PR
+- ✅ Address coverage gaps immediately
+- ✅ Monitor coverage trends continuously
+
+## COVERAGE SUCCESS METRICS ⭐
+
+Track these metrics to ensure coverage culture is healthy:
+
+### Leading Indicators (Behavior Metrics)
+
+- **Test-first adoption rate**: % of commits with tests added before/with code
+- **Coverage trend**: Coverage % over time (should increase or stay stable)
+- **Coverage PR comments**: % of PRs with coverage feedback
+- **Test execution time**: Average time to run full test suite (should decrease)
+- **Coverage review frequency**: # of times coverage reports reviewed per week
+
+### Lagging Indicators (Outcome Metrics)
+
+- **Production bugs**: # of bugs caught by tests vs. found in production
+- **Bug detection time**: Time from bug introduction to detection (should decrease)
+- **Regression rate**: # of regressions caught by existing tests
+- **Refactoring confidence**: Team surveys on confidence to refactor
+- **Code review time**: Time spent on code reviews (should decrease with better tests)
+
+### Coverage Health Metrics
+
+- **Overall coverage**: Current vs. target (80% min, 90% target)
+- **New code coverage**: Coverage of code added in last 30 days (85%+ required)
+- **Critical path coverage**: Coverage of security/payment/auth code (100% required)
+- **Coverage by layer**: Coverage breakdown (models, services, controllers, etc.)
+- **Coverage gaps**: # of files below threshold
+- **Coverage exemptions**: # of active exemptions (should decrease)
+
+### Team Health Metrics
+
+- **Test writing time**: % of dev time spent writing tests (20-30% is healthy)
+- **Test maintenance burden**: % of time fixing broken tests (should be low)
+- **Developer satisfaction**: Survey on satisfaction with test suite
+- **Onboarding time**: Time for new devs to understand testing approach
+- **Documentation quality**: Completeness of test documentation
+
+## COVERAGE CULTURE BUILDING ⭐
+
+The constitution should include strategies to build a coverage-first culture:
+
+### 1. Lead by Example
+
+- Tech leads write exemplary tests
+- Senior devs mentor juniors on testing
+- Architecture showcases test-first design
+- Leadership celebrates test quality
+
+### 2. Make Coverage Visible
+
+- Coverage dashboards in team space
+- Coverage badges in all README files
+- Coverage trends in sprint reviews
+- Coverage milestones celebrated publicly
+
+### 3. Remove Barriers
+
+- Fast test execution (<5 min for unit tests)
+- Easy coverage report access (one command)
+- Clear coverage targets (no ambiguity)
+- Good test examples (reference implementations)
+
+### 4. Provide Training
+
+- TDD workshops for all developers
+- Coverage tool training sessions
+- Testing best practices lunch-and-learns
+- Pair programming on test-first development
+
+### 5. Incentivize Quality
+
+- Coverage goals in performance reviews
+- Recognition for high-quality tests
+- Time allocated for test writing (20-30% of sprint)
+- Technical debt sprints to improve coverage
+
+### 6. Continuous Improvement
+
+- Retrospectives on test quality
+- Regular review of coverage metrics
+- Gradual increase of coverage targets
+- Sharing of testing wins and learnings
+
+### 7. Integration with Workflow
+
+- Coverage checks in pre-commit (immediate feedback)
+- Coverage reports in PR (context in review)
+- Coverage trends in dashboards (visibility)
+- Coverage alerts in chat (awareness)
+
+## FINAL REMINDERS FOR AI AGENT ⭐
+
+When creating the constitution.md, you MUST:
+
+1. **Make coverage mandatory and explicit**
+   - Use strong language: "MUST", "REQUIRED", "MANDATORY"
+   - No wiggle room for interpretation
+   - Clear consequences for non-compliance
+
+2. **Provide concrete, actionable examples**
+   - Exact commands to run tests with coverage
+   - Exact file paths for coverage reports
+   - Exact configuration for coverage tools
+   - Exact thresholds and targets
+
+3. **Cover all tech stacks in the project**
+   - Include configurations for each language/framework
+   - Provide tool recommendations for each stack
+   - Include version numbers and installation commands
+
+4. **Make it developer-friendly**
+   - Clear, concise language (no jargon without explanation)
+   - Quick reference cards (printable cheat sheets)
+   - Troubleshooting guides (common issues and solutions)
+   - Links to additional resources
+
+5. **Automate everything possible**
+   - Pre-commit hooks for immediate feedback
+   - CI/CD integration for continuous validation
+   - Automated report generation and distribution
+   - Automated alerts for coverage issues
+
+6. **Balance rigor with pragmatism**
+   - Strict for critical code (100% coverage)
+   - Reasonable for standard code (80-90% coverage)
+   - Flexible for prototypes (60%+ with exemption)
+   - Exemption process for edge cases
+
+7. **Focus on behavior, not just metrics**
+   - Emphasize test quality over coverage percentage
+   - Encourage meaningful assertions
+   - Discourage gaming the metrics
+   - Promote test-first thinking
+
+8. **Make coverage a team sport**
+   - Everyone responsible for coverage
+   - Coverage reviewed in PRs
+   - Coverage discussed in retrospectives
+   - Coverage celebrated in demos
+
+9. **Provide escape hatches responsibly**
+   - Clear bypass policy for emergencies
+   - Documented exemption process
+   - Tracked technical debt
+   - Regular review of exemptions
+
+10. **Keep it living and evolving**
+    - Regular review of coverage targets
+    - Adjustment based on team feedback
+    - Addition of new best practices
+    - Removal of obsolete requirements
+
+## CONSTITUTION VALIDATION CHECKLIST ⭐
+
+Before finalizing the constitution.md, verify:
+
+- [ ] **Research section**: Comprehensive research methodology defined
+- [ ] **Code quality**: Clear standards and metrics
+- [ ] **Testing standards**: TDD workflow mandated
+- [ ] **UX consistency**: Design system and patterns defined
+- [ ] **Performance requirements**: Concrete targets set
+- [ ] **Coverage thresholds**: Minimum and target percentages defined for all layers
+- [ ] **Coverage tools**: Tool recommendations for each tech stack
+- [ ] **Coverage configuration**: Example configs for all tech stacks
+- [ ] **Test file structure**: Naming conventions and organization defined
+- [ ] **Coverage reporting**: Multiple report formats configured
+- [ ] **Pre-commit hooks**: Coverage checks enabled and blocking
+- [ ] **Pre-push hooks**: Full coverage verification enabled
+- [ ] **CI/CD integration**: Coverage reporting and gates configured
+- [ ] **Coverage dashboard**: Integration with Codecov/Coveralls/etc.
+- [ ] **Coverage badges**: Auto-updating badges configured
+- [ ] **PR comments**: Coverage diff comments enabled
+- [ ] **Test file templates**: Auto-generation templates provided
+- [ ] **Coverage exemptions**: Policy clearly defined
+- [ ] **Coverage troubleshooting**: Common issues and solutions documented
+- [ ] **Developer onboarding**: Coverage training included
+- [ ] **Quick reference cards**: Printable cheat sheets created
+- [ ] **Success metrics**: Measurable KPIs defined
+- [ ] **Culture building**: Strategies for adoption included
+- [ ] **Anti-patterns**: What to avoid explicitly stated
+- [ ] **Enforcement**: Consequences for non-compliance clear
+- [ ] **Escape hatches**: Bypass policy documented
+- [ ] **Examples**: Good and bad examples provided
+- [ ] **Commands**: Exact commands for all operations
+- [ ] **Links**: References to external resources
+- [ ] **Versions**: Tool versions specified where relevant
+- [ ] **All sections**: Comprehensive and actionable
+- [ ] **Language**: Clear, unambiguous, developer-friendly
+- [ ] **Structure**: Well-organized with table of contents
+- [ ] **Length**: Detailed enough but not overwhelming
+- [ ] **Tone**: Firm but supportive, not punitive
+
+---
+
+## EXECUTION SUMMARY
+
+This prompt will create a comprehensive constitution.md that:
+
+✅ **Mandates in-depth research** for all technical decisions in planning phase
+✅ **Requires automated quality gates** with pre-commit, pre-push, and CI checks
+✅ **Makes test coverage mandatory** with 80% minimum, 85% for new code, 100% for critical paths
+✅ **Automates test file creation** when source files are created
+✅ **Generates coverage reports** automatically in multiple formats (HTML, LCOV, JSON, etc.)
+✅ **Blocks commits and merges** that don't meet coverage thresholds
+✅ **Integrates with CI/CD** for coverage reporting, trending, and alerting
+✅ **Provides concrete configurations** for all major tech stacks
+✅ **Includes troubleshooting guides** for common coverage issues
+✅ **Builds a coverage-first culture** with training, visibility, and incentives
+✅ **Balances rigor with pragmatism** through exemption policies and gradual targets
+
+The resulting constitution will be:
+
+- **Comprehensive**: Covers all aspects of quality, testing, and coverage
+- **Actionable**: Provides exact commands, configs, and workflows
+- **Automated**: Everything that can be automated, is automated
+- **Developer-friendly**: Clear language, examples, and quick references
+- **Enterprise-grade**: Meets compliance and audit requirements
+- **Living document**: Designed to evolve with the project
+
+This constitution will ensure that **EVERY line of code is tested, EVERY test measures coverage, and EVERY coverage gap is addressed** before code reaches production.
+
+🎯 **Primary Goal Achieved**: Zero untested code in production through mandatory, automated, comprehensive test coverage.
