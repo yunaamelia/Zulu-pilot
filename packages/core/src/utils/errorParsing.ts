@@ -13,15 +13,10 @@ const RATE_LIMIT_ERROR_MESSAGE_USE_GEMINI =
   '\nPlease wait and try again later. To increase your limits, request a quota increase through AI Studio, or switch to another /auth method';
 const RATE_LIMIT_ERROR_MESSAGE_VERTEX =
   '\nPlease wait and try again later. To increase your limits, request a quota increase through Vertex, or switch to another /auth method';
-const getRateLimitErrorMessageDefault = (
-  fallbackModel: string = DEFAULT_GEMINI_FLASH_MODEL,
-) =>
+const getRateLimitErrorMessageDefault = (fallbackModel: string = DEFAULT_GEMINI_FLASH_MODEL) =>
   `\nPossible quota limitations in place or slow response times detected. Switching to the ${fallbackModel} model for the rest of this session.`;
 
-function getRateLimitMessage(
-  authType?: AuthType,
-  fallbackModel?: string,
-): string {
+function getRateLimitMessage(authType?: AuthType, fallbackModel?: string): string {
   switch (authType) {
     case AuthType.USE_GEMINI:
       return RATE_LIMIT_ERROR_MESSAGE_USE_GEMINI;
@@ -35,9 +30,9 @@ function getRateLimitMessage(
 export function parseAndFormatApiError(
   error: unknown,
   authType?: AuthType,
-  userTier?: UserTierId,
-  currentModel?: string,
-  fallbackModel?: string,
+  _userTier?: UserTierId,
+  _currentModel?: string,
+  fallbackModel?: string
 ): string {
   if (isStructuredError(error)) {
     let text = `[API Error: ${error.message}]`;
@@ -66,7 +61,7 @@ export function parseAndFormatApiError(
           if (isApiError(nestedError)) {
             finalMessage = nestedError.error.message;
           }
-        } catch (_e) {
+        } catch {
           // It's not a nested JSON error, so we just use the message as is.
         }
         let text = `[API Error: ${finalMessage} (Status: ${parsedError.error.status})]`;
@@ -75,7 +70,7 @@ export function parseAndFormatApiError(
         }
         return text;
       }
-    } catch (_e) {
+    } catch {
       // Not a valid JSON, fall through and return the original message.
     }
     return `[API Error: ${error}]`;

@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import type { PartUnion } from '@google/genai';
-// eslint-disable-next-line import/no-internal-modules
+// @ts-expect-error - mime/lite types may not be resolved correctly
 import mime from 'mime/lite';
 import type { FileSystemService } from '../services/fileSystemService.js';
 import { ToolErrorType } from '../tools/tool-error.js';
@@ -18,9 +18,7 @@ import { debugLogger } from './debugLogger.js';
 
 const requireModule = createModuleRequire(import.meta.url);
 
-export async function readWasmBinaryFromDisk(
-  specifier: string,
-): Promise<Uint8Array> {
+export async function readWasmBinaryFromDisk(specifier: string): Promise<Uint8Array> {
   const resolvedPath = requireModule.resolve(specifier);
   const buffer = await fsPromises.readFile(resolvedPath);
   return new Uint8Array(buffer);
@@ -28,7 +26,7 @@ export async function readWasmBinaryFromDisk(
 
 export async function loadWasmBinary(
   dynamicImport: () => Promise<{ default: Uint8Array }>,
-  fallbackSpecifier: string,
+  fallbackSpecifier: string
 ): Promise<Uint8Array> {
   try {
     const module = await dynamicImport();
@@ -75,21 +73,11 @@ interface BOMInfo {
 export function detectBOM(buf: Buffer): BOMInfo | null {
   if (buf.length >= 4) {
     // UTF-32 LE: FF FE 00 00
-    if (
-      buf[0] === 0xff &&
-      buf[1] === 0xfe &&
-      buf[2] === 0x00 &&
-      buf[3] === 0x00
-    ) {
+    if (buf[0] === 0xff && buf[1] === 0xfe && buf[2] === 0x00 && buf[3] === 0x00) {
       return { encoding: 'utf32le', bomLength: 4 };
     }
     // UTF-32 BE: 00 00 FE FF
-    if (
-      buf[0] === 0x00 &&
-      buf[1] === 0x00 &&
-      buf[2] === 0xfe &&
-      buf[3] === 0xff
-    ) {
+    if (buf[0] === 0x00 && buf[1] === 0x00 && buf[2] === 0xfe && buf[3] === 0xff) {
       return { encoding: 'utf32be', bomLength: 4 };
     }
   }
@@ -137,16 +125,8 @@ function decodeUTF32(buf: Buffer, littleEndian: boolean): string {
   let out = '';
   for (let i = 0; i < usable; i += 4) {
     const cp = littleEndian
-      ? (buf[i] |
-          (buf[i + 1] << 8) |
-          (buf[i + 2] << 16) |
-          (buf[i + 3] << 24)) >>>
-        0
-      : (buf[i + 3] |
-          (buf[i + 2] << 8) |
-          (buf[i + 1] << 16) |
-          (buf[i] << 24)) >>>
-        0;
+      ? (buf[i] | (buf[i + 1] << 8) | (buf[i + 2] << 16) | (buf[i + 3] << 24)) >>> 0
+      : (buf[i + 3] | (buf[i + 2] << 8) | (buf[i + 1] << 16) | (buf[i] << 24)) >>> 0;
     // Valid planes: 0x0000..0x10FFFF excluding surrogates
     if (cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff)) {
       out += String.fromCodePoint(cp);
@@ -207,18 +187,14 @@ export function getSpecificMimeType(filePath: string): string | undefined {
  * @param rootDirectory The absolute root directory.
  * @returns True if the path is within the root directory, false otherwise.
  */
-export function isWithinRoot(
-  pathToCheck: string,
-  rootDirectory: string,
-): boolean {
+export function isWithinRoot(pathToCheck: string, rootDirectory: string): boolean {
   const normalizedPathToCheck = path.resolve(pathToCheck);
   const normalizedRootDirectory = path.resolve(rootDirectory);
 
   // Ensure the rootDirectory path ends with a separator for correct startsWith comparison,
   // unless it's the root path itself (e.g., '/' or 'C:\').
   const rootWithSeparator =
-    normalizedRootDirectory === path.sep ||
-    normalizedRootDirectory.endsWith(path.sep)
+    normalizedRootDirectory === path.sep || normalizedRootDirectory.endsWith(path.sep)
       ? normalizedRootDirectory
       : normalizedRootDirectory + path.sep;
 
@@ -263,7 +239,7 @@ export async function isBinaryFile(filePath: string): Promise<boolean> {
   } catch (error) {
     debugLogger.warn(
       `Failed to check if file is binary: ${filePath}`,
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     return false;
   } finally {
@@ -273,7 +249,7 @@ export async function isBinaryFile(filePath: string): Promise<boolean> {
       } catch (closeError) {
         debugLogger.warn(
           `Failed to close file handle for: ${filePath}`,
-          closeError instanceof Error ? closeError.message : String(closeError),
+          closeError instanceof Error ? closeError.message : String(closeError)
         );
       }
     }
@@ -286,7 +262,7 @@ export async function isBinaryFile(filePath: string): Promise<boolean> {
  * @returns Promise that resolves to 'text', 'image', 'pdf', 'audio', 'video', 'binary' or 'svg'.
  */
 export async function detectFileType(
-  filePath: string,
+  filePath: string
 ): Promise<'text' | 'image' | 'pdf' | 'audio' | 'video' | 'binary' | 'svg'> {
   const ext = path.extname(filePath).toLowerCase();
 
@@ -353,16 +329,15 @@ export interface ProcessedFileReadResult {
 export async function processSingleFileContent(
   filePath: string,
   rootDirectory: string,
-  fileSystemService: FileSystemService,
+  _fileSystemService: FileSystemService,
   offset?: number,
-  limit?: number,
+  limit?: number
 ): Promise<ProcessedFileReadResult> {
   try {
     if (!fs.existsSync(filePath)) {
       // Sync check is acceptable before async read
       return {
-        llmContent:
-          'Could not read file because no file was found at the specified path.',
+        llmContent: 'Could not read file because no file was found at the specified path.',
         returnDisplay: 'File not found.',
         error: `File not found: ${filePath}`,
         errorType: ToolErrorType.FILE_NOT_FOUND,
@@ -371,8 +346,7 @@ export async function processSingleFileContent(
     const stats = await fs.promises.stat(filePath);
     if (stats.isDirectory()) {
       return {
-        llmContent:
-          'Could not read file because the provided path is a directory, not a file.',
+        llmContent: 'Could not read file because the provided path is a directory, not a file.',
         returnDisplay: 'Path is a directory.',
         error: `Path is a directory, not a file: ${filePath}`,
         errorType: ToolErrorType.TARGET_IS_DIRECTORY,
@@ -390,9 +364,7 @@ export async function processSingleFileContent(
     }
 
     const fileType = await detectFileType(filePath);
-    const relativePathForDisplay = path
-      .relative(rootDirectory, filePath)
-      .replace(/\\/g, '/');
+    const relativePathForDisplay = path.relative(rootDirectory, filePath).replace(/\\/g, '/');
 
     switch (fileType) {
       case 'binary': {
@@ -422,8 +394,7 @@ export async function processSingleFileContent(
         const originalLineCount = lines.length;
 
         const startLine = offset || 0;
-        const effectiveLimit =
-          limit === undefined ? DEFAULT_MAX_LINES_TEXT_FILE : limit;
+        const effectiveLimit = limit === undefined ? DEFAULT_MAX_LINES_TEXT_FILE : limit;
         // Ensure endLine does not exceed originalLineCount
         const endLine = Math.min(startLine + effectiveLimit, originalLineCount);
         // Ensure selectedLines doesn't try to slice beyond array bounds if startLine is too high
@@ -434,15 +405,12 @@ export async function processSingleFileContent(
         const formattedLines = selectedLines.map((line) => {
           if (line.length > MAX_LINE_LENGTH_TEXT_FILE) {
             linesWereTruncatedInLength = true;
-            return (
-              line.substring(0, MAX_LINE_LENGTH_TEXT_FILE) + '... [truncated]'
-            );
+            return line.substring(0, MAX_LINE_LENGTH_TEXT_FILE) + '... [truncated]';
           }
           return line;
         });
 
-        const contentRangeTruncated =
-          startLine > 0 || endLine < originalLineCount;
+        const contentRangeTruncated = startLine > 0 || endLine < originalLineCount;
         const isTruncated = contentRangeTruncated || linesWereTruncatedInLength;
         const llmContent = formattedLines.join('\n');
 
@@ -495,9 +463,7 @@ export async function processSingleFileContent(
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    const displayPath = path
-      .relative(rootDirectory, filePath)
-      .replace(/\\/g, '/');
+    const displayPath = path.relative(rootDirectory, filePath).replace(/\\/g, '/');
     return {
       llmContent: `Error reading file ${displayPath}: ${errorMessage}`,
       returnDisplay: `Error reading file ${displayPath}: ${errorMessage}`,
@@ -511,7 +477,7 @@ export async function fileExists(filePath: string): Promise<boolean> {
   try {
     await fsPromises.access(filePath, fs.constants.F_OK);
     return true;
-  } catch (_: unknown) {
+  } catch {
     return false;
   }
 }

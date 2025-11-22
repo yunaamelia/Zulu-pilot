@@ -8,8 +8,9 @@
 export * from './config/config.js';
 export * from './config/defaultModelConfigs.js';
 export * from './config/models.js';
-export * from './config/UnifiedConfiguration.js';
-export * from './config/UnifiedConfigManager.js';
+// Export UnifiedConfiguration types separately to avoid MCPServerConfig conflict
+export type { UnifiedConfiguration, ProviderConfiguration } from './config/UnifiedConfiguration.js';
+export { UnifiedConfigManager } from './config/UnifiedConfigManager.js';
 
 // Export context
 export * from './context/FileContext.js';

@@ -13,14 +13,11 @@
  */
 import type { Config } from '../config/config.js';
 
-export function safeJsonStringify(
-  obj: unknown,
-  space?: string | number,
-): string {
+export function safeJsonStringify(obj: unknown, space?: string | number): string {
   const seen = new WeakSet();
   return JSON.stringify(
     obj,
-    (key, value) => {
+    (_key, value) => {
       if (typeof value === 'object' && value !== null) {
         if (seen.has(value)) {
           return '[Circular]';
@@ -29,7 +26,7 @@ export function safeJsonStringify(
       }
       return value;
     },
-    space,
+    space
   );
 }
 
@@ -55,7 +52,7 @@ function removeEmptyObjects(data: any): object {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function safeJsonStringifyBooleanValuesOnly(obj: any): string {
   let configSeen = false;
-  return JSON.stringify(removeEmptyObjects(obj), (key, value) => {
+  return JSON.stringify(removeEmptyObjects(obj), (_key, value) => {
     if ((value as Config) !== null && !configSeen) {
       configSeen = true;
       return value;
