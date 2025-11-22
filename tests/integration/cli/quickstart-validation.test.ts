@@ -213,7 +213,9 @@ function add(a: number, b: number): number {
 
   describe('Configuration validation', () => {
     it('should load default configuration when file does not exist', async () => {
-      const configManager = new ConfigManager();
+      // Use temp directory to avoid reading from home directory config
+      const tempConfigPath = path.join(tempDir, '.zulu-pilotrc');
+      const configManager = new ConfigManager(tempConfigPath);
       const config = await configManager.load();
 
       expect(config.provider).toBe('googleClaude');

@@ -3,9 +3,6 @@ import { OllamaProvider } from '../../core/llm/OllamaProvider.js';
 import { GeminiProvider } from '../../core/llm/GeminiProvider.js';
 import { OpenAIProvider } from '../../core/llm/OpenAIProvider.js';
 import { GoogleCloudProvider } from '../../core/llm/GoogleCloudProvider.js';
-import { GoogleAuth } from 'google-auth-library';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import type { IModelProvider } from '../../core/llm/IModelProvider.js';
 import type { FileContext } from '../../core/context/FileContext.js';
 import { ConnectionError, RateLimitError } from '../../utils/errors.js';
@@ -290,10 +287,10 @@ async function createProvider(
     case 'openai':
       return createOpenAIProvider(providerConfig, configManager);
     case 'googleCloud':
-      return createGoogleCloudProvider(providerConfig);
+      return await createGoogleCloudProvider(providerConfig);
     case 'googleClaude':
       // googleClaude uses GoogleCloudProvider with all models registered
-      return createGoogleCloudProvider(providerConfig);
+      return await createGoogleCloudProvider(providerConfig);
     default:
       throw new ConnectionError(`Unsupported provider: ${providerName}`, providerName);
   }
@@ -375,67 +372,11 @@ function createOpenAIProvider(
 
 /**
  * Create Google Cloud provider.
+ * Uses request.json for service account authentication if available,
+ * otherwise falls back to gcloud CLI.
  */
-/**
- * Create access token getter using service account key file if available,
- * otherwise fallback to gcloud auth.
- */
-async function createAccessTokenGetter(): Promise<() => Promise<string>> {
-  // Try to use service account key file (request.json) first
-  const serviceAccountPath = join(process.cwd(), 'request.json');
-  try {
-    const serviceAccountKey = await readFile(serviceAccountPath, 'utf-8');
-    const serviceAccount = JSON.parse(serviceAccountKey);
 
-    // Validate service account structure
-    if (
-      serviceAccount.type === 'service_account' &&
-      serviceAccount.project_id &&
-      serviceAccount.private_key &&
-      serviceAccount.client_email
-    ) {
-      const auth = new GoogleAuth({
-        credentials: serviceAccount,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-      });
-
-      return async (): Promise<string> => {
-        const client = await auth.getClient();
-        const accessToken = await client.getAccessToken();
-        if (!accessToken.token) {
-          throw new Error('Failed to get access token from service account');
-        }
-        return accessToken.token;
-      };
-    }
-  } catch (error) {
-    // If service account file doesn't exist or is invalid, fallback to gcloud
-    if (process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
-      console.error(
-        `[DEBUG] Service account auth failed, using gcloud: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
-
-  // Fallback to gcloud auth print-access-token
-  const { exec } = await import('node:child_process');
-  const { promisify } = await import('node:util');
-  const execAsync = promisify(exec);
-
-  return async (): Promise<string> => {
-    try {
-      const { stdout } = await execAsync('gcloud auth print-access-token');
-      return stdout.trim();
-    } catch (error) {
-      throw new ConnectionError(
-        `Failed to get access token: ${error instanceof Error ? error.message : String(error)}. Please run 'gcloud auth login' or provide request.json service account key file.`,
-        'googleCloud'
-      );
-    }
-  };
-}
-
-function createGoogleCloudProvider(
+async function createGoogleCloudProvider(
   providerConfig:
     | {
         projectId?: string;
@@ -445,10 +386,11 @@ function createGoogleCloudProvider(
         maxTokens?: number;
         temperature?: number;
         topP?: number;
+        credentialsPath?: string;
         [key: string]: unknown;
       }
     | undefined
-): IModelProvider {
+): Promise<IModelProvider> {
   const projectId = providerConfig?.projectId as string | undefined;
   const region = providerConfig?.region as string | undefined;
   if (!projectId || !region) {
@@ -458,24 +400,21 @@ function createGoogleCloudProvider(
     );
   }
 
-  // Create access token getter (will be resolved asynchronously)
-  let accessTokenGetter: (() => Promise<string>) | undefined;
-  const getAccessTokenPromise = createAccessTokenGetter().then((getter) => {
-    accessTokenGetter = getter;
-  });
-
-  // For now, create provider with a wrapper that will use the getter once ready
-  // We'll need to handle this asynchronously, but GoogleCloudProvider expects
-  // getAccessToken to be provided synchronously. Let's create a lazy getter.
-  const lazyGetAccessToken = async (): Promise<string> => {
-    if (!accessTokenGetter) {
-      await getAccessTokenPromise;
+  // Try to use request.json if credentialsPath is not explicitly provided
+  let credentialsPath: string | undefined = providerConfig?.credentialsPath;
+  if (!credentialsPath) {
+    try {
+      const path = await import('node:path');
+      const fs = await import('node:fs/promises');
+      const requestJsonPath = path.resolve(process.cwd(), 'request.json');
+      await fs.access(requestJsonPath);
+      credentialsPath = requestJsonPath;
+      debugLog(`Using service account credentials from: ${credentialsPath}`);
+    } catch {
+      // Ignore errors, will fallback to gcloud CLI
+      debugLog('request.json not found, will use gcloud CLI for authentication');
     }
-    if (!accessTokenGetter) {
-      throw new ConnectionError('Failed to initialize access token getter', 'googleCloud');
-    }
-    return accessTokenGetter();
-  };
+  }
 
   return new GoogleCloudProvider({
     projectId,
@@ -485,6 +424,6 @@ function createGoogleCloudProvider(
     maxTokens: providerConfig?.maxTokens as number | undefined,
     temperature: providerConfig?.temperature as number | undefined,
     topP: providerConfig?.topP as number | undefined,
-    getAccessToken: lazyGetAccessToken,
+    credentialsPath,
   });
 }

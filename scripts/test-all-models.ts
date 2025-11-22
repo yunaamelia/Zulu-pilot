@@ -360,8 +360,8 @@ function getRegionForModel(model: string): string {
     'qwen/qwen3-coder-480b-a35b-instruct-maas': 'us-south1',
     'deepseek-ai/deepseek-r1-0528-maas': 'us-central1',
     'moonshotai/kimi-k2-thinking-maas': 'global',
-    'openai/gpt-oss-120b-maas': 'us-central1',
-    'meta/llama-3.1-405b-instruct-maas': 'us-central1',
+    'openai/gpt-oss-120b-maas': 'global', // Updated: uses global region with v1 endpoint
+    'intfloat/multilingual-e5-large-instruct-maas': 'us-central1', // Embeddings model
   };
   return regionMap[model] || 'us-central1';
 }

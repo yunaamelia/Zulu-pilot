@@ -4,6 +4,7 @@ import { promisify } from 'node:util';
 import type { IModelProvider } from './IModelProvider.js';
 import type { FileContext } from '../context/FileContext.js';
 import { ConnectionError, RateLimitError } from '../../utils/errors.js';
+import { GoogleCloudAuth, type GoogleCloudAuthOptions } from '../auth/GoogleCloudAuth.js';
 
 const execAsync = promisify(exec);
 
@@ -22,7 +23,7 @@ interface ModelConfig {
  */
 const MODEL_CONFIGS: Record<string, ModelConfig> = {
   'deepseek-ai/deepseek-v3.1-maas': {
-    endpoint: 'v1beta1',
+    endpoint: 'v1', // Updated: uses v1 endpoint with region-specific URL
     maxTokens: 32768,
     temperature: 0.4,
     topP: 0.95,
@@ -34,8 +35,8 @@ const MODEL_CONFIGS: Record<string, ModelConfig> = {
     topP: 0.8,
   },
   'deepseek-ai/deepseek-r1-0528-maas': {
-    endpoint: 'v1beta1',
-    maxTokens: 32768,
+    endpoint: 'v1', // Updated: uses v1 endpoint with region-specific URL (us-central1-aiplatform.googleapis.com)
+    maxTokens: 32138, // Updated per user config
     temperature: 0.4,
     topP: 0.95,
   },
@@ -46,7 +47,7 @@ const MODEL_CONFIGS: Record<string, ModelConfig> = {
     topP: 0.95,
   },
   'openai/gpt-oss-120b-maas': {
-    endpoint: 'v1beta1',
+    endpoint: 'v1', // Updated: uses v1 endpoint with global region
     maxTokens: 8192,
     temperature: 0.4,
     topP: 0.95,
@@ -70,7 +71,22 @@ export interface GoogleCloudProviderConfig {
   maxTokens?: number;
   temperature?: number;
   topP?: number;
+  /**
+   * Custom function to get access token.
+   * If not provided, will use GoogleCloudAuth with credentialsPath or default to gcloud CLI.
+   */
   getAccessToken?: () => Promise<string>;
+  /**
+   * Path to service account credentials JSON file.
+   * If provided, will be used instead of gcloud CLI.
+   * Example: './request.json' or absolute path.
+   */
+  credentialsPath?: string;
+  /**
+   * Service account credentials object.
+   * If provided, will be used directly instead of reading from file.
+   */
+  credentials?: GoogleCloudAuthOptions['credentials'];
   axiosInstance?: AxiosInstance;
 }
 
@@ -107,26 +123,59 @@ export class GoogleCloudProvider implements IModelProvider {
     this.temperature = config.temperature ?? modelConfig.temperature;
     this.topP = config.topP ?? modelConfig.topP;
 
-    this.getAccessToken =
-      config.getAccessToken ??
-      (async (): Promise<string> => {
-        // Default: use gcloud auth print-access-token
+    // Setup authentication
+    if (config.getAccessToken) {
+      // Use custom getAccessToken function if provided
+      this.getAccessToken = config.getAccessToken;
+    } else if (config.credentialsPath || config.credentials) {
+      // Use service account credentials from file or object
+      const auth = new GoogleCloudAuth({
+        credentialsPath: config.credentialsPath,
+        credentials: config.credentials,
+      });
+      this.getAccessToken = async (): Promise<string> => {
+        try {
+          return await auth.getAccessToken();
+        } catch (error) {
+          throw new ConnectionError(
+            `Failed to authenticate with service account: ${error instanceof Error ? error.message : String(error)}`,
+            'googleCloud'
+          );
+        }
+      };
+    } else {
+      // Default: use gcloud auth print-access-token
+      this.getAccessToken = async (): Promise<string> => {
         try {
           const { stdout } = await execAsync('gcloud auth print-access-token');
           return stdout.trim();
         } catch (error) {
           throw new ConnectionError(
-            `Failed to get access token: ${error instanceof Error ? error.message : String(error)}. Please run 'gcloud auth login' first.`,
+            `Failed to get access token: ${error instanceof Error ? error.message : String(error)}. ` +
+              `Please run 'gcloud auth login' first, or provide credentialsPath/credentials in config.`,
             'googleCloud'
           );
         }
-      });
+      };
+    }
 
     // Build base URL based on endpoint version
     // Format per vertex-config.md:
-    // v1beta1: https://aiplatform.googleapis.com/v1beta1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi
-    // v1: https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi
-    const baseURL = `https://aiplatform.googleapis.com/${this.endpoint}/projects/${this.projectId}/locations/${this.region}/endpoints/openapi`;
+    // Build base URL with support for region-specific endpoints
+    // For some models (e.g., DeepSeek V3.1), use region-specific endpoint:
+    // https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi
+    // For others, use global endpoint:
+    // https://aiplatform.googleapis.com/{endpoint}/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi
+
+    // Check if this model uses region-specific endpoint
+    const useRegionSpecificEndpoint =
+      this.model === 'deepseek-ai/deepseek-v3.1-maas' ||
+      this.model === 'deepseek-ai/deepseek-r1-0528-maas' ||
+      this.model === 'intfloat/multilingual-e5-large-instruct-maas';
+
+    const baseURL = useRegionSpecificEndpoint
+      ? `https://${this.region}-aiplatform.googleapis.com/${this.endpoint}/projects/${this.projectId}/locations/${this.region}/endpoints/openapi`
+      : `https://aiplatform.googleapis.com/${this.endpoint}/projects/${this.projectId}/locations/${this.region}/endpoints/openapi`;
 
     this.axiosInstance =
       config.axiosInstance ??
@@ -275,6 +324,7 @@ export class GoogleCloudProvider implements IModelProvider {
 
   /**
    * Build OpenAI-compatible API request body.
+   * Supports different content formats based on model requirements.
    */
   private buildRequest(prompt: string, context: FileContext[], stream: boolean): unknown {
     const messages: Array<{ role: string; content: string | unknown[] }> = [];
@@ -296,7 +346,7 @@ ${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) =>
     });
 
     // Add user prompt
-    // For Kimi K2, content should be a string, not an array
+    // All models now use content as string (not array)
     messages.push({
       role: 'user',
       content: prompt,

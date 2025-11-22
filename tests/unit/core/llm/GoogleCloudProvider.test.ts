@@ -160,7 +160,7 @@ describe('GoogleCloudProvider', () => {
       const llamaProvider = new GoogleCloudProvider({
         projectId: 'test-project',
         region: 'us-central1',
-        model: 'meta/llama-3.1-405b-instruct-maas',
+        model: 'intfloat/multilingual-e5-large-instruct-maas',
         axiosInstance,
       });
 
@@ -175,7 +175,7 @@ describe('GoogleCloudProvider', () => {
 
       const request = mockAdapter.history.post[0];
       const requestData = JSON.parse(request.data as string);
-      expect(requestData.model).toBe('meta/llama-3.1-405b-instruct-maas');
+      expect(requestData.model).toBe('intfloat/multilingual-e5-large-instruct-maas');
     });
   });
 

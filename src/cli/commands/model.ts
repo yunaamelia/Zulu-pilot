@@ -13,7 +13,7 @@ const AVAILABLE_MODELS: Record<string, string[]> = {
     'deepseek-ai/deepseek-r1-0528-maas',
     'moonshotai/kimi-k2-thinking-maas',
     'openai/gpt-oss-120b-maas',
-    'meta/llama-3.1-405b-instruct-maas',
+    'intfloat/multilingual-e5-large-instruct-maas', // Embeddings model
   ],
   // Google Claude provider - all models registered here
   googleClaude: [
@@ -22,7 +22,7 @@ const AVAILABLE_MODELS: Record<string, string[]> = {
     'deepseek-ai/deepseek-r1-0528-maas',
     'moonshotai/kimi-k2-thinking-maas',
     'openai/gpt-oss-120b-maas',
-    'meta/llama-3.1-405b-instruct-maas',
+    'intfloat/multilingual-e5-large-instruct-maas', // Embeddings model
     'gemini-2.5-pro',
     'gemini-1.5-pro',
     'gemini-1.5-flash',
@@ -82,8 +82,8 @@ export async function handleModelCommand(options: { list?: boolean; set?: string
     console.log('    Qwen Coder: qwen/qwen3-coder-480b-a35b-instruct-maas (us-south1)');
     console.log('    DeepSeek R1: deepseek-ai/deepseek-r1-0528-maas (us-central1)');
     console.log('    Kimi K2: moonshotai/kimi-k2-thinking-maas (global)');
-    console.log('    GPT OSS 120B: openai/gpt-oss-120b-maas (us-central1)');
-    console.log('    Llama 3.1: meta/llama-3.1-405b-instruct-maas (us-central1)');
+    console.log('    GPT OSS 120B: openai/gpt-oss-120b-maas (global)');
+    console.log('    E5 Embeddings: intfloat/multilingual-e5-large-instruct-maas (us-central1)');
     console.log('    Gemini 2.5 Pro: gemini-2.5-pro');
     console.log('    Gemini 1.5 Pro: gemini-1.5-pro');
     console.log('    Gemini 1.5 Flash: gemini-1.5-flash');
