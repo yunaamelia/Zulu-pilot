@@ -33,7 +33,7 @@ describe('clear command', () => {
 
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      handleClearCommand(true, contextManager);
+      await handleClearCommand(true, contextManager);
 
       expect(contextManager.getContext()).toHaveLength(0);
       expect(logSpy).toHaveBeenCalledWith('✓ Context cleared.');
@@ -50,7 +50,7 @@ describe('clear command', () => {
 
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      handleClearCommand(false, contextManager);
+      await handleClearCommand(false, contextManager);
 
       expect(contextManager.getContext()).toHaveLength(1);
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('This will remove'));
@@ -59,10 +59,10 @@ describe('clear command', () => {
       logSpy.mockRestore();
     });
 
-    it('should show message when context is already empty', () => {
+    it('should show message when context is already empty', async () => {
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      handleClearCommand(true, contextManager);
+      await handleClearCommand(true, contextManager);
 
       expect(logSpy).toHaveBeenCalledWith('Context is already empty.');
 
@@ -78,7 +78,7 @@ describe('clear command', () => {
 
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      handleClearCommand(true);
+      await handleClearCommand(true);
 
       expect(contextManager.getContext()).toHaveLength(0);
       expect(logSpy).toHaveBeenCalledWith('✓ Context cleared.');
