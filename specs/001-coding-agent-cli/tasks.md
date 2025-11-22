@@ -90,12 +90,12 @@
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 > **Constitution Requirement**: Minimum 90% coverage for new code, all test types required
 
-- [ ] T014 [P] [US1] Unit test for OllamaProvider in tests/unit/core/llm/OllamaProvider.test.ts
+- [x] T014 [P] [US1] Unit test for OllamaProvider in tests/unit/core/llm/OllamaProvider.test.ts
   - Mock HTTP call to localhost:11434
   - Test successful streaming response
   - Test connection error handling
   - Test model configuration
-- [ ] T015 [P] [US1] Contract test for Ollama API in tests/contract/ollama-api.test.ts
+- [x] T015 [P] [US1] Contract test for Ollama API in tests/contract/ollama-api.test.ts
   - Verify OpenAI-compatible endpoint format
   - Test streaming response format
   - Test error response formats
@@ -107,31 +107,31 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Implement OllamaProvider in src/core/llm/OllamaProvider.ts
+- [x] T019 [US1] Implement OllamaProvider in src/core/llm/OllamaProvider.ts
   - Connect to http://localhost:11434
   - Support OpenAI-compatible chat completions endpoint
   - Implement streamResponse with AsyncGenerator
   - Implement generateResponse with Promise
   - Make model name configurable (default: "qwen2.5-coder")
   - Handle connection errors gracefully
-- [ ] T020 [US1] Implement streaming output handler in src/cli/ui/stream.ts
+- [x] T020 [US1] Implement streaming output handler in src/cli/ui/stream.ts
   - Handle real-time token-by-token output to stdout
   - Support stream cancellation (Ctrl+C)
-- [ ] T021 [US1] Implement chat command in src/cli/commands/chat.ts
+- [x] T021 [US1] Implement chat command in src/cli/commands/chat.ts
   - Accept prompt as argument or interactive input
   - Initialize OllamaProvider from config
   - Stream response to user
-- [ ] T022 [US1] Add model command in src/cli/commands/model.ts
+- [x] T022 [US1] Add model command in src/cli/commands/model.ts
   - List available models
   - Allow changing model via command
-- [ ] T023 [US1] Integrate chat command into main CLI in src/cli/index.ts
+- [x] T023 [US1] Integrate chat command into main CLI in src/cli/index.ts
   - Add chat subcommand
   - Handle --provider flag for provider selection
-- [ ] T024 [US1] Add validation and error handling (Constitution I: Code Quality)
+- [x] T024 [US1] Add validation and error handling (Constitution I: Code Quality)
   - Validate Ollama connection before use
   - Clear error messages for connection failures
-- [ ] T025 [US1] Ensure code passes all pre-commit hooks (linting, formatting, type checking)
-- [ ] T026 [US1] Verify cyclomatic complexity < 15 per function (Constitution I)
+- [x] T025 [US1] Ensure code passes all pre-commit hooks (linting, formatting, type checking)
+- [x] T026 [US1] Verify cyclomatic complexity < 15 per function (Constitution I)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Developers can chat with local Ollama models.
 

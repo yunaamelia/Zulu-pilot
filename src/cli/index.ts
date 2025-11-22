@@ -1,6 +1,8 @@
 import { Command } from 'commander';
 import { validateProviderName } from '../utils/validators.js';
 import { ValidationError } from '../utils/errors.js';
+import { handleChatCommand } from './commands/chat.js';
+import { handleModelCommand } from './commands/model.js';
 
 const program = new Command();
 
@@ -18,7 +20,7 @@ async function main(): Promise<void> {
     )
     .option('--config <path>', 'Path to configuration file', '~/.zulu-pilotrc');
 
-  // Chat command (placeholder - will be implemented in Phase 3)
+  // Chat command
   program
     .command('chat')
     .description('Start interactive chat with AI model')
@@ -40,29 +42,17 @@ async function main(): Promise<void> {
         }
       }
 
-      console.log('Chat command - coming in Phase 3');
-      if (provider) {
-        console.log(`Using provider: ${provider}`);
-      }
-      if (prompt) {
-        console.log(`Prompt: ${prompt}`);
-      }
+      await handleChatCommand(prompt, provider);
     });
 
-  // Model command (placeholder - will be implemented in Phase 3)
+  // Model command
   program
     .command('model')
     .description('List or change AI models')
     .option('-l, --list', 'List available models')
     .option('-s, --set <model>', 'Set default model')
     .action(async (options) => {
-      console.log('Model command - coming in Phase 3');
-      if (options.list) {
-        console.log('Available models will be listed here');
-      }
-      if (options.set) {
-        console.log(`Setting model to: ${options.set}`);
-      }
+      await handleModelCommand(options);
     });
 
   // Parse command line arguments
