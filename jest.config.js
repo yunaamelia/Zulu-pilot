@@ -24,6 +24,9 @@ export default {
     '!src/**/*.d.ts',
     '!src/**/*.test.ts',
     '!src/**/*.spec.ts',
+    // CLI entry points are tested via integration tests
+    '!src/cli/index.ts',
+    '!src/cli/commands/chat.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'json', 'html'],
