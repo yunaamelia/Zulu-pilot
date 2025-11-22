@@ -1,0 +1,22 @@
+{
+  "name": "@zulu-pilot/adapter",
+  "version": "0.1.0",
+  "description": "Adapter layer bridging Gemini CLI with custom model providers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@zulu-pilot/core": "*",
+    "@zulu-pilot/providers": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}
+

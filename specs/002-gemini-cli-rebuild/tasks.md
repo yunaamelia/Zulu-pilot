@@ -91,55 +91,55 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Configuration System
 
-- [ ] T017 [P] Create UnifiedConfiguration interface in packages/core/src/config/UnifiedConfiguration.ts
-- [ ] T018 [P] Create ProviderConfiguration interface in packages/core/src/config/ProviderConfiguration.ts
-- [ ] T019 [P] Create UnifiedConfigManager class in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T020 [P] Implement config loading from ~/.zulu-pilotrc in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T021 [P] Implement config validation using JSON schema in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T022 [P] Implement config saving with atomic writes in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T023 [P] [P] Write unit tests for UnifiedConfigManager in tests/unit/config/UnifiedConfigManager.test.ts (90%+ coverage)
+- [x] T017 [P] Create UnifiedConfiguration interface in packages/core/src/config/UnifiedConfiguration.ts
+- [x] T018 [P] Create ProviderConfiguration interface in packages/core/src/config/ProviderConfiguration.ts
+- [x] T019 [P] Create UnifiedConfigManager class in packages/core/src/config/UnifiedConfigManager.ts
+- [x] T020 [P] Implement config loading from ~/.zulu-pilotrc in packages/core/src/config/UnifiedConfigManager.ts
+- [x] T021 [P] Implement config validation using JSON schema in packages/core/src/config/UnifiedConfigManager.ts
+- [x] T022 [P] Implement config saving with atomic writes in packages/core/src/config/UnifiedConfigManager.ts
+- [x] T023 [P] [P] Write unit tests for UnifiedConfigManager in tests/unit/config/UnifiedConfigManager.test.ts (90%+ coverage)
 
 ### Provider Interface & Registry
 
-- [ ] T024 [P] Create IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T025 [P] Create ProviderRegistry class in packages/adapter/src/ProviderRegistry.ts
-- [ ] T026 [P] Implement provider registration in packages/adapter/src/ProviderRegistry.ts
-- [ ] T027 [P] Implement provider retrieval with lazy initialization in packages/adapter/src/ProviderRegistry.ts
-- [ ] T028 [P] [P] Write unit tests for ProviderRegistry in tests/unit/adapter/ProviderRegistry.test.ts (90%+ coverage)
+- [x] T024 [P] Create IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [x] T025 [P] Create ProviderRegistry class in packages/adapter/src/ProviderRegistry.ts
+- [x] T026 [P] Implement provider registration in packages/adapter/src/ProviderRegistry.ts
+- [x] T027 [P] Implement provider retrieval with lazy initialization in packages/adapter/src/ProviderRegistry.ts
+- [x] T028 [P] [P] Write unit tests for ProviderRegistry in tests/unit/adapter/ProviderRegistry.test.ts (90%+ coverage)
 
 ### Multi-Provider Router
 
-- [ ] T029 [P] Create MultiProviderRouter class in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T030 [P] Implement model ID parsing (provider:model format) in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T031 [P] Implement provider routing logic in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T032 [P] Implement provider switching in packages/adapter/src/MultiProviderRouter.ts
-- [ ] T033 [P] [P] Write unit tests for MultiProviderRouter in tests/unit/adapter/MultiProviderRouter.test.ts (95%+ coverage)
+- [x] T029 [P] Create MultiProviderRouter class in packages/adapter/src/MultiProviderRouter.ts
+- [x] T030 [P] Implement model ID parsing (provider:model format) in packages/adapter/src/MultiProviderRouter.ts
+- [x] T031 [P] Implement provider routing logic in packages/adapter/src/MultiProviderRouter.ts
+- [x] T032 [P] Implement provider switching in packages/adapter/src/MultiProviderRouter.ts
+- [x] T033 [P] [P] Write unit tests for MultiProviderRouter in tests/unit/adapter/MultiProviderRouter.test.ts (95%+ coverage)
 
 ### Model Adapter Layer
 
-- [ ] T034 [P] Create IModelAdapter interface in packages/adapter/src/interfaces/IModelAdapter.ts
-- [ ] T035 [P] Create GeminiCLIModelAdapter class in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T036 [P] Implement request format conversion (Gemini CLI → Provider) in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T037 [P] Implement response format conversion (Provider → Gemini CLI) in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T038 [P] Implement generateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T039 [P] Implement streamGenerateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T040 [P] [P] Write unit tests for GeminiCLIModelAdapter in tests/unit/adapter/GeminiCLIModelAdapter.test.ts (95%+ coverage)
+- [x] T034 [P] Create IModelAdapter interface in packages/adapter/src/interfaces/IModelAdapter.ts
+- [x] T035 [P] Create GeminiCLIModelAdapter class in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T036 [P] Implement request format conversion (Gemini CLI → Provider) in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T037 [P] Implement response format conversion (Provider → Gemini CLI) in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T038 [P] Implement generateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T039 [P] Implement streamGenerateContent method in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T040 [P] [P] Write unit tests for GeminiCLIModelAdapter in tests/unit/adapter/GeminiCLIModelAdapter.test.ts (95%+ coverage)
 
 ### Fork Gemini CLI Packages
 
-- [ ] T041 Fork Gemini CLI packages/cli to packages/cli using git subtree
-- [ ] T042 Fork Gemini CLI packages/core to packages/core using git subtree
-- [ ] T043 Modify ModelManager in packages/core/src/model/ModelManager.ts to use GeminiCLIModelAdapter
-- [ ] T044 [P] Write integration tests for Gemini CLI core integration in tests/integration/core/ModelManager.test.ts
+- [x] T041 Fork Gemini CLI packages/cli to packages/cli using git subtree
+- [x] T042 Fork Gemini CLI packages/core to packages/core using git subtree
+- [x] T043 Modify createContentGenerator in packages/core/src/core/contentGenerator.ts to use GeminiCLIModelAdapter
+- [x] T044 [P] Write integration tests for Gemini CLI core integration in tests/integration/core/ModelManager.test.ts
 
 ### Basic Provider Implementation (Ollama POC)
 
-- [ ] T045 [P] Port OllamaProvider from current Zulu Pilot to packages/providers/src/OllamaProvider.ts
-- [ ] T046 [P] Implement IModelProvider interface in packages/providers/src/OllamaProvider.ts
-- [ ] T047 [P] Implement streamResponse method in packages/providers/src/OllamaProvider.ts
-- [ ] T048 [P] Implement generateResponse method in packages/providers/src/OllamaProvider.ts
-- [ ] T049 [P] [P] Write unit tests for OllamaProvider in tests/unit/providers/OllamaProvider.test.ts (90%+ coverage)
-- [ ] T050 [P] Write integration tests for adapter + OllamaProvider in tests/integration/adapter-providers/OllamaAdapter.test.ts
+- [x] T045 [P] Port OllamaProvider from current Zulu Pilot to packages/providers/src/OllamaProvider.ts
+- [x] T046 [P] Implement IModelProvider interface in packages/providers/src/OllamaProvider.ts
+- [x] T047 [P] Implement streamResponse method in packages/providers/src/OllamaProvider.ts
+- [x] T048 [P] Implement generateResponse method in packages/providers/src/OllamaProvider.ts
+- [x] T049 [P] [P] Write unit tests for OllamaProvider in tests/unit/providers/OllamaProvider.test.ts (90%+ coverage)
+- [x] T050 [P] Write integration tests for adapter + OllamaProvider in tests/integration/adapter-providers/OllamaAdapter.test.ts
 
 **Checkpoint**: Foundation ready - adapter layer working with Ollama provider, user story implementation can now begin
 

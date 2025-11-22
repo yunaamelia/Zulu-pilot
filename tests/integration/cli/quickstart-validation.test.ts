@@ -179,7 +179,7 @@ function add(a: number, b: number): number {
       mockAdapter.onPost('/v1/chat/completions').networkError();
 
       await expect(provider.generateResponse('Hello', [])).rejects.toThrow();
-
+      
       try {
         await provider.generateResponse('Hello', []);
       } catch (error: unknown) {
