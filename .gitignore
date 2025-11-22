@@ -59,3 +59,7 @@ Thumbs.db
 .zulu-pilotrc.local
 
 request.json
+
+# Gemini CLI
+.gemini/
+GEMINI.md

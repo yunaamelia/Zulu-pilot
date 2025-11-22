@@ -153,23 +153,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 1
 
-- [ ] T051 [P] [US1] Write contract test for model interface in tests/contract/model-interface.test.ts
-- [ ] T052 [P] [US1] Write integration test for interactive chat flow in tests/integration/cli/interactive-chat.test.ts
-- [ ] T053 [P] [US1] Write E2E test for complete chat session in tests/e2e/full-workflows/interactive-chat.test.ts
+- [x] T051 [P] [US1] Write contract test for model interface in tests/contract/model-interface.test.ts
+- [x] T052 [P] [US1] Write integration test for interactive chat flow in tests/integration/cli/interactive-chat.test.ts
+- [x] T053 [P] [US1] Write E2E test for complete chat session in tests/e2e/full-workflows/interactive-chat.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T054 [P] [US1] Create ChatCommand class in packages/cli/src/commands/chat.ts
-- [ ] T055 [US1] Implement interactive chat loop in packages/cli/src/commands/chat.ts
-- [ ] T056 [US1] Integrate adapter with Gemini CLI core for chat in packages/cli/src/commands/chat.ts
-- [ ] T057 [US1] Implement conversation history management in packages/core/src/conversation/ConversationManager.ts
-- [ ] T058 [US1] Implement real-time streaming output in packages/cli/src/ui/StreamOutput.ts (token interval < 100ms, no buffering delays > 500ms per FR-018)
-- [ ] T059 [US1] Implement loading indicators during API calls in packages/cli/src/ui/Spinner.ts
-- [ ] T060 [US1] Implement thinking process display for models with reasoning capabilities in packages/cli/src/ui/ThinkingDisplay.ts (display with `[thinking]` prefix or dimmed text, toggle visibility per FR-019)
-- [ ] T061 [US1] Implement graceful degradation for unsupported features in packages/cli/src/ui/FeatureDegradation.ts (display clear message: "Feature X not available with provider Y" per FR-020)
-- [ ] T062 [US1] Add provider selection in chat command in packages/cli/src/commands/chat.ts
-- [ ] T063 [US1] Add model selection in chat command in packages/cli/src/commands/chat.ts
-- [ ] T064 [US1] Write unit tests for ChatCommand in tests/unit/cli/commands/chat.test.ts (90%+ coverage)
+- [x] T054 [P] [US1] Create ChatCommand class in packages/cli/src/commands/chat.ts
+- [x] T055 [US1] Implement interactive chat loop in packages/cli/src/commands/chat.ts
+- [x] T056 [US1] Integrate adapter with Gemini CLI core for chat in packages/cli/src/commands/chat.ts
+- [x] T057 [US1] Implement conversation history management in packages/core/src/conversation/ConversationManager.ts
+- [x] T058 [US1] Implement real-time streaming output in packages/cli/src/ui/StreamOutput.ts (token interval < 100ms, no buffering delays > 500ms per FR-018)
+- [x] T059 [US1] Implement loading indicators during API calls in packages/cli/src/ui/Spinner.ts
+- [x] T060 [US1] Implement thinking process display for models with reasoning capabilities in packages/cli/src/ui/ThinkingDisplay.ts (display with `[thinking]` prefix or dimmed text, toggle visibility per FR-019)
+- [x] T061 [US1] Implement graceful degradation for unsupported features in packages/cli/src/ui/FeatureDegradation.ts (display clear message: "Feature X not available with provider Y" per FR-020)
+- [x] T062 [US1] Add provider selection in chat command in packages/cli/src/commands/chat.ts
+- [x] T063 [US1] Add model selection in chat command in packages/cli/src/commands/chat.ts
+- [x] T064 [US1] Write unit tests for ChatCommand in tests/unit/cli/commands/chat.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 1 complete - interactive chat working with custom models
 

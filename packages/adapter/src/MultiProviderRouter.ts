@@ -7,6 +7,7 @@
 
 import type { IModelProvider } from '@zulu-pilot/providers';
 import { ProviderRegistry } from './ProviderRegistry.js';
+import type { UnifiedConfiguration } from '@zulu-pilot/core';
 
 /**
  * Parsed model ID
@@ -23,10 +24,19 @@ interface ParsedModelId {
  */
 export class MultiProviderRouter {
   private readonly registry: ProviderRegistry;
+  private readonly config: UnifiedConfiguration;
   private currentProvider: string | null = null;
 
-  constructor(registry: ProviderRegistry) {
+  constructor(registry: ProviderRegistry, config: UnifiedConfiguration) {
     this.registry = registry;
+    this.config = config;
+  }
+
+  /**
+   * Get default provider from config
+   */
+  getDefaultProvider(): string {
+    return this.config.defaultProvider;
   }
 
   /**

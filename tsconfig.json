@@ -19,7 +19,14 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "@zulu-pilot/adapter": ["packages/adapter/src"],
+      "@zulu-pilot/cli": ["packages/cli/src"],
+      "@zulu-pilot/core": ["packages/core/src"],
+      "@zulu-pilot/providers": ["packages/providers/src"]
+    }
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist", "coverage"]

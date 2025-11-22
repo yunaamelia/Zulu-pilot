@@ -29,7 +29,7 @@ class MockModelAdapter implements IModelAdapter {
   }
 
   async *streamGenerateContent(
-    params: GenerateContentParams,
+    params: GenerateContentParams
   ): AsyncGenerator<GenerateContentResponse, void, unknown> {
     yield {
       content: [
@@ -50,7 +50,7 @@ describe('Gemini CLI Core Integration', () => {
   let mockAdapter: IModelAdapter;
   let mockConfig: Partial<Config>;
 
-  beforeEach(() => {
+  beforeEach((): void => {
     mockAdapter = new MockModelAdapter();
     mockConfig = {
       fakeResponses: undefined,
@@ -61,7 +61,7 @@ describe('Gemini CLI Core Integration', () => {
   });
 
   describe('createContentGenerator with Zulu Pilot adapter', () => {
-    it('should create ZuluPilotContentGenerator when adapter is provided', async () => {
+    it('should create ZuluPilotContentGenerator when adapter is provided', async (): Promise<void> => {
       const config: ContentGeneratorConfig = {
         authType: undefined,
       };
@@ -70,45 +70,39 @@ describe('Gemini CLI Core Integration', () => {
         config,
         mockConfig as Config,
         'test-session',
-        mockAdapter,
+        mockAdapter
       );
 
       expect(generator).toBeInstanceOf(ZuluPilotContentGenerator);
     });
 
-    it('should generate content using adapter', async () => {
+    it('should generate content using adapter', async (): Promise<void> => {
       const generator = new ZuluPilotContentGenerator(mockAdapter);
-      const response = await generator.generateContent(
-        {
-          model: 'ollama:qwen2.5-coder',
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: 'Hello' }],
-            },
-          ],
-        },
-        'test-prompt-id',
-      );
+      const response = await generator.generateContent({
+        model: 'ollama:qwen2.5-coder',
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: 'Hello' }],
+          },
+        ],
+      });
 
       expect(response.content).toBeDefined();
       expect(response.content[0].parts[0].text).toContain('Mock response');
     });
 
-    it('should stream content using adapter', async () => {
+    it('should stream content using adapter', async (): Promise<void> => {
       const generator = new ZuluPilotContentGenerator(mockAdapter);
-      const stream = generator.generateContentStream(
-        {
-          model: 'ollama:qwen2.5-coder',
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: 'Hello' }],
-            },
-          ],
-        },
-        'test-prompt-id',
-      );
+      const stream = generator.generateContentStream({
+        model: 'ollama:qwen2.5-coder',
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: 'Hello' }],
+          },
+        ],
+      });
 
       let responseCount = 0;
       for await (const response of stream) {
@@ -121,7 +115,7 @@ describe('Gemini CLI Core Integration', () => {
   });
 
   describe('ZuluPilotContentGenerator', () => {
-    it('should implement ContentGenerator interface', () => {
+    it('should implement ContentGenerator interface', (): void => {
       const generator = new ZuluPilotContentGenerator(mockAdapter);
 
       expect(generator.generateContent).toBeDefined();
@@ -130,7 +124,7 @@ describe('Gemini CLI Core Integration', () => {
       expect(generator.embedContent).toBeDefined();
     });
 
-    it('should handle countTokens', async () => {
+    it('should handle countTokens', async (): Promise<void> => {
       const generator = new ZuluPilotContentGenerator(mockAdapter);
       const result = await generator.countTokens({
         contents: [],
@@ -140,15 +134,14 @@ describe('Gemini CLI Core Integration', () => {
       expect(result.totalTokens).toBeDefined();
     });
 
-    it('should throw error for embedContent (not yet supported)', async () => {
+    it('should throw error for embedContent (not yet supported)', async (): Promise<void> => {
       const generator = new ZuluPilotContentGenerator(mockAdapter);
 
       await expect(
         generator.embedContent({
           contents: [],
-        }),
+        })
       ).rejects.toThrow('Embedding not yet supported');
     });
   });
 });
-

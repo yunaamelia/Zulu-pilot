@@ -16,6 +16,7 @@ import {
   createContentGenerator,
   createContentGeneratorConfig,
 } from '../core/contentGenerator.js';
+import type { IModelAdapter } from '@zulu-pilot/adapter';
 import { PromptRegistry } from '../prompts/prompt-registry.js';
 import { ToolRegistry } from '../tools/tool-registry.js';
 import { LSTool } from '../tools/ls.js';
@@ -343,6 +344,7 @@ export class Config {
   private geminiClient!: GeminiClient;
   private baseLlmClient!: BaseLlmClient;
   private modelRouterService: ModelRouterService;
+  private zuluPilotAdapter?: IModelAdapter;
   private readonly fileFiltering: {
     respectGitIgnore: boolean;
     respectGeminiIgnore: boolean;
@@ -634,6 +636,24 @@ export class Config {
     return this.contentGenerator;
   }
 
+  /**
+   * Set Zulu Pilot adapter for custom model providers
+   *
+   * @param adapter - Model adapter instance
+   */
+  setZuluPilotAdapter(adapter: IModelAdapter): void {
+    this.zuluPilotAdapter = adapter;
+  }
+
+  /**
+   * Get Zulu Pilot adapter if set
+   *
+   * @returns Adapter instance or undefined
+   */
+  getZuluPilotAdapter(): IModelAdapter | undefined {
+    return this.zuluPilotAdapter;
+  }
+
   async refreshAuth(authMethod: AuthType) {
     // Vertex and Genai have incompatible encryption and sending history with
     // thoughtSignature from Genai to Vertex will fail, we need to strip them
@@ -653,6 +673,7 @@ export class Config {
       newContentGeneratorConfig,
       this,
       this.getSessionId(),
+      this.zuluPilotAdapter,
     );
     // Only assign to instance properties after successful initialization
     this.contentGeneratorConfig = newContentGeneratorConfig;

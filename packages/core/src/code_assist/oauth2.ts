@@ -5,12 +5,7 @@
  */
 
 import type { Credentials, AuthClient, JWTInput } from 'google-auth-library';
-import {
-  OAuth2Client,
-  Compute,
-  CodeChallengeMethod,
-  GoogleAuth,
-} from 'google-auth-library';
+import { OAuth2Client, Compute, CodeChallengeMethod, GoogleAuth } from 'google-auth-library';
 import * as http from 'node:http';
 import url from 'node:url';
 import crypto from 'node:crypto';
@@ -31,11 +26,7 @@ import { Storage } from '../config/storage.js';
 import { OAuthCredentialStorage } from './oauth-credential-storage.js';
 import { FORCE_ENCRYPTED_FILE_ENV_VAR } from '../mcp/token-storage/index.js';
 import { debugLogger } from '../utils/debugLogger.js';
-import {
-  writeToStdout,
-  createInkStdio,
-  writeToStderr,
-} from '../utils/stdio.js';
+import { writeToStdout, createInkStdio, writeToStderr } from '../utils/stdio.js';
 import {
   enableLineWrapping,
   disableMouseEvents,
@@ -48,16 +39,18 @@ import { coreEvents, CoreEvent } from '../utils/events.js';
 const userAccountManager = new UserAccountManager();
 
 //  OAuth Client ID used to initiate OAuth2Client class.
+// Reads from environment variable GEMINI_OAUTH_CLIENT_ID.
+// Set these environment variables in your .env file or system environment.
+// For installed applications, you can use credentials provided by Google.
 const OAUTH_CLIENT_ID =
-  'YOUR_CLIENT_ID';
+  process.env.GEMINI_OAUTH_CLIENT_ID || process.env.GOOGLE_OAUTH_CLIENT_ID || '';
 
 // OAuth Secret value used to initiate OAuth2Client class.
-// Note: It's ok to save this in git because this is an installed application
-// as described here: https://developers.google.com/identity/protocols/oauth2#installed
-// "The process results in a client ID and, in some cases, a client secret,
-// which you embed in the source code of your application. (In this context,
-// the client secret is obviously not treated as a secret.)"
-const OAUTH_CLIENT_SECRET = 'YOUR_CLIENT_SECRET';
+// Reads from environment variable GEMINI_OAUTH_CLIENT_SECRET.
+// Set these environment variables in your .env file or system environment.
+// For installed applications, you can use credentials provided by Google.
+const OAUTH_CLIENT_SECRET =
+  process.env.GEMINI_OAUTH_CLIENT_SECRET || process.env.GOOGLE_OAUTH_CLIENT_SECRET || '';
 
 // OAuth Scopes for Cloud Code authorization.
 const OAUTH_SCOPE = [
@@ -67,10 +60,8 @@ const OAUTH_SCOPE = [
 ];
 
 const HTTP_REDIRECT = 301;
-const SIGN_IN_SUCCESS_URL =
-  'https://developers.google.com/gemini-code-assist/auth_success_gemini';
-const SIGN_IN_FAILURE_URL =
-  'https://developers.google.com/gemini-code-assist/auth_failure_gemini';
+const SIGN_IN_SUCCESS_URL = 'https://developers.google.com/gemini-code-assist/auth_success_gemini';
+const SIGN_IN_FAILURE_URL = 'https://developers.google.com/gemini-code-assist/auth_failure_gemini';
 
 /**
  * An Authentication URL for updating the credentials of a Oauth2Client
@@ -88,16 +79,12 @@ function getUseEncryptedStorageFlag() {
   return process.env[FORCE_ENCRYPTED_FILE_ENV_VAR] === 'true';
 }
 
-async function initOauthClient(
-  authType: AuthType,
-  config: Config,
-): Promise<AuthClient> {
+async function initOauthClient(authType: AuthType, config: Config): Promise<AuthClient> {
   const credentials = await fetchCachedCredentials();
 
   if (
     credentials &&
-    (credentials as { type?: string }).type ===
-      'external_account_authorized_user'
+    (credentials as { type?: string }).type === 'external_account_authorized_user'
   ) {
     const auth = new GoogleAuth({
       scopes: OAUTH_SCOPE,
@@ -113,6 +100,14 @@ async function initOauthClient(
     }
   }
 
+  // Validate OAuth credentials are set
+  if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET) {
+    throw new Error(
+      'OAuth credentials not configured. Please set GEMINI_OAUTH_CLIENT_ID and GEMINI_OAUTH_CLIENT_SECRET environment variables. ' +
+        'See .env.example for details.'
+    );
+  }
+
   const client = new OAuth2Client({
     clientId: OAUTH_CLIENT_ID,
     clientSecret: OAUTH_CLIENT_SECRET,
@@ -122,10 +117,7 @@ async function initOauthClient(
   });
   const useEncryptedStorage = getUseEncryptedStorageFlag();
 
-  if (
-    process.env['GOOGLE_GENAI_USE_GCA'] &&
-    process.env['GOOGLE_CLOUD_ACCESS_TOKEN']
-  ) {
+  if (process.env['GOOGLE_GENAI_USE_GCA'] && process.env['GOOGLE_CLOUD_ACCESS_TOKEN']) {
     client.setCredentials({
       access_token: process.env['GOOGLE_CLOUD_ACCESS_TOKEN'],
     });
@@ -155,20 +147,14 @@ async function initOauthClient(
             await fetchAndCacheUserInfo(client);
           } catch (error) {
             // Non-fatal, continue with existing auth.
-            debugLogger.warn(
-              'Failed to fetch user info:',
-              getErrorMessage(error),
-            );
+            debugLogger.warn('Failed to fetch user info:', getErrorMessage(error));
           }
         }
         debugLogger.log('Loaded cached credentials.');
         return client;
       }
     } catch (error) {
-      debugLogger.debug(
-        `Cached credentials are not valid:`,
-        getErrorMessage(error),
-      );
+      debugLogger.debug(`Cached credentials are not valid:`, getErrorMessage(error));
     }
   }
 
@@ -178,7 +164,7 @@ async function initOauthClient(
   if (authType === AuthType.COMPUTE_ADC) {
     try {
       debugLogger.log(
-        'Attempting to authenticate via metadata server application default credentials.',
+        'Attempting to authenticate via metadata server application default credentials.'
       );
 
       const computeClient = new Compute({
@@ -193,8 +179,8 @@ async function initOauthClient(
     } catch (e) {
       throw new Error(
         `Could not authenticate using metadata server application default credentials. Please select a different authentication method or ensure you are in a properly configured environment. Error: ${getErrorMessage(
-          e,
-        )}`,
+          e
+        )}`
       );
     }
   }
@@ -216,7 +202,7 @@ async function initOauthClient(
         if (!success) {
           writeToStderr(
             '\nFailed to authenticate with user code.' +
-              (i === maxRetries - 1 ? '' : ' Retrying...\n'),
+              (i === maxRetries - 1 ? '' : ' Retrying...\n')
           );
         }
       }
@@ -230,9 +216,7 @@ async function initOauthClient(
 
     if (!success) {
       writeToStderr('Failed to authenticate with user code.\n');
-      throw new FatalAuthenticationError(
-        'Failed to authenticate with user code.',
-      );
+      throw new FatalAuthenticationError('Failed to authenticate with user code.');
     }
   } else {
     const webLogin = await authWithWeb(client);
@@ -269,9 +253,7 @@ async function initOauthClient(
           `Failed to open browser with error: ${getErrorMessage(err)}\n` +
           `Please try running again with NO_BROWSER=true set.`,
       });
-      throw new FatalAuthenticationError(
-        `Failed to open browser: ${getErrorMessage(err)}`,
-      );
+      throw new FatalAuthenticationError(`Failed to open browser: ${getErrorMessage(err)}`);
     }
     coreEvents.emit(CoreEvent.UserFeedback, {
       severity: 'info',
@@ -285,8 +267,8 @@ async function initOauthClient(
         reject(
           new FatalAuthenticationError(
             'Authentication timed out after 5 minutes. The browser tab may have gotten stuck in a loading state. ' +
-              'Please try again or use NO_BROWSER=true for manual authentication.',
-          ),
+              'Please try again or use NO_BROWSER=true for manual authentication.'
+          )
         );
       }, authTimeout);
     });
@@ -302,10 +284,7 @@ async function initOauthClient(
   return client;
 }
 
-export async function getOauthClient(
-  authType: AuthType,
-  config: Config,
-): Promise<AuthClient> {
+export async function getOauthClient(authType: AuthType, config: Config): Promise<AuthClient> {
   if (!oauthClientPromises.has(authType)) {
     oauthClientPromises.set(authType, initOauthClient(authType, config));
   }
@@ -326,9 +305,7 @@ async function authWithUserCode(client: OAuth2Client): Promise<boolean> {
       state,
     });
     writeToStdout(
-      'Please visit the following URL to authorize the application:\n\n' +
-        authUrl +
-        '\n\n',
+      'Please visit the following URL to authorize the application:\n\n' + authUrl + '\n\n'
     );
 
     const code = await new Promise<string>((resolve, _) => {
@@ -359,15 +336,10 @@ async function authWithUserCode(client: OAuth2Client): Promise<boolean> {
       client.setCredentials(tokens);
     } catch (error) {
       writeToStderr(
-        'Failed to authenticate with authorization code:' +
-          getErrorMessage(error) +
-          '\n',
+        'Failed to authenticate with authorization code:' + getErrorMessage(error) + '\n'
       );
 
-      debugLogger.error(
-        'Failed to authenticate with authorization code:',
-        getErrorMessage(error),
-      );
+      debugLogger.error('Failed to authenticate with authorization code:', getErrorMessage(error));
       return false;
     }
     return true;
@@ -375,13 +347,8 @@ async function authWithUserCode(client: OAuth2Client): Promise<boolean> {
     if (err instanceof FatalCancellationError) {
       throw err;
     }
-    writeToStderr(
-      'Failed to authenticate with user code:' + getErrorMessage(err) + '\n',
-    );
-    debugLogger.error(
-      'Failed to authenticate with user code:',
-      getErrorMessage(err),
-    );
+    writeToStderr('Failed to authenticate with user code:' + getErrorMessage(err) + '\n');
+    debugLogger.error('Failed to authenticate with user code:', getErrorMessage(err));
     return false;
   }
 }
@@ -411,8 +378,8 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
           res.end();
           reject(
             new FatalAuthenticationError(
-              'OAuth callback not received. Unexpected request: ' + req.url,
-            ),
+              'OAuth callback not received. Unexpected request: ' + req.url
+            )
           );
         }
         // acquire the code from the querystring, and close the web server.
@@ -422,20 +389,17 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
           res.end();
 
           const errorCode = qs.get('error');
-          const errorDescription =
-            qs.get('error_description') || 'No additional details provided';
+          const errorDescription = qs.get('error_description') || 'No additional details provided';
           reject(
-            new FatalAuthenticationError(
-              `Google OAuth error: ${errorCode}. ${errorDescription}`,
-            ),
+            new FatalAuthenticationError(`Google OAuth error: ${errorCode}. ${errorDescription}`)
           );
         } else if (qs.get('state') !== state) {
           res.end('State mismatch. Possible CSRF attack');
 
           reject(
             new FatalAuthenticationError(
-              'OAuth state mismatch. Possible CSRF attack or browser session issue.',
-            ),
+              'OAuth state mismatch. Possible CSRF attack or browser session issue.'
+            )
           );
         } else if (qs.get('code')) {
           try {
@@ -451,7 +415,7 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
             } catch (error) {
               debugLogger.warn(
                 'Failed to retrieve Google Account ID during authentication:',
-                getErrorMessage(error),
+                getErrorMessage(error)
               );
               // Don't fail the auth flow if Google Account ID retrieval fails
             }
@@ -464,15 +428,15 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
             res.end();
             reject(
               new FatalAuthenticationError(
-                `Failed to exchange authorization code for tokens: ${getErrorMessage(error)}`,
-              ),
+                `Failed to exchange authorization code for tokens: ${getErrorMessage(error)}`
+              )
             );
           }
         } else {
           reject(
             new FatalAuthenticationError(
-              'No authorization code received from Google OAuth. Please try authenticating again.',
-            ),
+              'No authorization code received from Google OAuth. Please try authenticating again.'
+            )
           );
         }
       } catch (e) {
@@ -482,8 +446,8 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
         } else {
           reject(
             new FatalAuthenticationError(
-              `Unexpected error during OAuth authentication: ${getErrorMessage(e)}`,
-            ),
+              `Unexpected error during OAuth authentication: ${getErrorMessage(e)}`
+            )
           );
         }
       } finally {
@@ -496,11 +460,7 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
     });
 
     server.on('error', (err) => {
-      reject(
-        new FatalAuthenticationError(
-          `OAuth callback server error: ${getErrorMessage(err)}`,
-        ),
-      );
+      reject(new FatalAuthenticationError(`OAuth callback server error: ${getErrorMessage(err)}`));
     });
   });
 
@@ -518,9 +478,7 @@ export function getAvailablePort(): Promise<number> {
       if (portStr) {
         port = parseInt(portStr, 10);
         if (isNaN(port) || port <= 0 || port > 65535) {
-          return reject(
-            new Error(`Invalid value for OAUTH_CALLBACK_PORT: "${portStr}"`),
-          );
+          return reject(new Error(`Invalid value for OAUTH_CALLBACK_PORT: "${portStr}"`));
         }
         return resolve(port);
       }
@@ -541,9 +499,7 @@ export function getAvailablePort(): Promise<number> {
   });
 }
 
-async function fetchCachedCredentials(): Promise<
-  Credentials | JWTInput | null
-> {
+async function fetchCachedCredentials(): Promise<Credentials | JWTInput | null> {
   const useEncryptedStorage = getUseEncryptedStorageFlag();
   if (useEncryptedStorage) {
     return await OAuthCredentialStorage.loadCredentials();
@@ -560,10 +516,7 @@ async function fetchCachedCredentials(): Promise<
       return JSON.parse(keyFileString);
     } catch (error) {
       // Log specific error for debugging, but continue trying other paths
-      debugLogger.debug(
-        `Failed to load credentials from ${keyFile}:`,
-        getErrorMessage(error),
-      );
+      debugLogger.debug(`Failed to load credentials from ${keyFile}:`, getErrorMessage(error));
     }
   }
 
@@ -611,21 +564,14 @@ async function fetchAndCacheUserInfo(client: OAuth2Client): Promise<void> {
       return;
     }
 
-    const response = await fetch(
-      'https://www.googleapis.com/oauth2/v2/userinfo',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     if (!response.ok) {
-      debugLogger.log(
-        'Failed to fetch user info:',
-        response.status,
-        response.statusText,
-      );
+      debugLogger.log('Failed to fetch user info:', response.status, response.statusText);
       return;
     }
 
