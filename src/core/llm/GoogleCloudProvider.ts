@@ -267,6 +267,72 @@ export class GoogleCloudProvider implements IModelProvider {
   }
 
   /**
+   * Log request details in debug mode.
+   */
+  private logRequestDetails(url: string): void {
+    if (!process.env.DEBUG && !process.env.ZULU_PILOT_DEBUG) {
+      return;
+    }
+
+    console.error(`[DEBUG] Request URL: ${this.axiosInstance.defaults.baseURL}${url}`);
+    console.error(
+      `[DEBUG] Model: ${this.model}, Region: ${this.region}, Endpoint: ${this.endpoint}`
+    );
+  }
+
+  /**
+   * Create request headers with authorization token.
+   */
+  private createRequestHeaders(token: string): Record<string, string> {
+    return {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  /**
+   * Process stream chunks and yield tokens.
+   */
+  private async *processStream(
+    stream: AsyncIterable<unknown>
+  ): AsyncGenerator<string, void, unknown> {
+    let buffer = '';
+    let hasData = false;
+    let firstChunk = true;
+
+    for await (const chunk of stream) {
+      const chunkStr = String(chunk);
+      hasData = true;
+
+      // Check first chunk for errors
+      if (firstChunk) {
+        firstChunk = false;
+        this.checkFirstChunkForErrors(chunkStr);
+      }
+
+      // Process chunk and yield tokens
+      const result = this.processChunk(chunkStr, buffer);
+      buffer = result.newBuffer;
+
+      for (const token of result.tokens) {
+        yield token;
+      }
+
+      if (result.done) {
+        return;
+      }
+    }
+
+    // Validate we received data
+    if (!hasData || buffer.length === 0) {
+      throw new ConnectionError(
+        `No response data received. Model "${this.model}" may not be available in region "${this.region}"`,
+        'googleCloud'
+      );
+    }
+  }
+
+  /**
    * Stream response from Google Cloud AI Platform.
    */
   async *streamResponse(
@@ -278,58 +344,15 @@ export class GoogleCloudProvider implements IModelProvider {
 
     try {
       const token = await this.getAccessToken();
-
-      // Log request details in debug mode
-      if (process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
-        console.error(`[DEBUG] Request URL: ${this.axiosInstance.defaults.baseURL}${url}`);
-        console.error(
-          `[DEBUG] Model: ${this.model}, Region: ${this.region}, Endpoint: ${this.endpoint}`
-        );
-      }
+      this.logRequestDetails(url);
 
       const response = await this.axiosInstance.post(url, requestBody, {
         responseType: 'stream',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: this.createRequestHeaders(token),
       });
 
-      let buffer = '';
-      let hasData = false;
-      let firstChunk = true;
-
       try {
-        for await (const chunk of response.data) {
-          const chunkStr = chunk.toString();
-          hasData = true;
-
-          // Check first chunk for errors
-          if (firstChunk) {
-            firstChunk = false;
-            this.checkFirstChunkForErrors(chunkStr);
-          }
-
-          // Process chunk and yield tokens
-          const result = this.processChunk(chunkStr, buffer);
-          buffer = result.newBuffer;
-
-          for (const token of result.tokens) {
-            yield token;
-          }
-
-          if (result.done) {
-            return;
-          }
-        }
-
-        // Validate we received data
-        if (!hasData || buffer.length === 0) {
-          throw new ConnectionError(
-            `No response data received. Model "${this.model}" may not be available in region "${this.region}"`,
-            'googleCloud'
-          );
-        }
+        yield* this.processStream(response.data);
       } catch (streamError) {
         // If it's already a ConnectionError, re-throw
         if (streamError instanceof ConnectionError) {
