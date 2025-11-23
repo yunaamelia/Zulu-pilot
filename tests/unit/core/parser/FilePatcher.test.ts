@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { FilePatcher } from '../../../../src/core/parser/FilePatcher.js';
-import { createCodeChange } from '../../../../src/core/parser/CodeChange.js';
-import { ValidationError } from '../../../../src/utils/errors.js';
+import { FilePatcher } from '../../../../packages/core/src/parser/FilePatcher.js';
+import { createCodeChangeProposal, createCodeChange } from '../../../../packages/core/src/parser/CodeChangeProposal.js';
+import { ValidationError } from '../../../../packages/core/src/utils/errors.js';
 
 describe('FilePatcher', () => {
   let patcher: FilePatcher;

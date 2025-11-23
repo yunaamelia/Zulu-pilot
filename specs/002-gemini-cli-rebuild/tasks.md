@@ -382,23 +382,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 7
 
-- [ ] T152 [P] [US7] Write unit tests for CodeChangeProposal entity in tests/unit/core/parser/CodeChangeProposal.test.ts
-- [ ] T153 [P] [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts
-- [ ] T154 [P] [US7] Write integration test for code change workflow in tests/integration/cli/code-change.test.ts
-- [ ] T155 [P] [US7] Write E2E test for code change approval workflow in tests/e2e/full-workflows/code-change.test.ts
+- [x] T152 [P] [US7] Write unit tests for CodeChangeProposal entity in tests/unit/core/parser/CodeChangeProposal.test.ts
+- [x] T153 [P] [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts
+- [x] T154 [P] [US7] Write integration test for code change workflow in tests/integration/cli/code-change.test.ts
+- [x] T155 [P] [US7] Write E2E test for code change approval workflow in tests/e2e/full-workflows/code-change.test.ts
 
 ### Implementation for User Story 7
 
-- [ ] T156 [P] [US7] Port CodeChangeProposal interface from current Zulu Pilot to packages/core/src/parser/CodeChangeProposal.ts
-- [ ] T157 [P] [US7] Port CodeChangeParser from current Zulu Pilot to packages/core/src/parser/CodeChangeParser.ts
-- [ ] T158 [P] [US7] Port FilePatcher from current Zulu Pilot to packages/core/src/parser/FilePatcher.ts
-- [ ] T159 [US7] Verify Gemini CLI code editing tools work with custom adapter in packages/core/src/tools/CodeEditTool.ts
-- [ ] T160 [US7] Implement diff display in CLI in packages/cli/src/ui/DiffDisplay.ts
-- [ ] T161 [US7] Implement approval/rejection workflow in packages/cli/src/commands/chat.ts
-- [ ] T162 [US7] Implement backup creation before file modification in packages/core/src/parser/FilePatcher.ts
-- [ ] T163 [US7] Implement syntax validation before applying changes in packages/core/src/parser/FilePatcher.ts
-- [ ] T164 [US7] Write unit tests for CodeChangeParser in tests/unit/core/parser/CodeChangeParser.test.ts (90%+ coverage)
-- [ ] T165 [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts (90%+ coverage)
+- [x] T156 [P] [US7] Port CodeChangeProposal interface from current Zulu Pilot to packages/core/src/parser/CodeChangeProposal.ts
+- [x] T157 [P] [US7] Port CodeChangeParser from current Zulu Pilot to packages/core/src/parser/CodeChangeParser.ts
+- [x] T158 [P] [US7] Port FilePatcher from current Zulu Pilot to packages/core/src/parser/FilePatcher.ts
+- [x] T159 [US7] Verify Gemini CLI code editing tools work with custom adapter in packages/core/src/tools/CodeEditTool.ts
+- [x] T160 [US7] Implement diff display in CLI in packages/cli/src/ui/DiffDisplay.ts
+- [x] T161 [US7] Implement approval/rejection workflow in packages/cli/src/commands/chat.ts
+- [x] T162 [US7] Implement backup creation before file modification in packages/core/src/parser/FilePatcher.ts
+- [x] T163 [US7] Implement syntax validation before applying changes in packages/core/src/parser/FilePatcher.ts
+- [x] T164 [US7] Write unit tests for CodeChangeParser in tests/unit/core/parser/CodeChangeParser.test.ts (90%+ coverage)
+- [x] T165 [US7] Write unit tests for FilePatcher in tests/unit/core/parser/FilePatcher.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 7 complete - code change proposal and approval workflow working
 
