@@ -261,10 +261,10 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 - [x] T105 [US4] Implement provider list functionality in packages/cli/src/commands/provider.ts
 - [x] T106 [US4] Implement provider set functionality in packages/cli/src/commands/provider.ts
 - [x] T107 [US4] Implement provider config functionality in packages/cli/src/commands/provider.ts
-- [ ] T108 [US4] Implement provider switching in interactive chat in packages/cli/src/commands/chat.ts
-- [ ] T109 [US4] Ensure context persists across provider switches in packages/core/src/conversation/ConversationManager.ts
-- [ ] T110 [US4] Write unit tests for ProviderCommand in tests/unit/cli/commands/provider.test.ts (90%+ coverage)
-- [ ] T111 [US4] Write integration tests for all providers in tests/integration/providers/all-providers.test.ts
+- [x] T108 [US4] Implement provider switching in interactive chat in packages/cli/src/commands/chat.ts
+- [x] T109 [US4] Ensure context persists across provider switches in packages/core/src/conversation/ConversationManager.ts
+- [x] T110 [US4] Write unit tests for ProviderCommand in tests/unit/cli/commands/provider.test.ts (90%+ coverage)
+- [x] T111 [US4] Write integration tests for all providers in tests/integration/providers/all-providers.test.ts
 
 **Checkpoint**: User Story 4 complete - multi-provider support working with easy switching
 

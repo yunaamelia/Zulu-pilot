@@ -181,4 +181,13 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
   getContextManager(): ContextManager | undefined {
     return this.contextManager;
   }
+
+  /**
+   * Get MultiProviderRouter instance
+   * 
+   * @returns Router instance
+   */
+  getRouter(): MultiProviderRouter {
+    return this.router;
+  }
 }
