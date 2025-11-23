@@ -224,7 +224,6 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
       const defaultProvider = this.config.defaultProvider;
 
       const provider = this.router.getProviderForModel(params.model, defaultProvider);
-      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
 
       const response = await provider.generateResponse(prompt, context);
 
@@ -256,7 +255,6 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
       const defaultProvider = this.config.defaultProvider;
 
       const provider = this.router.getProviderForModel(params.model, defaultProvider);
-      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
 
       let accumulatedText = '';
 
