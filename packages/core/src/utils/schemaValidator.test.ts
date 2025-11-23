@@ -24,9 +24,7 @@ describe('SchemaValidator', () => {
         },
       },
     };
-    expect(SchemaValidator.validate(schema, null)).toBe(
-      'Value of params must be an object',
-    );
+    expect(SchemaValidator.validate(schema, null)).toBe('Value of params must be an object');
   });
 
   it('rejects params that are not objects', () => {
@@ -39,7 +37,7 @@ describe('SchemaValidator', () => {
       },
     };
     expect(SchemaValidator.validate(schema, 'not an object')).toBe(
-      'Value of params must be an object',
+      'Value of params must be an object'
     );
   });
 

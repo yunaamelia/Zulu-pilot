@@ -69,12 +69,10 @@ export class ModelConfigService {
   private resolveAlias(
     aliasName: string,
     aliases: Record<string, ModelConfigAlias>,
-    visited = new Set<string>(),
+    visited = new Set<string>()
   ): ModelConfigAlias {
     if (visited.has(aliasName)) {
-      throw new Error(
-        `Circular alias dependency: ${[...visited, aliasName].join(' -> ')}`,
-      );
+      throw new Error(`Circular alias dependency: ${[...visited, aliasName].join(' -> ')}`);
     }
     visited.add(aliasName);
 
@@ -94,7 +92,7 @@ export class ModelConfigService {
         model: alias.modelConfig.model ?? baseAlias.modelConfig.model,
         generateContentConfig: this.deepMerge(
           baseAlias.modelConfig.generateContentConfig,
-          alias.modelConfig.generateContentConfig,
+          alias.modelConfig.generateContentConfig
         ),
       },
     };
@@ -120,7 +118,7 @@ export class ModelConfigService {
       baseModel = resolvedAlias.modelConfig.model; // This can now be undefined
       resolvedConfig = this.deepMerge(
         resolvedConfig,
-        resolvedAlias.modelConfig.generateContentConfig,
+        resolvedAlias.modelConfig.generateContentConfig
       );
     }
 
@@ -185,10 +183,7 @@ export class ModelConfigService {
         baseModel = match.modelConfig.model;
       }
       if (match.modelConfig.generateContentConfig) {
-        resolvedConfig = this.deepMerge(
-          resolvedConfig,
-          match.modelConfig.generateContentConfig,
-        );
+        resolvedConfig = this.deepMerge(resolvedConfig, match.modelConfig.generateContentConfig);
       }
     }
 
@@ -203,7 +198,7 @@ export class ModelConfigService {
 
     if (!resolved.model) {
       throw new Error(
-        `Could not resolve a model name for alias "${context.model}". Please ensure the alias chain or a matching override specifies a model.`,
+        `Could not resolve a model name for alias "${context.model}". Please ensure the alias chain or a matching override specifies a model.`
       );
     }
 
@@ -219,11 +214,11 @@ export class ModelConfigService {
 
   private deepMerge(
     config1: GenerateContentConfig | undefined,
-    config2: GenerateContentConfig | undefined,
+    config2: GenerateContentConfig | undefined
   ): Record<string, unknown> {
     return this.genericDeepMerge(
       config1 as Record<string, unknown> | undefined,
-      config2 as Record<string, unknown> | undefined,
+      config2 as Record<string, unknown> | undefined
     );
   }
 
@@ -247,7 +242,7 @@ export class ModelConfigService {
         if (this.isObject(accValue) && this.isObject(objValue)) {
           acc[key] = this.deepMerge(
             accValue as Record<string, unknown>,
-            objValue as Record<string, unknown>,
+            objValue as Record<string, unknown>
           );
         } else {
           acc[key] = objValue;

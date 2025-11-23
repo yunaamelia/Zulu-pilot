@@ -84,15 +84,12 @@ const SearchReplaceEditSchema = {
   required: ['search', 'replace', 'explanation'],
 };
 
-const editCorrectionWithInstructionCache = new LruCache<
-  string,
-  SearchReplaceEdit
->(MAX_CACHE_SIZE);
+const editCorrectionWithInstructionCache = new LruCache<string, SearchReplaceEdit>(MAX_CACHE_SIZE);
 
 async function generateJsonWithTimeout<T>(
   client: BaseLlmClient,
   params: Parameters<BaseLlmClient['generateJson']>[0],
-  timeoutMs: number,
+  timeoutMs: number
 ): Promise<T | null> {
   try {
     // Create a signal that aborts automatically after the specified timeout.
@@ -134,26 +131,18 @@ export async function FixLLMEditWithInstruction(
   error: string,
   current_content: string,
   baseLlmClient: BaseLlmClient,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<SearchReplaceEdit | null> {
   let promptId = promptIdContext.getStore();
   if (!promptId) {
     promptId = `llm-fixer-fallback-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     debugLogger.warn(
-      `Could not find promptId in context. This is unexpected. Using a fallback ID: ${promptId}`,
+      `Could not find promptId in context. This is unexpected. Using a fallback ID: ${promptId}`
     );
   }
 
   const cacheKey = createHash('sha256')
-    .update(
-      JSON.stringify([
-        current_content,
-        old_string,
-        new_string,
-        instruction,
-        error,
-      ]),
-    )
+    .update(JSON.stringify([current_content, old_string, new_string, instruction, error]))
     .digest('hex');
   const cachedResult = editCorrectionWithInstructionCache.get(cacheKey);
   if (cachedResult) {
@@ -183,7 +172,7 @@ export async function FixLLMEditWithInstruction(
       promptId,
       maxAttempts: 1,
     },
-    GENERATE_JSON_TIMEOUT_MS,
+    GENERATE_JSON_TIMEOUT_MS
   );
 
   if (result) {

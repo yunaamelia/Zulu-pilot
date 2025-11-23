@@ -18,13 +18,7 @@ describe('CodeAssistServer', () => {
 
   it('should be able to be constructed', () => {
     const auth = new OAuth2Client();
-    const server = new CodeAssistServer(
-      auth,
-      'test-project',
-      {},
-      'test-session',
-      UserTierId.FREE,
-    );
+    const server = new CodeAssistServer(auth, 'test-project', {}, 'test-session', UserTierId.FREE);
     expect(server).toBeInstanceOf(CodeAssistServer);
   });
 
@@ -36,7 +30,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       { headers: { 'x-custom-header': 'test-value' } },
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockResponseData = {
       response: {
@@ -60,7 +54,7 @@ describe('CodeAssistServer', () => {
         model: 'test-model',
         contents: [{ role: 'user', parts: [{ text: 'request' }] }],
       },
-      'user-prompt-id',
+      'user-prompt-id'
     );
 
     expect(mockRequest).toHaveBeenCalledWith({
@@ -79,9 +73,7 @@ describe('CodeAssistServer', () => {
     expect(requestBody.user_prompt_id).toBe('user-prompt-id');
     expect(requestBody.project).toBe('test-project');
 
-    expect(response.candidates?.[0]?.content?.parts?.[0]?.text).toBe(
-      'response',
-    );
+    expect(response.candidates?.[0]?.content?.parts?.[0]?.text).toBe('response');
   });
 
   describe('getMethodUrl', () => {
@@ -100,9 +92,7 @@ describe('CodeAssistServer', () => {
     it('should construct the default URL correctly', () => {
       const server = new CodeAssistServer({} as never);
       const url = server.getMethodUrl('testMethod');
-      expect(url).toBe(
-        'https://cloudcode-pa.googleapis.com/v1internal:testMethod',
-      );
+      expect(url).toBe('https://cloudcode-pa.googleapis.com/v1internal:testMethod');
     });
 
     it('should use the CODE_ASSIST_ENDPOINT environment variable if set', () => {
@@ -121,7 +111,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
 
     // Create a mock readable stream
@@ -144,7 +134,7 @@ describe('CodeAssistServer', () => {
         model: 'test-model',
         contents: [{ role: 'user', parts: [{ text: 'request' }] }],
       },
-      'user-prompt-id',
+      'user-prompt-id'
     );
 
     // Push SSE data to the stream
@@ -211,7 +201,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockResponse = {
       name: 'operations/123',
@@ -225,10 +215,7 @@ describe('CodeAssistServer', () => {
       metadata: {},
     });
 
-    expect(server.requestPost).toHaveBeenCalledWith(
-      'onboardUser',
-      expect.any(Object),
-    );
+    expect(server.requestPost).toHaveBeenCalledWith('onboardUser', expect.any(Object));
     expect(response.name).toBe('operations/123');
   });
 
@@ -239,7 +226,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockResponse = {
       currentTier: {
@@ -257,10 +244,7 @@ describe('CodeAssistServer', () => {
       metadata: {},
     });
 
-    expect(server.requestPost).toHaveBeenCalledWith(
-      'loadCodeAssist',
-      expect.any(Object),
-    );
+    expect(server.requestPost).toHaveBeenCalledWith('loadCodeAssist', expect.any(Object));
     expect(response).toEqual(mockResponse);
   });
 
@@ -271,7 +255,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockResponse = {
       totalTokens: 100,
@@ -292,13 +276,13 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     await expect(
       server.embedContent({
         model: 'test-model',
         contents: [{ role: 'user', parts: [{ text: 'request' }] }],
-      }),
+      })
     ).rejects.toThrow();
   });
 
@@ -309,7 +293,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockVpcScError = {
       response: {
@@ -330,10 +314,7 @@ describe('CodeAssistServer', () => {
       metadata: {},
     });
 
-    expect(server.requestPost).toHaveBeenCalledWith(
-      'loadCodeAssist',
-      expect.any(Object),
-    );
+    expect(server.requestPost).toHaveBeenCalledWith('loadCodeAssist', expect.any(Object));
     expect(response).toEqual({
       currentTier: { id: UserTierId.STANDARD },
     });
@@ -346,13 +327,10 @@ describe('CodeAssistServer', () => {
     vi.spyOn(server, 'requestPost').mockRejectedValue(genericError);
 
     await expect(server.loadCodeAssist({ metadata: {} })).rejects.toThrow(
-      'Something else went wrong',
+      'Something else went wrong'
     );
 
-    expect(server.requestPost).toHaveBeenCalledWith(
-      'loadCodeAssist',
-      expect.any(Object),
-    );
+    expect(server.requestPost).toHaveBeenCalledWith('loadCodeAssist', expect.any(Object));
   });
 
   it('should call the listExperiments endpoint with metadata', async () => {
@@ -362,7 +340,7 @@ describe('CodeAssistServer', () => {
       'test-project',
       {},
       'test-session',
-      UserTierId.FREE,
+      UserTierId.FREE
     );
     const mockResponse = {
       experiments: [],

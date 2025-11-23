@@ -22,12 +22,8 @@ describe('safeLiteralReplace', () => {
   });
 
   it("does not interpret replacement patterns like $&, $', $` and $1", () => {
-    expect(safeLiteralReplace('hello', 'hello', '$&-replacement')).toBe(
-      '$&-replacement',
-    );
-    expect(safeLiteralReplace('mid', 'mid', 'new$`content')).toBe(
-      'new$`content',
-    );
+    expect(safeLiteralReplace('hello', 'hello', '$&-replacement')).toBe('$&-replacement');
+    expect(safeLiteralReplace('mid', 'mid', 'new$`content')).toBe('new$`content');
     expect(safeLiteralReplace('test', 'test', '$1$2value')).toBe('$1$2value');
   });
 
@@ -49,11 +45,7 @@ describe('safeLiteralReplace', () => {
 
   it('handles complex malicious patterns from PR #7871', () => {
     const original = 'The price is PRICE.';
-    const result = safeLiteralReplace(
-      original,
-      'PRICE',
-      "$& Wow, that's a lot! $'",
-    );
+    const result = safeLiteralReplace(original, 'PRICE', "$& Wow, that's a lot! $'");
     expect(result).toBe("The price is $& Wow, that's a lot! $'.");
   });
 

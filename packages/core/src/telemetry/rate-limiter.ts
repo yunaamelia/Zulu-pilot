@@ -54,10 +54,7 @@ export class RateLimiter {
   /**
    * Get time until next allowed recording for a metric
    */
-  getTimeUntilNextAllowed(
-    metricKey: string,
-    isHighPriority: boolean = false,
-  ): number {
+  getTimeUntilNextAllowed(metricKey: string, isHighPriority: boolean = false): number {
     const now = Date.now();
     const lastRecordTime = this.lastRecordTimes.get(metricKey) || 0;
     const interval = isHighPriority
@@ -91,8 +88,7 @@ export class RateLimiter {
     const oldest = Math.min(...recordTimes);
     const newest = Math.max(...recordTimes);
     const totalSpan = newest - oldest;
-    const averageInterval =
-      recordTimes.length > 1 ? totalSpan / (recordTimes.length - 1) : 0;
+    const averageInterval = recordTimes.length > 1 ? totalSpan / (recordTimes.length - 1) : 0;
 
     return {
       totalMetrics: recordTimes.length,

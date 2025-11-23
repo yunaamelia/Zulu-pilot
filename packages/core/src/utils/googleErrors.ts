@@ -153,21 +153,16 @@ export function parseGoogleApiError(error: unknown): GoogleApiError | null {
     return null;
   }
 
-  let currentError: ErrorShape | undefined =
-    fromGaxiosError(errorObj) ?? fromApiError(errorObj);
+  let currentError: ErrorShape | undefined = fromGaxiosError(errorObj) ?? fromApiError(errorObj);
 
   let depth = 0;
   const maxDepth = 10;
   // Handle cases where the actual error object is stringified inside the message
   // by drilling down until we find an error that doesn't have a stringified message.
-  while (
-    currentError &&
-    typeof currentError.message === 'string' &&
-    depth < maxDepth
-  ) {
+  while (currentError && typeof currentError.message === 'string' && depth < maxDepth) {
     try {
       const parsedMessage = JSON.parse(
-        currentError.message.replace(/\u00A0/g, '').replace(/\n/g, ' '),
+        currentError.message.replace(/\u00A0/g, '').replace(/\n/g, ' ')
       );
       if (parsedMessage.error) {
         currentError = parsedMessage.error;
@@ -195,9 +190,7 @@ export function parseGoogleApiError(error: unknown): GoogleApiError | null {
     for (const detail of errorDetails) {
       if (detail && typeof detail === 'object') {
         const detailObj = detail as Record<string, unknown>;
-        const typeKey = Object.keys(detailObj).find(
-          (key) => key.trim() === '@type',
-        );
+        const typeKey = Object.keys(detailObj).find((key) => key.trim() === '@type');
         if (typeKey) {
           if (typeKey !== '@type') {
             detailObj['@type'] = detailObj[typeKey];

@@ -37,9 +37,7 @@ interface JsonSchemaProperty {
  * @throws An `Error` if an unsupported input type is encountered, ensuring
  * configuration errors are caught early.
  */
-export function convertInputConfigToJsonSchema(
-  inputConfig: InputConfig,
-): JsonSchemaObject {
+export function convertInputConfigToJsonSchema(inputConfig: InputConfig): JsonSchemaObject {
   const properties: Record<string, JsonSchemaProperty> = {};
   const required: string[] = [];
 
@@ -70,7 +68,7 @@ export function convertInputConfigToJsonSchema(
         const exhaustiveCheck: never = definition.type;
         throw new Error(
           `Unsupported input type '${exhaustiveCheck}' for parameter '${name}'. ` +
-            'Supported types: string, number, integer, boolean, string[], number[]',
+            'Supported types: string, number, integer, boolean, string[], number[]'
         );
       }
     }

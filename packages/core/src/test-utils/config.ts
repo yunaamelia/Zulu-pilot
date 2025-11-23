@@ -28,7 +28,7 @@ export const DEFAULT_CONFIG_PARAMETERS: ConfigParameters = {
 export function makeFakeConfig(
   config: Partial<ConfigParameters> = {
     ...DEFAULT_CONFIG_PARAMETERS,
-  },
+  }
 ): Config {
   return new Config({
     ...DEFAULT_CONFIG_PARAMETERS,

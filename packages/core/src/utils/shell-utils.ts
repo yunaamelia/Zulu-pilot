@@ -9,11 +9,7 @@ import type { Config } from '../config/config.js';
 import os from 'node:os';
 import { quote } from 'shell-quote';
 import { doesToolInvocationMatch } from './tool-utils.js';
-import {
-  spawn,
-  spawnSync,
-  type SpawnOptionsWithoutStdio,
-} from 'node:child_process';
+import { spawn, spawnSync, type SpawnOptionsWithoutStdio } from 'node:child_process';
 import type { Node } from 'web-tree-sitter';
 import { Language, Parser } from 'web-tree-sitter';
 import { loadWasmBinary } from './fileUtils.js';
@@ -71,14 +67,14 @@ async function loadBashLanguage(): Promise<void> {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore resolved by esbuild-plugin-wasm during bundling
           import('web-tree-sitter/tree-sitter.wasm?binary'),
-        'web-tree-sitter/tree-sitter.wasm',
+        'web-tree-sitter/tree-sitter.wasm'
       ),
       loadWasmBinary(
         () =>
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore resolved by esbuild-plugin-wasm during bundling
           import('tree-sitter-bash/tree-sitter-bash.wasm?binary'),
-        'tree-sitter-bash/tree-sitter-bash.wasm',
+        'tree-sitter-bash/tree-sitter-bash.wasm'
       ),
     ]);
 
@@ -153,7 +149,7 @@ foreach ($commandAst in $commandAsts) {
   commands = $commandObjects
 } | ConvertTo-Json -Compress
 `,
-  'utf16le',
+  'utf16le'
 ).toString('base64');
 
 function createParser(): Parser | null {
@@ -224,10 +220,7 @@ function extractNameFromNode(node: Node): string | null {
   }
 }
 
-function collectCommandDetails(
-  root: Node,
-  source: string,
-): ParsedCommandDetail[] {
+function collectCommandDetails(root: Node, source: string): ParsedCommandDetail[] {
   const stack: Node[] = [root];
   const details: ParsedCommandDetail[] = [];
 
@@ -270,10 +263,7 @@ function hasPromptCommandTransform(root: Node): boolean {
         const operatorNode = current.child(i);
         const transformNode = current.child(i + 1);
 
-        if (
-          operatorNode?.text === '@' &&
-          transformNode?.text?.toLowerCase() === 'p'
-        ) {
+        if (operatorNode?.text === '@' && transformNode?.text?.toLowerCase() === 'p') {
           return true;
         }
       }
@@ -311,15 +301,13 @@ function parseBashCommandDetails(command: string): CommandParseResult | null {
   return {
     details,
     hasError:
-      tree.rootNode.hasError ||
-      details.length === 0 ||
-      hasPromptCommandTransform(tree.rootNode),
+      tree.rootNode.hasError || details.length === 0 || hasPromptCommandTransform(tree.rootNode),
   };
 }
 
 function parsePowerShellCommandDetails(
   command: string,
-  executable: string,
+  executable: string
 ): CommandParseResult | null {
   const trimmed = command.trim();
   if (!trimmed) {
@@ -332,20 +320,14 @@ function parsePowerShellCommandDetails(
   try {
     const result = spawnSync(
       executable,
-      [
-        '-NoLogo',
-        '-NoProfile',
-        '-NonInteractive',
-        '-EncodedCommand',
-        POWERSHELL_PARSER_SCRIPT,
-      ],
+      ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', POWERSHELL_PARSER_SCRIPT],
       {
         env: {
           ...process.env,
           [POWERSHELL_COMMAND_ENV]: command,
         },
         encoding: 'utf-8',
-      },
+      }
     );
 
     if (result.error || result.status !== 0) {
@@ -378,10 +360,7 @@ function parsePowerShellCommandDetails(
         }
 
         const name = normalizeCommandName(commandDetail.name);
-        const text =
-          typeof commandDetail.text === 'string'
-            ? commandDetail.text.trim()
-            : command;
+        const text = typeof commandDetail.text === 'string' ? commandDetail.text.trim() : command;
 
         return {
           name,
@@ -426,10 +405,7 @@ export function getShellConfiguration(): ShellConfiguration {
     const comSpec = process.env['ComSpec'];
     if (comSpec) {
       const executable = comSpec.toLowerCase();
-      if (
-        executable.endsWith('powershell.exe') ||
-        executable.endsWith('pwsh.exe')
-      ) {
+      if (executable.endsWith('powershell.exe') || executable.endsWith('pwsh.exe')) {
         return {
           executable: comSpec,
           argsPrefix: ['-NoProfile', '-Command'],
@@ -579,7 +555,7 @@ export function stripShellWrapper(command: string): string {
 export function checkCommandPermissions(
   command: string,
   config: Config,
-  sessionAllowlist?: Set<string>,
+  sessionAllowlist?: Set<string>
 ): {
   allAllowed: boolean;
   disallowedCommands: string[];
@@ -606,9 +582,7 @@ export function checkCommandPermissions(
 
   // 1. Blocklist Check (Highest Priority)
   const excludeTools = config.getExcludeTools() || new Set([]);
-  const isWildcardBlocked = SHELL_TOOL_NAMES.some((name) =>
-    excludeTools.has(name),
-  );
+  const isWildcardBlocked = SHELL_TOOL_NAMES.some((name) => excludeTools.has(name));
 
   if (isWildcardBlocked) {
     return {
@@ -621,11 +595,7 @@ export function checkCommandPermissions(
 
   for (const cmd of commandsToValidate) {
     invocation.params['command'] = cmd;
-    if (
-      doesToolInvocationMatch('run_shell_command', invocation, [
-        ...excludeTools,
-      ])
-    ) {
+    if (doesToolInvocationMatch('run_shell_command', invocation, [...excludeTools])) {
       return {
         allAllowed: false,
         disallowedCommands: [cmd],
@@ -636,9 +606,7 @@ export function checkCommandPermissions(
   }
 
   const coreTools = config.getCoreTools() || [];
-  const isWildcardAllowed = SHELL_TOOL_NAMES.some((name) =>
-    coreTools.includes(name),
-  );
+  const isWildcardAllowed = SHELL_TOOL_NAMES.some((name) => coreTools.includes(name));
 
   // If there's a global wildcard, all commands are allowed at this point
   // because they have already passed the blocklist check.
@@ -652,25 +620,17 @@ export function checkCommandPermissions(
     // "DEFAULT DENY" MODE: A session allowlist is provided.
     // All commands must be in either the session or global allowlist.
     const normalizedSessionAllowlist = new Set(
-      [...sessionAllowlist].flatMap((cmd) =>
-        SHELL_TOOL_NAMES.map((name) => `${name}(${cmd})`),
-      ),
+      [...sessionAllowlist].flatMap((cmd) => SHELL_TOOL_NAMES.map((name) => `${name}(${cmd})`))
     );
 
     for (const cmd of commandsToValidate) {
       invocation.params['command'] = cmd;
-      const isSessionAllowed = doesToolInvocationMatch(
-        'run_shell_command',
-        invocation,
-        [...normalizedSessionAllowlist],
-      );
+      const isSessionAllowed = doesToolInvocationMatch('run_shell_command', invocation, [
+        ...normalizedSessionAllowlist,
+      ]);
       if (isSessionAllowed) continue;
 
-      const isGloballyAllowed = doesToolInvocationMatch(
-        'run_shell_command',
-        invocation,
-        coreTools,
-      );
+      const isGloballyAllowed = doesToolInvocationMatch('run_shell_command', invocation, coreTools);
       if (isGloballyAllowed) continue;
 
       disallowedCommands.push(cmd);
@@ -689,9 +649,8 @@ export function checkCommandPermissions(
   } else {
     // "DEFAULT ALLOW" MODE: No session allowlist.
     const hasSpecificAllowedCommands =
-      coreTools.filter((tool) =>
-        SHELL_TOOL_NAMES.some((name) => tool.startsWith(`${name}(`)),
-      ).length > 0;
+      coreTools.filter((tool) => SHELL_TOOL_NAMES.some((name) => tool.startsWith(`${name}(`)))
+        .length > 0;
 
     if (hasSpecificAllowedCommands) {
       for (const cmd of commandsToValidate) {
@@ -699,7 +658,7 @@ export function checkCommandPermissions(
         const isGloballyAllowed = doesToolInvocationMatch(
           'run_shell_command',
           invocation,
-          coreTools,
+          coreTools
         );
         if (!isGloballyAllowed) {
           disallowedCommands.push(cmd);
@@ -738,7 +697,7 @@ export function checkCommandPermissions(
 export const spawnAsync = (
   command: string,
   args: string[],
-  options?: SpawnOptionsWithoutStdio,
+  options?: SpawnOptionsWithoutStdio
 ): Promise<{ stdout: string; stderr: string }> =>
   new Promise((resolve, reject) => {
     const child = spawn(command, args, options);
@@ -768,7 +727,7 @@ export const spawnAsync = (
 
 export function isCommandAllowed(
   command: string,
-  config: Config,
+  config: Config
 ): { allowed: boolean; reason?: string } {
   // By not providing a sessionAllowlist, we invoke "default allow" behavior.
   const { allAllowed, blockReason } = checkCommandPermissions(command, config);
@@ -790,17 +749,15 @@ export function isCommandAllowed(
  */
 export function isShellInvocationAllowlisted(
   invocation: AnyToolInvocation,
-  allowedPatterns: string[],
+  allowedPatterns: string[]
 ): boolean {
   if (!allowedPatterns.length) {
     return false;
   }
 
-  const hasShellWildcard = allowedPatterns.some((pattern) =>
-    SHELL_TOOL_NAMES.includes(pattern),
-  );
+  const hasShellWildcard = allowedPatterns.some((pattern) => SHELL_TOOL_NAMES.includes(pattern));
   const hasShellSpecificPattern = allowedPatterns.some((pattern) =>
-    SHELL_TOOL_NAMES.some((name) => pattern.startsWith(`${name}(`)),
+    SHELL_TOOL_NAMES.some((name) => pattern.startsWith(`${name}(`))
   );
 
   if (!hasShellWildcard && !hasShellSpecificPattern) {
@@ -845,7 +802,7 @@ export function isShellInvocationAllowlisted(
     doesToolInvocationMatch(
       SHELL_TOOL_NAMES[0],
       { params: { command: commandSegment } } as AnyToolInvocation,
-      allowedPatterns,
-    ),
+      allowedPatterns
+    )
   );
 }

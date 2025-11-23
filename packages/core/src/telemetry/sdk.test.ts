@@ -14,11 +14,7 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 import { OTLPLogExporter as OTLPLogExporterHttp } from '@opentelemetry/exporter-logs-otlp-http';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import {
-  GcpTraceExporter,
-  GcpLogExporter,
-  GcpMetricExporter,
-} from './gcp-exporters.js';
+import { GcpTraceExporter, GcpLogExporter, GcpMetricExporter } from './gcp-exporters.js';
 import { TelemetryTarget } from './index.js';
 
 import * as os from 'node:os';
@@ -75,9 +71,7 @@ describe('Telemetry SDK', () => {
   it('should use HTTP exporters when protocol is http', () => {
     vi.spyOn(mockConfig, 'getTelemetryEnabled').mockReturnValue(true);
     vi.spyOn(mockConfig, 'getTelemetryOtlpProtocol').mockReturnValue('http');
-    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue(
-      'http://localhost:4318',
-    );
+    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('http://localhost:4318');
 
     initializeTelemetry(mockConfig);
 
@@ -94,30 +88,24 @@ describe('Telemetry SDK', () => {
   });
 
   it('should parse gRPC endpoint correctly', () => {
-    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue(
-      'https://my-collector.com',
-    );
+    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('https://my-collector.com');
     initializeTelemetry(mockConfig);
     expect(OTLPTraceExporter).toHaveBeenCalledWith(
-      expect.objectContaining({ url: 'https://my-collector.com' }),
+      expect.objectContaining({ url: 'https://my-collector.com' })
     );
   });
 
   it('should parse HTTP endpoint correctly', () => {
     vi.spyOn(mockConfig, 'getTelemetryOtlpProtocol').mockReturnValue('http');
-    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue(
-      'https://my-collector.com',
-    );
+    vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('https://my-collector.com');
     initializeTelemetry(mockConfig);
     expect(OTLPTraceExporterHttp).toHaveBeenCalledWith(
-      expect.objectContaining({ url: 'https://my-collector.com/' }),
+      expect.objectContaining({ url: 'https://my-collector.com/' })
     );
   });
 
   it('should use direct GCP exporters when target is gcp, project ID is set, and useCollector is false', () => {
-    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(
-      TelemetryTarget.GCP,
-    );
+    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(TelemetryTarget.GCP);
     vi.spyOn(mockConfig, 'getTelemetryUseCollector').mockReturnValue(false);
     vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('');
 
@@ -141,9 +129,7 @@ describe('Telemetry SDK', () => {
   });
 
   it('should use OTLP exporters when target is gcp but useCollector is true', () => {
-    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(
-      TelemetryTarget.GCP,
-    );
+    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(TelemetryTarget.GCP);
     vi.spyOn(mockConfig, 'getTelemetryUseCollector').mockReturnValue(true);
 
     initializeTelemetry(mockConfig);
@@ -163,9 +149,7 @@ describe('Telemetry SDK', () => {
   });
 
   it('should not use GCP exporters when project ID environment variable is not set', () => {
-    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(
-      TelemetryTarget.GCP,
-    );
+    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(TelemetryTarget.GCP);
     vi.spyOn(mockConfig, 'getTelemetryUseCollector').mockReturnValue(false);
     vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('');
 
@@ -192,9 +176,7 @@ describe('Telemetry SDK', () => {
   });
 
   it('should use GOOGLE_CLOUD_PROJECT as fallback when OTLP_GOOGLE_CLOUD_PROJECT is not set', () => {
-    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(
-      TelemetryTarget.GCP,
-    );
+    vi.spyOn(mockConfig, 'getTelemetryTarget').mockReturnValue(TelemetryTarget.GCP);
     vi.spyOn(mockConfig, 'getTelemetryUseCollector').mockReturnValue(false);
     vi.spyOn(mockConfig, 'getTelemetryOtlpEndpoint').mockReturnValue('');
 
@@ -223,9 +205,7 @@ describe('Telemetry SDK', () => {
   });
 
   it('should not use OTLP exporters when telemetryOutfile is set', () => {
-    vi.spyOn(mockConfig, 'getTelemetryOutfile').mockReturnValue(
-      path.join(os.tmpdir(), 'test.log'),
-    );
+    vi.spyOn(mockConfig, 'getTelemetryOutfile').mockReturnValue(path.join(os.tmpdir(), 'test.log'));
     initializeTelemetry(mockConfig);
 
     expect(OTLPTraceExporter).not.toHaveBeenCalled();

@@ -76,12 +76,10 @@ export abstract class HookTranslator {
   abstract toHookLLMRequest(sdkRequest: GenerateContentParameters): LLMRequest;
   abstract fromHookLLMRequest(
     hookRequest: LLMRequest,
-    baseRequest?: GenerateContentParameters,
+    baseRequest?: GenerateContentParameters
   ): GenerateContentParameters;
   abstract toHookLLMResponse(sdkResponse: GenerateContentResponse): LLMResponse;
-  abstract fromHookLLMResponse(
-    hookResponse: LLMResponse,
-  ): GenerateContentResponse;
+  abstract fromHookLLMResponse(hookResponse: LLMResponse): GenerateContentResponse;
   abstract toHookToolConfig(sdkToolConfig: ToolConfig): HookToolConfig;
   abstract fromHookToolConfig(hookToolConfig: HookToolConfig): ToolConfig;
 }
@@ -101,15 +99,8 @@ function hasTextProperty(value: unknown): value is { text: string } {
 /**
  * Type guard to check if content has role and parts properties
  */
-function isContentWithParts(
-  content: unknown,
-): content is { role: string; parts: unknown } {
-  return (
-    typeof content === 'object' &&
-    content !== null &&
-    'role' in content &&
-    'parts' in content
-  );
+function isContentWithParts(content: unknown): content is { role: string; parts: unknown } {
+  return typeof content === 'object' && content !== null && 'role' in content && 'parts' in content;
 }
 
 /**
@@ -181,9 +172,7 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
                 ? ('system' as const)
                 : ('user' as const);
 
-          const parts = Array.isArray(content.parts)
-            ? content.parts
-            : [content.parts];
+          const parts = Array.isArray(content.parts) ? content.parts : [content.parts];
 
           // Extract only text parts - intentionally filtering out non-text content
           const textContent = parts
@@ -222,17 +211,14 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
    */
   fromHookLLMRequest(
     hookRequest: LLMRequest,
-    baseRequest?: GenerateContentParameters,
+    baseRequest?: GenerateContentParameters
   ): GenerateContentParameters {
     // Convert hook messages back to SDK Content format
     const contents = hookRequest.messages.map((message) => ({
       role: message.role === 'model' ? 'model' : message.role,
       parts: [
         {
-          text:
-            typeof message.content === 'string'
-              ? message.content
-              : String(message.content),
+          text: typeof message.content === 'string' ? message.content : String(message.content),
         },
       ],
     }));
@@ -246,9 +232,7 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
 
     // Add generation config if it exists in the hook request
     if (hookRequest.config) {
-      const baseConfig = baseRequest
-        ? extractGenerationConfig(baseRequest)
-        : undefined;
+      const baseConfig = baseRequest ? extractGenerationConfig(baseRequest) : undefined;
 
       result.config = {
         ...baseConfig,
@@ -271,17 +255,14 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
       candidates: (sdkResponse.candidates || []).map((candidate) => {
         // Extract text parts from the candidate
         const textParts =
-          candidate.content?.parts
-            ?.filter(hasTextProperty)
-            .map((part) => part.text) || [];
+          candidate.content?.parts?.filter(hasTextProperty).map((part) => part.text) || [];
 
         return {
           content: {
             role: 'model' as const,
             parts: textParts,
           },
-          finishReason:
-            candidate.finishReason as LLMResponse['candidates'][0]['finishReason'],
+          finishReason: candidate.finishReason as LLMResponse['candidates'][0]['finishReason'],
           index: candidate.index,
           safetyRatings: candidate.safetyRatings?.map((rating) => ({
             category: String(rating.category || ''),
@@ -292,8 +273,7 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
       usageMetadata: sdkResponse.usageMetadata
         ? {
             promptTokenCount: sdkResponse.usageMetadata.promptTokenCount,
-            candidatesTokenCount:
-              sdkResponse.usageMetadata.candidatesTokenCount,
+            candidatesTokenCount: sdkResponse.usageMetadata.candidatesTokenCount,
             totalTokenCount: sdkResponse.usageMetadata.totalTokenCount,
           }
         : undefined,
@@ -330,8 +310,7 @@ export class HookTranslatorGenAIv1 extends HookTranslator {
   toHookToolConfig(sdkToolConfig: ToolConfig): HookToolConfig {
     return {
       mode: sdkToolConfig.functionCallingConfig?.mode as HookToolConfig['mode'],
-      allowedFunctionNames:
-        sdkToolConfig.functionCallingConfig?.allowedFunctionNames,
+      allowedFunctionNames: sdkToolConfig.functionCallingConfig?.allowedFunctionNames,
     };
   }
 

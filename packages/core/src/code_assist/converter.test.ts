@@ -6,21 +6,9 @@
 
 import { describe, it, expect } from 'vitest';
 import type { CaGenerateContentResponse } from './converter.js';
-import {
-  toGenerateContentRequest,
-  fromGenerateContentResponse,
-  toContents,
-} from './converter.js';
-import type {
-  ContentListUnion,
-  GenerateContentParameters,
-} from '@google/genai';
-import {
-  GenerateContentResponse,
-  FinishReason,
-  BlockedReason,
-  type Part,
-} from '@google/genai';
+import { toGenerateContentRequest, fromGenerateContentResponse, toContents } from './converter.js';
+import type { ContentListUnion, GenerateContentParameters } from '@google/genai';
+import { GenerateContentResponse, FinishReason, BlockedReason, type Part } from '@google/genai';
 
 describe('converter', () => {
   describe('toCodeAssistRequest', () => {
@@ -33,7 +21,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq).toEqual({
         model: 'gemini-pro',
@@ -62,7 +50,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         undefined,
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq).toEqual({
         model: 'gemini-pro',
@@ -91,7 +79,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'session-123',
+        'session-123'
       );
       expect(codeAssistReq).toEqual({
         model: 'gemini-pro',
@@ -120,7 +108,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq.request.contents).toEqual([
         { role: 'user', parts: [{ text: 'Hello' }] },
@@ -136,7 +124,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq.request.contents).toEqual([
         { role: 'user', parts: [{ text: 'Hello' }] },
@@ -156,7 +144,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq.request.systemInstruction).toEqual({
         role: 'user',
@@ -177,7 +165,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq.request.generationConfig).toEqual({
         temperature: 0.8,
@@ -208,7 +196,7 @@ describe('converter', () => {
         genaiReq,
         'my-prompt',
         'my-project',
-        'my-session',
+        'my-session'
       );
       expect(codeAssistReq.request.generationConfig).toEqual({
         temperature: 0.1,
@@ -265,12 +253,8 @@ describe('converter', () => {
         },
       };
       const genaiRes = fromGenerateContentResponse(codeAssistRes);
-      expect(genaiRes.promptFeedback).toEqual(
-        codeAssistRes.response.promptFeedback,
-      );
-      expect(genaiRes.usageMetadata).toEqual(
-        codeAssistRes.response.usageMetadata,
-      );
+      expect(genaiRes.promptFeedback).toEqual(codeAssistRes.response.promptFeedback);
+      expect(genaiRes.usageMetadata).toEqual(codeAssistRes.response.usageMetadata);
     });
 
     it('should handle automatic function calling history', () => {
@@ -296,7 +280,7 @@ describe('converter', () => {
       };
       const genaiRes = fromGenerateContentResponse(codeAssistRes);
       expect(genaiRes.automaticFunctionCallingHistory).toEqual(
-        codeAssistRes.response.automaticFunctionCallingHistory,
+        codeAssistRes.response.automaticFunctionCallingHistory
       );
     });
 
@@ -339,9 +323,7 @@ describe('converter', () => {
         role: 'user',
         parts: [{ text: 'hello' }],
       };
-      expect(toContents(content)).toEqual([
-        { role: 'user', parts: [{ text: 'hello' }] },
-      ]);
+      expect(toContents(content)).toEqual([{ role: 'user', parts: [{ text: 'hello' }] }]);
     });
 
     it('should handle array of Contents', () => {
@@ -357,9 +339,7 @@ describe('converter', () => {
 
     it('should handle Part', () => {
       const part: ContentListUnion = { text: 'a part' };
-      expect(toContents(part)).toEqual([
-        { role: 'user', parts: [{ text: 'a part' }] },
-      ]);
+      expect(toContents(part)).toEqual([{ role: 'user', parts: [{ text: 'a part' }] }]);
     });
 
     it('should handle array of Parts', () => {
@@ -372,9 +352,7 @@ describe('converter', () => {
 
     it('should handle string', () => {
       const str: ContentListUnion = 'a string';
-      expect(toContents(str)).toEqual([
-        { role: 'user', parts: [{ text: 'a string' }] },
-      ]);
+      expect(toContents(str)).toEqual([{ role: 'user', parts: [{ text: 'a string' }] }]);
     });
 
     it('should handle array of strings', () => {

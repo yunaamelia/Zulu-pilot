@@ -33,20 +33,8 @@ vi.mock('../utils/editor.js', () => ({
   openDiff: mockOpenDiff,
 }));
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-  type Mock,
-} from 'vitest';
-import {
-  SmartEditTool,
-  type EditToolParams,
-  calculateReplacement,
-} from './smart-edit.js';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
+import { SmartEditTool, type EditToolParams, calculateReplacement } from './smart-edit.js';
 import { type FileDiff, ToolConfirmationOutcome } from './tools.js';
 import { ToolErrorType } from './tool-error.js';
 import path from 'node:path';
@@ -131,40 +119,33 @@ describe('SmartEditTool', () => {
     });
 
     mockGenerateJson.mockReset();
-    mockGenerateJson.mockImplementation(
-      async (contents: Content[], schema: SchemaUnion) => {
-        const userContent = contents.find((c: Content) => c.role === 'user');
-        let promptText = '';
-        if (userContent && userContent.parts) {
-          promptText = userContent.parts
-            .filter((p: Part) => typeof (p as any).text === 'string')
-            .map((p: Part) => (p as any).text)
-            .join('\n');
-        }
-        const snippetMatch = promptText.match(
-          /Problematic target snippet:\n```\n([\s\S]*?)\n```/,
-        );
-        const problematicSnippet =
-          snippetMatch && snippetMatch[1] ? snippetMatch[1] : '';
+    mockGenerateJson.mockImplementation(async (contents: Content[], schema: SchemaUnion) => {
+      const userContent = contents.find((c: Content) => c.role === 'user');
+      let promptText = '';
+      if (userContent && userContent.parts) {
+        promptText = userContent.parts
+          .filter((p: Part) => typeof (p as any).text === 'string')
+          .map((p: Part) => (p as any).text)
+          .join('\n');
+      }
+      const snippetMatch = promptText.match(/Problematic target snippet:\n```\n([\s\S]*?)\n```/);
+      const problematicSnippet = snippetMatch && snippetMatch[1] ? snippetMatch[1] : '';
 
-        if (((schema as any).properties as any)?.corrected_target_snippet) {
-          return Promise.resolve({
-            corrected_target_snippet: problematicSnippet,
-          });
-        }
-        if (((schema as any).properties as any)?.corrected_new_string) {
-          const originalNewStringMatch = promptText.match(
-            /original_new_string \(what was intended to replace original_old_string\):\n```\n([\s\S]*?)\n```/,
-          );
-          const originalNewString =
-            originalNewStringMatch && originalNewStringMatch[1]
-              ? originalNewStringMatch[1]
-              : '';
-          return Promise.resolve({ corrected_new_string: originalNewString });
-        }
-        return Promise.resolve({});
-      },
-    );
+      if (((schema as any).properties as any)?.corrected_target_snippet) {
+        return Promise.resolve({
+          corrected_target_snippet: problematicSnippet,
+        });
+      }
+      if (((schema as any).properties as any)?.corrected_new_string) {
+        const originalNewStringMatch = promptText.match(
+          /original_new_string \(what was intended to replace original_old_string\):\n```\n([\s\S]*?)\n```/
+        );
+        const originalNewString =
+          originalNewStringMatch && originalNewStringMatch[1] ? originalNewStringMatch[1] : '';
+        return Promise.resolve({ corrected_new_string: originalNewString });
+      }
+      return Promise.resolve({});
+    });
 
     tool = new SmartEditTool(mockConfig);
   });
@@ -201,23 +182,20 @@ describe('SmartEditTool', () => {
         expected: 'hello world',
         occurrences: 0,
       },
-    ])(
-      'should $name',
-      async ({ content, old_string, new_string, expected, occurrences }) => {
-        const result = await calculateReplacement(mockConfig, {
-          params: {
-            file_path: 'test.txt',
-            instruction: 'test',
-            old_string,
-            new_string,
-          },
-          currentContent: content,
-          abortSignal,
-        });
-        expect(result.newContent).toBe(expected);
-        expect(result.occurrences).toBe(occurrences);
-      },
-    );
+    ])('should $name', async ({ content, old_string, new_string, expected, occurrences }) => {
+      const result = await calculateReplacement(mockConfig, {
+        params: {
+          file_path: 'test.txt',
+          instruction: 'test',
+          old_string,
+          new_string,
+        },
+        currentContent: content,
+        abortSignal,
+      });
+      expect(result.newContent).toBe(expected);
+      expect(result.occurrences).toBe(occurrences);
+    });
 
     it('should perform a regex-based replacement for flexible intra-line whitespace', async () => {
       // This case would fail with the previous exact and line-trimming flexible logic
@@ -235,8 +213,7 @@ describe('SmartEditTool', () => {
       });
 
       // The indentation from the original line should be preserved and applied to the new string.
-      const expectedContent =
-        '  const yourFunc = (a, b) => {\n    return a + b;\n  }';
+      const expectedContent = '  const yourFunc = (a, b) => {\n    return a + b;\n  }';
       expect(result.newContent).toBe(expectedContent);
       expect(result.occurrences).toBe(1);
     });
@@ -261,7 +238,7 @@ describe('SmartEditTool', () => {
         new_string: 'new',
       };
       expect(tool.validateToolParams(params)).toMatch(
-        /must be within one of the workspace directories/,
+        /must be within one of the workspace directories/
       );
     });
   });
@@ -284,9 +261,7 @@ describe('SmartEditTool', () => {
 
       const invocation = tool.build(params);
       const abortController = new AbortController();
-      const abortError = new Error(
-        'Abort requested during smart edit execution',
-      );
+      const abortError = new Error('Abort requested during smart edit execution');
 
       const calculateSpy = vi
         .spyOn(invocation as any, 'calculateEdit')
@@ -297,9 +272,7 @@ describe('SmartEditTool', () => {
           throw abortError;
         });
 
-      await expect(invocation.execute(abortController.signal)).rejects.toBe(
-        abortError,
-      );
+      await expect(invocation.execute(abortController.signal)).rejects.toBe(abortError);
 
       calculateSpy.mockRestore();
     });
@@ -337,9 +310,7 @@ describe('SmartEditTool', () => {
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
       expect(result.llmContent).toMatch(/0 occurrences found for old_string/);
-      expect(result.returnDisplay).toMatch(
-        /Failed to edit, could not find the string to replace./,
-      );
+      expect(result.returnDisplay).toMatch(/Failed to edit, could not find the string to replace./);
       expect(mockFixLLMEditWithInstruction).toHaveBeenCalled();
     });
 
@@ -424,12 +395,8 @@ describe('SmartEditTool', () => {
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
 
-      expect(result.error?.type).toBe(
-        ToolErrorType.EDIT_NO_CHANGE_LLM_JUDGEMENT,
-      );
-      expect(result.llmContent).toMatch(
-        /A secondary check by an LLM determined/,
-      );
+      expect(result.error?.type).toBe(ToolErrorType.EDIT_NO_CHANGE_LLM_JUDGEMENT);
+      expect(result.llmContent).toMatch(/A secondary check by an LLM determined/);
       expect(fs.readFileSync(filePath, 'utf8')).toBe(initialContent); // File is unchanged
     });
   });
@@ -444,14 +411,12 @@ describe('SmartEditTool', () => {
 
     it('should use refreshed file content for self-correction if file was modified externally', async () => {
       const initialContent = 'This is the original content.';
-      const externallyModifiedContent =
-        'This is the externally modified content.';
+      const externallyModifiedContent = 'This is the externally modified content.';
       fs.writeFileSync(filePath, initialContent, 'utf8');
 
       const params: EditToolParams = {
         file_path: filePath,
-        instruction:
-          'Replace "externally modified content" with "externally modified string"',
+        instruction: 'Replace "externally modified content" with "externally modified string"',
         old_string: 'externally modified content', // This will fail the first attempt, triggering self-correction.
         new_string: 'externally modified string',
       };
@@ -474,11 +439,11 @@ describe('SmartEditTool', () => {
         params.old_string,
         params.new_string,
         expect.stringContaining(
-          'However, the file has been modified by either the user or an external process',
+          'However, the file has been modified by either the user or an external process'
         ), // errorForLlmEditFixer
         externallyModifiedContent, // The new content for correction
         expect.any(Object), // baseLlmClient
-        expect.any(Object), // abortSignal
+        expect.any(Object) // abortSignal
       );
     });
   });
@@ -516,19 +481,16 @@ describe('SmartEditTool', () => {
         params: { old_string: 'one', new_string: 'new' },
         expectedError: ToolErrorType.EDIT_EXPECTED_OCCURRENCE_MISMATCH,
       },
-    ])(
-      'should return $name error',
-      async ({ setup, params, expectedError }) => {
-        setup(filePath);
-        const invocation = tool.build({
-          file_path: filePath,
-          instruction: 'test',
-          ...params,
-        });
-        const result = await invocation.execute(new AbortController().signal);
-        expect(result.error?.type).toBe(expectedError);
-      },
-    );
+    ])('should return $name error', async ({ setup, params, expectedError }) => {
+      setup(filePath);
+      const invocation = tool.build({
+        file_path: filePath,
+        instruction: 'test',
+        ...params,
+      });
+      const result = await invocation.execute(new AbortController().signal);
+      expect(result.error?.type).toBe(expectedError);
+    });
   });
 
   describe('expected_replacements', () => {
@@ -559,31 +521,25 @@ describe('SmartEditTool', () => {
         expected: undefined,
         shouldSucceed: false,
       },
-    ])(
-      'should $name',
-      async ({ content, expected, shouldSucceed, finalContent }) => {
-        fs.writeFileSync(filePath, content, 'utf8');
-        const params: EditToolParams = {
-          file_path: filePath,
-          instruction: 'Replace all foo with bar',
-          old_string: 'foo',
-          new_string: 'bar',
-          ...(expected !== undefined && { expected_replacements: expected }),
-        };
-        const invocation = tool.build(params);
-        const result = await invocation.execute(new AbortController().signal);
+    ])('should $name', async ({ content, expected, shouldSucceed, finalContent }) => {
+      fs.writeFileSync(filePath, content, 'utf8');
+      const params: EditToolParams = {
+        file_path: filePath,
+        instruction: 'Replace all foo with bar',
+        old_string: 'foo',
+        new_string: 'bar',
+        ...(expected !== undefined && { expected_replacements: expected }),
+      };
+      const invocation = tool.build(params);
+      const result = await invocation.execute(new AbortController().signal);
 
-        if (shouldSucceed) {
-          expect(result.error).toBeUndefined();
-          if (finalContent)
-            expect(fs.readFileSync(filePath, 'utf8')).toBe(finalContent);
-        } else {
-          expect(result.error?.type).toBe(
-            ToolErrorType.EDIT_EXPECTED_OCCURRENCE_MISMATCH,
-          );
-        }
-      },
-    );
+      if (shouldSucceed) {
+        expect(result.error).toBeUndefined();
+        if (finalContent) expect(fs.readFileSync(filePath, 'utf8')).toBe(finalContent);
+      } else {
+        expect(result.error?.type).toBe(ToolErrorType.EDIT_EXPECTED_OCCURRENCE_MISMATCH);
+      }
+    });
   });
 
   describe('IDE mode', () => {
@@ -619,9 +575,7 @@ describe('SmartEditTool', () => {
       });
 
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
 
       expect(ideClient.openDiff).toHaveBeenCalledWith(filePath, newContent);
 
@@ -646,9 +600,7 @@ describe('SmartEditTool', () => {
 
       const invocation = tool.build(params);
       const abortController = new AbortController();
-      const abortError = new Error(
-        'Abort requested during smart edit confirmation',
-      );
+      const abortError = new Error('Abort requested during smart edit confirmation');
 
       const calculateSpy = vi
         .spyOn(invocation as any, 'calculateEdit')
@@ -659,9 +611,9 @@ describe('SmartEditTool', () => {
           throw abortError;
         });
 
-      await expect(
-        invocation.shouldConfirmExecute(abortController.signal),
-      ).rejects.toBe(abortError);
+      await expect(invocation.shouldConfirmExecute(abortController.signal)).rejects.toBe(
+        abortError
+      );
 
       calculateSpy.mockRestore();
     });
@@ -683,20 +635,14 @@ describe('SmartEditTool', () => {
         const fileName = `test-file-${i}.txt`;
         const filePath = path.join(rootDir, fileName);
         const numLines = Math.floor(Math.random() * 6) + 5; // 5 to 10 lines
-        const lines = Array.from(
-          { length: numLines },
-          (_, j) => `File ${i}, Line ${j + 1}`,
-        );
+        const lines = Array.from({ length: numLines }, (_, j) => `File ${i}, Line ${j + 1}`);
         const content = lines.join('\n') + '\n';
 
         // Determine which lines to remove (2 or 3 lines)
         const numLinesToRemove = Math.floor(Math.random() * 2) + 2; // 2 or 3
         expectedLinesRemoved.push(numLinesToRemove);
         const startLineToRemove = 1; // Start removing from the second line
-        const linesToRemove = lines.slice(
-          startLineToRemove,
-          startLineToRemove + numLinesToRemove,
-        );
+        const linesToRemove = lines.slice(startLineToRemove, startLineToRemove + numLinesToRemove);
         const toRemove = linesToRemove.join('\n') + '\n';
 
         fs.writeFileSync(filePath, content, 'utf8');
@@ -725,9 +671,7 @@ describe('SmartEditTool', () => {
           'diffStat' in result.returnDisplay &&
           result.returnDisplay.diffStat
         ) {
-          actualLinesRemoved.push(
-            result.returnDisplay.diffStat?.model_removed_lines,
-          );
+          actualLinesRemoved.push(result.returnDisplay.diffStat?.model_removed_lines);
         } else if (result.error) {
           console.error(`Edit failed for ${file.path}:`, result.error);
         }
@@ -742,14 +686,8 @@ describe('SmartEditTool', () => {
       }
 
       // 4. Assert that the total number of removed lines matches the diffStat total
-      const totalExpectedRemoved = expectedLinesRemoved.reduce(
-        (sum, current) => sum + current,
-        0,
-      );
-      const totalActualRemoved = actualLinesRemoved.reduce(
-        (sum, current) => sum + current,
-        0,
-      );
+      const totalExpectedRemoved = expectedLinesRemoved.reduce((sum, current) => sum + current, 0);
+      const totalActualRemoved = actualLinesRemoved.reduce((sum, current) => sum + current, 0);
       expect(totalActualRemoved).toBe(totalExpectedRemoved);
     });
   });

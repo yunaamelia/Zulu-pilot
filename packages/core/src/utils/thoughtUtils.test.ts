@@ -44,8 +44,7 @@ describe('parseThought', () => {
     },
     {
       name: 'newlines within the subject and description',
-      rawText:
-        '**Multi-line\nSubject**\nHere is a description\nspread across lines.',
+      rawText: '**Multi-line\nSubject**\nHere is a description\nspread across lines.',
       expected: {
         subject: 'Multi-line\nSubject',
         description: 'Here is a description\nspread across lines.',

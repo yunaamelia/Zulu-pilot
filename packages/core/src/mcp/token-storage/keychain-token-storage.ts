@@ -11,24 +11,15 @@ import { coreEvents } from '../../utils/events.js';
 
 interface Keytar {
   getPassword(service: string, account: string): Promise<string | null>;
-  setPassword(
-    service: string,
-    account: string,
-    password: string,
-  ): Promise<void>;
+  setPassword(service: string, account: string, password: string): Promise<void>;
   deletePassword(service: string, account: string): Promise<boolean>;
-  findCredentials(
-    service: string,
-  ): Promise<Array<{ account: string; password: string }>>;
+  findCredentials(service: string): Promise<Array<{ account: string; password: string }>>;
 }
 
 const KEYCHAIN_TEST_PREFIX = '__keychain_test__';
 const SECRET_PREFIX = '__secret__';
 
-export class KeychainTokenStorage
-  extends BaseTokenStorage
-  implements SecretStorage
-{
+export class KeychainTokenStorage extends BaseTokenStorage implements SecretStorage {
   private keychainAvailable: boolean | null = null;
   private keytarModule: Keytar | null = null;
   private keytarLoadAttempted = false;
@@ -118,10 +109,7 @@ export class KeychainTokenStorage
     }
 
     const sanitizedName = this.sanitizeServerName(serverName);
-    const deleted = await keytar.deletePassword(
-      this.serviceName,
-      sanitizedName,
-    );
+    const deleted = await keytar.deletePassword(this.serviceName, sanitizedName);
 
     if (!deleted) {
       throw new Error(`No credentials found for ${serverName}`);
@@ -144,15 +132,11 @@ export class KeychainTokenStorage
         .filter(
           (cred) =>
             !cred.account.startsWith(KEYCHAIN_TEST_PREFIX) &&
-            !cred.account.startsWith(SECRET_PREFIX),
+            !cred.account.startsWith(SECRET_PREFIX)
         )
         .map((cred: { account: string }) => cred.account);
     } catch (error) {
-      coreEvents.emitFeedback(
-        'error',
-        'Failed to list servers from keychain',
-        error,
-      );
+      coreEvents.emitFeedback('error', 'Failed to list servers from keychain', error);
       return [];
     }
   }
@@ -169,12 +153,8 @@ export class KeychainTokenStorage
 
     const result = new Map<string, OAuthCredentials>();
     try {
-      const credentials = (
-        await keytar.findCredentials(this.serviceName)
-      ).filter(
-        (c) =>
-          !c.account.startsWith(KEYCHAIN_TEST_PREFIX) &&
-          !c.account.startsWith(SECRET_PREFIX),
+      const credentials = (await keytar.findCredentials(this.serviceName)).filter(
+        (c) => !c.account.startsWith(KEYCHAIN_TEST_PREFIX) && !c.account.startsWith(SECRET_PREFIX)
       );
 
       for (const cred of credentials) {
@@ -187,16 +167,12 @@ export class KeychainTokenStorage
           coreEvents.emitFeedback(
             'error',
             `Failed to parse credentials for ${cred.account}`,
-            error,
+            error
           );
         }
       }
     } catch (error) {
-      coreEvents.emitFeedback(
-        'error',
-        'Failed to get all credentials from keychain',
-        error,
-      );
+      coreEvents.emitFeedback('error', 'Failed to get all credentials from keychain', error);
     }
 
     return result;
@@ -212,9 +188,7 @@ export class KeychainTokenStorage
           .findCredentials(this.serviceName)
           .then((creds) => creds.map((c) => c.account))
           .catch((error: Error) => {
-            throw new Error(
-              `Failed to list servers for clearing: ${error.message}`,
-            );
+            throw new Error(`Failed to list servers for clearing: ${error.message}`);
           })
       : [];
     const errors: Error[] = [];
@@ -229,7 +203,7 @@ export class KeychainTokenStorage
 
     if (errors.length > 0) {
       throw new Error(
-        `Failed to clear some credentials: ${errors.map((e) => e.message).join(', ')}`,
+        `Failed to clear some credentials: ${errors.map((e) => e.message).join(', ')}`
       );
     }
   }
@@ -253,10 +227,7 @@ export class KeychainTokenStorage
 
       await keytar.setPassword(this.serviceName, testAccount, testPassword);
       const retrieved = await keytar.getPassword(this.serviceName, testAccount);
-      const deleted = await keytar.deletePassword(
-        this.serviceName,
-        testAccount,
-      );
+      const deleted = await keytar.deletePassword(this.serviceName, testAccount);
 
       const success = deleted && retrieved === testPassword;
       this.keychainAvailable = success;
@@ -301,10 +272,7 @@ export class KeychainTokenStorage
     if (!keytar) {
       throw new Error('Keytar module not available');
     }
-    const deleted = await keytar.deletePassword(
-      this.serviceName,
-      `${SECRET_PREFIX}${key}`,
-    );
+    const deleted = await keytar.deletePassword(this.serviceName, `${SECRET_PREFIX}${key}`);
     if (!deleted) {
       throw new Error(`No secret found for key: ${key}`);
     }

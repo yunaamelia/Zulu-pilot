@@ -4,17 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  ToolCallConfirmationDetails,
-  ToolInvocation,
-  ToolResult,
-} from './tools.js';
-import {
-  BaseDeclarativeTool,
-  BaseToolInvocation,
-  Kind,
-  ToolConfirmationOutcome,
-} from './tools.js';
+import type { ToolCallConfirmationDetails, ToolInvocation, ToolResult } from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind, ToolConfirmationOutcome } from './tools.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import { ToolErrorType } from './tool-error.js';
 import { getErrorMessage } from '../utils/errors.js';
@@ -23,10 +14,7 @@ import { ApprovalMode } from '../policy/types.js';
 import { getResponseText } from '../utils/partUtils.js';
 import { fetchWithTimeout, isPrivateIp } from '../utils/fetch.js';
 import { convert } from 'html-to-text';
-import {
-  logWebFetchFallbackAttempt,
-  WebFetchFallbackAttemptEvent,
-} from '../telemetry/index.js';
+import { logWebFetchFallbackAttempt, WebFetchFallbackAttemptEvent } from '../telemetry/index.js';
 import { WEB_FETCH_TOOL_NAME } from './tool-names.js';
 import { debugLogger } from '../utils/debugLogger.js';
 
@@ -58,7 +46,7 @@ export function parsePrompt(text: string): {
           validUrls.push(url.href);
         } else {
           errors.push(
-            `Unsupported protocol in URL: "${token}". Only http and https are supported.`,
+            `Unsupported protocol in URL: "${token}". Only http and https are supported.`
           );
         }
       } catch (_) {
@@ -102,16 +90,13 @@ export interface WebFetchToolParams {
   prompt: string;
 }
 
-class WebFetchToolInvocation extends BaseToolInvocation<
-  WebFetchToolParams,
-  ToolResult
-> {
+class WebFetchToolInvocation extends BaseToolInvocation<WebFetchToolParams, ToolResult> {
   constructor(
     private readonly config: Config,
     params: WebFetchToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
   }
@@ -123,16 +108,14 @@ class WebFetchToolInvocation extends BaseToolInvocation<
 
     // Convert GitHub blob URL to raw URL
     if (url.includes('github.com') && url.includes('/blob/')) {
-      url = url
-        .replace('github.com', 'raw.githubusercontent.com')
-        .replace('/blob/', '/');
+      url = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
     }
 
     try {
       const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS);
       if (!response.ok) {
         throw new Error(
-          `Request failed with status code ${response.status} ${response.statusText}`,
+          `Request failed with status code ${response.status} ${response.statusText}`
         );
       }
 
@@ -141,10 +124,7 @@ class WebFetchToolInvocation extends BaseToolInvocation<
       let textContent: string;
 
       // Only use html-to-text if content type is HTML, or if no content type is provided (assume HTML)
-      if (
-        contentType.toLowerCase().includes('text/html') ||
-        contentType === ''
-      ) {
+      if (contentType.toLowerCase().includes('text/html') || contentType === '') {
         textContent = convert(rawContent, {
           wordwrap: false,
           selectors: [
@@ -171,7 +151,7 @@ ${textContent}
       const result = await geminiClient.generateContent(
         { model: 'web-fetch-fallback' },
         [{ role: 'user', parts: [{ text: fallbackPrompt }] }],
-        signal,
+        signal
       );
       const resultText = getResponseText(result) || '';
       return {
@@ -201,7 +181,7 @@ ${textContent}
   }
 
   protected override async getConfirmationDetails(
-    _abortSignal: AbortSignal,
+    _abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     // Legacy confirmation flow (no message bus OR policy decision was ASK_USER)
     if (this.config.getApprovalMode() === ApprovalMode.AUTO_EDIT) {
@@ -213,9 +193,7 @@ ${textContent}
     const { validUrls } = parsePrompt(this.params.prompt);
     const urls = validUrls.map((url) => {
       if (url.includes('github.com') && url.includes('/blob/')) {
-        return url
-          .replace('github.com', 'raw.githubusercontent.com')
-          .replace('/blob/', '/');
+        return url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
       }
       return url;
     });
@@ -241,10 +219,7 @@ ${textContent}
     const isPrivate = isPrivateIp(url);
 
     if (isPrivate) {
-      logWebFetchFallbackAttempt(
-        this.config,
-        new WebFetchFallbackAttemptEvent('private_ip'),
-      );
+      logWebFetchFallbackAttempt(this.config, new WebFetchFallbackAttemptEvent('private_ip'));
       return this.executeFallback(signal);
     }
 
@@ -254,23 +229,18 @@ ${textContent}
       const response = await geminiClient.generateContent(
         { model: 'web-fetch' },
         [{ role: 'user', parts: [{ text: userPrompt }] }],
-        signal, // Pass signal
+        signal // Pass signal
       );
 
       debugLogger.debug(
-        `[WebFetchTool] Full response for prompt "${userPrompt.substring(
-          0,
-          50,
-        )}...":`,
-        JSON.stringify(response, null, 2),
+        `[WebFetchTool] Full response for prompt "${userPrompt.substring(0, 50)}...":`,
+        JSON.stringify(response, null, 2)
       );
 
       let responseText = getResponseText(response) || '';
       const urlContextMeta = response.candidates?.[0]?.urlContextMetadata;
       const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
-      const sources = groundingMetadata?.groundingChunks as
-        | GroundingChunkItem[]
-        | undefined;
+      const sources = groundingMetadata?.groundingChunks as GroundingChunkItem[] | undefined;
       const groundingSupports = groundingMetadata?.groundingSupports as
         | GroundingSupportItem[]
         | undefined;
@@ -278,13 +248,8 @@ ${textContent}
       // Error Handling
       let processingError = false;
 
-      if (
-        urlContextMeta?.urlMetadata &&
-        urlContextMeta.urlMetadata.length > 0
-      ) {
-        const allStatuses = urlContextMeta.urlMetadata.map(
-          (m) => m.urlRetrievalStatus,
-        );
+      if (urlContextMeta?.urlMetadata && urlContextMeta.urlMetadata.length > 0) {
+        const allStatuses = urlContextMeta.urlMetadata.map((m) => m.urlRetrievalStatus);
         if (allStatuses.every((s) => s !== 'URL_RETRIEVAL_STATUS_SUCCESS')) {
           processingError = true;
         }
@@ -293,20 +258,13 @@ ${textContent}
         processingError = true;
       }
 
-      if (
-        !processingError &&
-        !responseText.trim() &&
-        (!sources || sources.length === 0)
-      ) {
+      if (!processingError && !responseText.trim() && (!sources || sources.length === 0)) {
         // Successfully retrieved some URL (or no specific error from urlContextMeta), but no usable text or grounding data.
         processingError = true;
       }
 
       if (processingError) {
-        logWebFetchFallbackAttempt(
-          this.config,
-          new WebFetchFallbackAttemptEvent('primary_failed'),
-        );
+        logWebFetchFallbackAttempt(this.config, new WebFetchFallbackAttemptEvent('primary_failed'));
         return this.executeFallback(signal);
       }
 
@@ -352,7 +310,7 @@ ${sourceListFormatted.join('\n')}`;
 
       debugLogger.debug(
         `[WebFetchTool] Formatted tool response for prompt "${userPrompt}:\n\n":`,
-        llmContent,
+        llmContent
       );
 
       return {
@@ -362,7 +320,7 @@ ${sourceListFormatted.join('\n')}`;
     } catch (error: unknown) {
       const errorMessage = `Error processing web content for prompt "${userPrompt.substring(
         0,
-        50,
+        50
       )}...": ${getErrorMessage(error)}`;
       return {
         llmContent: `Error: ${errorMessage}`,
@@ -379,15 +337,12 @@ ${sourceListFormatted.join('\n')}`;
 /**
  * Implementation of the WebFetch tool logic
  */
-export class WebFetchTool extends BaseDeclarativeTool<
-  WebFetchToolParams,
-  ToolResult
-> {
+export class WebFetchTool extends BaseDeclarativeTool<WebFetchToolParams, ToolResult> {
   static readonly Name = WEB_FETCH_TOOL_NAME;
 
   constructor(
     private readonly config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       WebFetchTool.Name,
@@ -407,13 +362,11 @@ export class WebFetchTool extends BaseDeclarativeTool<
       },
       true, // isOutputMarkdown
       false, // canUpdateOutput
-      messageBus,
+      messageBus
     );
   }
 
-  protected override validateToolParamValues(
-    params: WebFetchToolParams,
-  ): string | null {
+  protected override validateToolParamValues(params: WebFetchToolParams): string | null {
     if (!params.prompt || params.prompt.trim() === '') {
       return "The 'prompt' parameter cannot be empty and must contain URL(s) and instructions.";
     }
@@ -435,14 +388,8 @@ export class WebFetchTool extends BaseDeclarativeTool<
     params: WebFetchToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<WebFetchToolParams, ToolResult> {
-    return new WebFetchToolInvocation(
-      this.config,
-      params,
-      messageBus,
-      _toolName,
-      _toolDisplayName,
-    );
+    return new WebFetchToolInvocation(this.config, params, messageBus, _toolName, _toolDisplayName);
   }
 }

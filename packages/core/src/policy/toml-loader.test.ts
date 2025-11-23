@@ -32,7 +32,7 @@ describe('policy-toml-loader', () => {
 
   async function runLoadPoliciesFromToml(
     tomlContent: string,
-    fileName = 'test.toml',
+    fileName = 'test.toml'
   ): Promise<PolicyLoadResult> {
     await fs.writeFile(path.join(tempDir, fileName), tomlContent);
     const getPolicyTier = (_dir: string) => 1;
@@ -70,12 +70,8 @@ priority = 100
       expect(result.rules).toHaveLength(2);
       expect(result.rules[0].toolName).toBe('run_shell_command');
       expect(result.rules[1].toolName).toBe('run_shell_command');
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git status"}'),
-      ).toBe(true);
-      expect(result.rules[1].argsPattern?.test('{"command":"git log"}')).toBe(
-        true,
-      );
+      expect(result.rules[0].argsPattern?.test('{"command":"git status"}')).toBe(true);
+      expect(result.rules[1].argsPattern?.test('{"command":"git log"}')).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -89,15 +85,9 @@ priority = 100
 `);
 
       expect(result.rules).toHaveLength(1);
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git status"}'),
-      ).toBe(true);
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git log --all"}'),
-      ).toBe(true);
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git branch"}'),
-      ).toBe(false);
+      expect(result.rules[0].argsPattern?.test('{"command":"git status"}')).toBe(true);
+      expect(result.rules[0].argsPattern?.test('{"command":"git log --all"}')).toBe(true);
+      expect(result.rules[0].argsPattern?.test('{"command":"git branch"}')).toBe(false);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -110,11 +100,7 @@ priority = 100
 `);
 
       expect(result.rules).toHaveLength(3);
-      expect(result.rules.map((r) => r.toolName)).toEqual([
-        'glob',
-        'grep',
-        'read',
-      ]);
+      expect(result.rules.map((r) => r.toolName)).toEqual(['glob', 'grep', 'read']);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -236,12 +222,8 @@ priority = 100
 
       expect(result.rules).toHaveLength(1);
       // The regex should have escaped the * and .
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git log file.txt"}'),
-      ).toBe(false);
-      expect(
-        result.rules[0].argsPattern?.test('{"command":"git log *.txt"}'),
-      ).toBe(true);
+      expect(result.rules[0].argsPattern?.test('{"command":"git log file.txt"}')).toBe(false);
+      expect(result.rules[0].argsPattern?.test('{"command":"git log *.txt"}')).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
@@ -253,7 +235,7 @@ priority = 100
 toolName = "glob"
 decision = "allow"
 priority = 100
-`,
+`
       );
 
       await fs.writeFile(
@@ -263,15 +245,11 @@ priority = 100
 toolName = "grep"
 decision = "allow"
 priority = -1
-`,
+`
       );
 
       const getPolicyTier = (_dir: string) => 1;
-      const result = await loadPoliciesFromToml(
-        ApprovalMode.DEFAULT,
-        [tempDir],
-        getPolicyTier,
-      );
+      const result = await loadPoliciesFromToml(ApprovalMode.DEFAULT, [tempDir], getPolicyTier);
 
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0].toolName).toBe('glob');
@@ -439,11 +417,7 @@ priority = 100
       await fs.writeFile(filePath, 'content');
 
       const getPolicyTier = (_dir: string) => 1;
-      const result = await loadPoliciesFromToml(
-        ApprovalMode.DEFAULT,
-        [filePath],
-        getPolicyTier,
-      );
+      const result = await loadPoliciesFromToml(ApprovalMode.DEFAULT, [filePath], getPolicyTier);
 
       expect(result.errors).toHaveLength(1);
       const error = result.errors[0];

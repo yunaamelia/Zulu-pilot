@@ -56,7 +56,7 @@ describe('reportError', () => {
 
     // Verify the console log
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `${baseMessage} Full report available at: ${expectedReportPath}`,
+      `${baseMessage} Full report available at: ${expectedReportPath}`
     );
   });
 
@@ -76,7 +76,7 @@ describe('reportError', () => {
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `${baseMessage} Full report available at: ${expectedReportPath}`,
+      `${baseMessage} Full report available at: ${expectedReportPath}`
     );
   });
 
@@ -96,7 +96,7 @@ describe('reportError', () => {
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `${baseMessage} Full report available at: ${expectedReportPath}`,
+      `${baseMessage} Full report available at: ${expectedReportPath}`
     );
   });
 
@@ -111,11 +111,11 @@ describe('reportError', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       `${baseMessage} Additionally, failed to write detailed error report:`,
-      expect.any(Error), // The actual write error
+      expect.any(Error) // The actual write error
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Original error that triggered report generation:',
-      error,
+      error
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith('Original context:', context);
   });
@@ -126,9 +126,7 @@ describe('reportError', () => {
     const baseMessage = 'Failed operation with BigInt.';
     const context = { a: BigInt(1) }; // BigInt cannot be stringified by JSON.stringify
     const type = 'bigint-fail';
-    const stringifyError = new TypeError(
-      'Do not know how to serialize a BigInt',
-    );
+    const stringifyError = new TypeError('Do not know how to serialize a BigInt');
     const expectedMinimalReportPath = getExpectedReportPath(type);
 
     // Simulate JSON.stringify throwing an error for the full report
@@ -148,14 +146,14 @@ describe('reportError', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       `${baseMessage} Could not stringify report content (likely due to context):`,
-      stringifyError,
+      stringifyError
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Original error that triggered report generation:',
-      error,
+      error
     );
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Original context could not be stringified or included in report.',
+      'Original context could not be stringified or included in report.'
     );
 
     // Check that it writes a minimal report
@@ -166,7 +164,7 @@ describe('reportError', () => {
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `${baseMessage} Partial report (excluding context) available at: ${expectedMinimalReportPath}`,
+      `${baseMessage} Partial report (excluding context) available at: ${expectedMinimalReportPath}`
     );
   });
 
@@ -187,7 +185,7 @@ describe('reportError', () => {
     });
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      `${baseMessage} Full report available at: ${expectedReportPath}`,
+      `${baseMessage} Full report available at: ${expectedReportPath}`
     );
   });
 });

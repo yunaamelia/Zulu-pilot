@@ -19,7 +19,7 @@ function createHookExecutionResult(
   output?: HookOutput,
   success = true,
   duration = 100,
-  error?: Error,
+  error?: Error
 ): HookExecutionResult {
   return {
     success,
@@ -46,10 +46,7 @@ describe('HookAggregator', () => {
     it('should handle empty results', () => {
       const results: HookExecutionResult[] = [];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeTool);
 
       expect(aggregated.success).toBe(true);
       expect(aggregated.allOutputs).toHaveLength(0);
@@ -60,31 +57,18 @@ describe('HookAggregator', () => {
 
     it('should aggregate successful results', () => {
       const results: HookExecutionResult[] = [
-        createHookExecutionResult(
-          { decision: 'allow', reason: 'Hook 1 approved' },
-          true,
-          100,
-        ),
-        createHookExecutionResult(
-          { decision: 'allow', reason: 'Hook 2 approved' },
-          true,
-          150,
-        ),
+        createHookExecutionResult({ decision: 'allow', reason: 'Hook 1 approved' }, true, 100),
+        createHookExecutionResult({ decision: 'allow', reason: 'Hook 2 approved' }, true, 150),
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeTool);
 
       expect(aggregated.success).toBe(true);
       expect(aggregated.allOutputs).toHaveLength(2);
       expect(aggregated.errors).toHaveLength(0);
       expect(aggregated.totalDuration).toBe(250);
       expect(aggregated.finalOutput?.decision).toBe('allow');
-      expect(aggregated.finalOutput?.reason).toBe(
-        'Hook 1 approved\nHook 2 approved',
-      );
+      expect(aggregated.finalOutput?.reason).toBe('Hook 1 approved\nHook 2 approved');
     });
 
     it('should handle errors in results', () => {
@@ -113,10 +97,7 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeTool);
 
       expect(aggregated.success).toBe(false);
       expect(aggregated.allOutputs).toHaveLength(1);
@@ -151,16 +132,11 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeTool);
 
       expect(aggregated.success).toBe(true);
       expect(aggregated.finalOutput?.decision).toBe('block');
-      expect(aggregated.finalOutput?.reason).toBe(
-        'Hook 1 allowed\nHook 2 blocked',
-      );
+      expect(aggregated.finalOutput?.reason).toBe('Hook 1 allowed\nHook 2 blocked');
     });
 
     it('should handle continue=false with precedence', () => {
@@ -193,10 +169,7 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeTool);
 
       expect(aggregated.success).toBe(true);
       expect(aggregated.finalOutput?.continue).toBe(false);
@@ -247,10 +220,7 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeToolSelection,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeToolSelection);
 
       expect(aggregated.success).toBe(true);
       const output = aggregated.finalOutput as BeforeToolSelectionOutput;
@@ -301,20 +271,13 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeToolSelection,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeToolSelection);
 
       expect(aggregated.success).toBe(true);
       const output = aggregated.finalOutput as BeforeToolSelectionOutput;
       const toolConfig = output.hookSpecificOutput?.toolConfig;
       expect(toolConfig?.mode).toBe('ANY');
-      expect(toolConfig?.allowedFunctionNames).toEqual([
-        'tool1',
-        'tool2',
-        'tool3',
-      ]);
+      expect(toolConfig?.allowedFunctionNames).toEqual(['tool1', 'tool2', 'tool3']);
     });
 
     it('should merge tool configurations with AUTO mode when all are AUTO', () => {
@@ -359,10 +322,7 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeToolSelection,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeToolSelection);
 
       expect(aggregated.success).toBe(true);
       const output = aggregated.finalOutput as BeforeToolSelectionOutput;
@@ -411,10 +371,7 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.BeforeModel,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.BeforeModel);
 
       expect(aggregated.success).toBe(true);
       expect(aggregated.finalOutput?.decision).toBe('block'); // Later value wins
@@ -461,15 +418,12 @@ describe('HookAggregator', () => {
         },
       ];
 
-      const aggregated = aggregator.aggregateResults(
-        results,
-        HookEventName.AfterTool,
-      );
+      const aggregated = aggregator.aggregateResults(results, HookEventName.AfterTool);
 
       expect(aggregated.success).toBe(true);
-      expect(
-        aggregated.finalOutput?.hookSpecificOutput?.['additionalContext'],
-      ).toBe('Context from hook 1\nContext from hook 2');
+      expect(aggregated.finalOutput?.hookSpecificOutput?.['additionalContext']).toBe(
+        'Context from hook 1\nContext from hook 2'
+      );
     });
   });
 });

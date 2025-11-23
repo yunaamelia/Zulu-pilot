@@ -90,6 +90,43 @@ export class OpenAIProvider implements IModelProvider {
   }
 
   /**
+   * T133: Discover available models from OpenAI API
+   * Lists all models available to the API key
+   *
+   * @returns Promise resolving to array of available model names
+   * @throws {ConnectionError} When cannot connect to OpenAI
+   * @throws {InvalidApiKeyError} When API key is invalid
+   */
+  async listModels(): Promise<string[]> {
+    try {
+      const response = await this.axiosInstance.get('/models');
+
+      const models = response.data?.data ?? [];
+      return models
+        .map((model: { id: string }) => model.id)
+        .filter((id: string) => id && (id.startsWith('gpt-') || id.startsWith('o1-')))
+        .sort();
+    } catch (error) {
+      throw this.handleError(error as AxiosError);
+    }
+  }
+
+  /**
+   * T133: Check if a model is available
+   *
+   * @param modelName - Model name to check
+   * @returns Promise resolving to true if model is available
+   */
+  async hasModel(modelName: string): Promise<boolean> {
+    try {
+      const models = await this.listModels();
+      return models.includes(modelName);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Stream response from OpenAI.
    */
   async *streamResponse(

@@ -16,10 +16,7 @@ import {
   WRITE_FILE_TOOL_NAME,
 } from '../tools/tool-names.js';
 import { LruCache } from './LruCache.js';
-import {
-  isFunctionResponse,
-  isFunctionCall,
-} from '../utils/messageInspectors.js';
+import { isFunctionResponse, isFunctionCall } from '../utils/messageInspectors.js';
 import * as fs from 'node:fs';
 import { promptIdContext } from './promptIdContext.js';
 
@@ -38,9 +35,7 @@ function getPromptId(): string {
 const MAX_CACHE_SIZE = 50;
 
 // Cache for ensureCorrectEdit results
-const editCorrectionCache = new LruCache<string, CorrectedEditResult>(
-  MAX_CACHE_SIZE,
-);
+const editCorrectionCache = new LruCache<string, CorrectedEditResult>(MAX_CACHE_SIZE);
 
 // Cache for ensureCorrectFileContent results
 const fileContentCorrectionCache = new LruCache<string, string>(MAX_CACHE_SIZE);
@@ -86,10 +81,7 @@ function getTimestampFromFunctionId(fcnId: string): number {
  * @param client the geminiClient, so that we can get the history
  * @returns a DateTime (as a number) of when the last edit occurred, or -1 if no edit was found.
  */
-async function findLastEditTimestamp(
-  filePath: string,
-  client: GeminiClient,
-): Promise<number> {
+async function findLastEditTimestamp(filePath: string, client: GeminiClient): Promise<number> {
   const history = (await client.getHistory()) ?? [];
 
   // Tools that may reference the file path in their FunctionResponse `output`.
@@ -169,7 +161,7 @@ export async function ensureCorrectEdit(
   originalParams: EditToolParams, // This is the EditToolParams from edit.ts, without \'corrected\'
   geminiClient: GeminiClient,
   baseLlmClient: BaseLlmClient,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<CorrectedEditResult> {
   const cacheKey = `${currentContent}---${originalParams.old_string}---${originalParams.new_string}`;
   const cachedResult = editCorrectionCache.get(cacheKey);
@@ -179,8 +171,7 @@ export async function ensureCorrectEdit(
 
   let finalNewString = originalParams.new_string;
   const newStringPotentiallyEscaped =
-    unescapeStringForGeminiBug(originalParams.new_string) !==
-    originalParams.new_string;
+    unescapeStringForGeminiBug(originalParams.new_string) !== originalParams.new_string;
 
   const expectedReplacements = originalParams.expected_replacements ?? 1;
 
@@ -193,7 +184,7 @@ export async function ensureCorrectEdit(
         baseLlmClient,
         finalOldString,
         originalParams.new_string,
-        abortSignal,
+        abortSignal
       );
     }
   } else if (occurrences > expectedReplacements) {
@@ -228,9 +219,7 @@ export async function ensureCorrectEdit(
     return result;
   } else {
     // occurrences is 0 or some other unexpected state initially
-    const unescapedOldStringAttempt = unescapeStringForGeminiBug(
-      originalParams.old_string,
-    );
+    const unescapedOldStringAttempt = unescapeStringForGeminiBug(originalParams.old_string);
     occurrences = countOccurrences(currentContent, unescapedOldStringAttempt);
 
     if (occurrences === expectedReplacements) {
@@ -241,7 +230,7 @@ export async function ensureCorrectEdit(
           originalParams.old_string, // original old
           unescapedOldStringAttempt, // corrected old
           originalParams.new_string, // original new (which is potentially escaped)
-          abortSignal,
+          abortSignal
         );
       }
     } else if (occurrences === 0) {
@@ -249,10 +238,7 @@ export async function ensureCorrectEdit(
         // In order to keep from clobbering edits made outside our system,
         // let's check if there was a more recent edit to the file than what
         // our system has done
-        const lastEditedByUsTime = await findLastEditTimestamp(
-          filePath,
-          geminiClient,
-        );
+        const lastEditedByUsTime = await findLastEditTimestamp(filePath, geminiClient);
 
         // Add a 1-second buffer to account for timing inaccuracies. If the file
         // was modified more than a second after the last edit tool was run, we
@@ -277,12 +263,9 @@ export async function ensureCorrectEdit(
         baseLlmClient,
         currentContent,
         unescapedOldStringAttempt,
-        abortSignal,
+        abortSignal
       );
-      const llmOldOccurrences = countOccurrences(
-        currentContent,
-        llmCorrectedOldString,
-      );
+      const llmOldOccurrences = countOccurrences(currentContent, llmCorrectedOldString);
 
       if (llmOldOccurrences === expectedReplacements) {
         finalOldString = llmCorrectedOldString;
@@ -290,14 +273,14 @@ export async function ensureCorrectEdit(
 
         if (newStringPotentiallyEscaped) {
           const baseNewStringForLLMCorrection = unescapeStringForGeminiBug(
-            originalParams.new_string,
+            originalParams.new_string
           );
           finalNewString = await correctNewString(
             baseLlmClient,
             originalParams.old_string, // original old
             llmCorrectedOldString, // corrected old
             baseNewStringForLLMCorrection, // base new for correction
-            abortSignal,
+            abortSignal
           );
         }
       } else {
@@ -324,7 +307,7 @@ export async function ensureCorrectEdit(
     finalOldString,
     finalNewString,
     currentContent,
-    expectedReplacements,
+    expectedReplacements
   );
   finalOldString = targetString;
   finalNewString = pair;
@@ -345,25 +328,20 @@ export async function ensureCorrectEdit(
 export async function ensureCorrectFileContent(
   content: string,
   baseLlmClient: BaseLlmClient,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<string> {
   const cachedResult = fileContentCorrectionCache.get(content);
   if (cachedResult) {
     return cachedResult;
   }
 
-  const contentPotentiallyEscaped =
-    unescapeStringForGeminiBug(content) !== content;
+  const contentPotentiallyEscaped = unescapeStringForGeminiBug(content) !== content;
   if (!contentPotentiallyEscaped) {
     fileContentCorrectionCache.set(content, content);
     return content;
   }
 
-  const correctedContent = await correctStringEscaping(
-    content,
-    baseLlmClient,
-    abortSignal,
-  );
+  const correctedContent = await correctStringEscaping(content, baseLlmClient, abortSignal);
   fileContentCorrectionCache.set(content, correctedContent);
   return correctedContent;
 }
@@ -385,7 +363,7 @@ export async function correctOldStringMismatch(
   baseLlmClient: BaseLlmClient,
   fileContent: string,
   problematicSnippet: string,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<string> {
   const prompt = `
 Context: A process needs to find an exact literal, unique match for a specific text snippet within a file's content. The provided snippet failed to match exactly. This is most likely because it has been overly escaped.
@@ -434,10 +412,7 @@ Return ONLY the corrected target snippet in the specified JSON format with the k
       throw error;
     }
 
-    console.error(
-      'Error during LLM call for old string snippet correction:',
-      error,
-    );
+    console.error('Error during LLM call for old string snippet correction:', error);
 
     return problematicSnippet;
   }
@@ -464,7 +439,7 @@ export async function correctNewString(
   originalOldString: string,
   correctedOldString: string,
   originalNewString: string,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<string> {
   if (originalOldString === correctedOldString) {
     return originalNewString;
@@ -544,7 +519,7 @@ export async function correctNewStringEscaping(
   baseLlmClient: BaseLlmClient,
   oldString: string,
   potentiallyProblematicNewString: string,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<string> {
   const prompt = `
 Context: A text replacement operation is planned. The text to be replaced (old_string) has been correctly identified in the file. However, the replacement text (new_string) might have been improperly escaped by a previous LLM generation (e.g. too many backslashes for newlines like \\n instead of \n, or unnecessarily quotes like \\"Hello\\" instead of "Hello").
@@ -593,10 +568,7 @@ Return ONLY the corrected string in the specified JSON format with the key 'corr
       throw error;
     }
 
-    console.error(
-      'Error during LLM call for new_string escaping correction:',
-      error,
-    );
+    console.error('Error during LLM call for new_string escaping correction:', error);
     return potentiallyProblematicNewString;
   }
 }
@@ -616,7 +588,7 @@ const CORRECT_STRING_ESCAPING_SCHEMA: Record<string, unknown> = {
 export async function correctStringEscaping(
   potentiallyProblematicString: string,
   baseLlmClient: BaseLlmClient,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<string> {
   const prompt = `
 Context: An LLM has just generated potentially_problematic_string and the text might have been improperly escaped (e.g. too many backslashes for newlines like \\n instead of \n, or unnecessarily quotes like \\"Hello\\" instead of "Hello").
@@ -660,10 +632,7 @@ Return ONLY the corrected string in the specified JSON format with the key 'corr
       throw error;
     }
 
-    console.error(
-      'Error during LLM call for string escaping correction:',
-      error,
-    );
+    console.error('Error during LLM call for string escaping correction:', error);
     return potentiallyProblematicString;
   }
 }
@@ -672,14 +641,11 @@ function trimPairIfPossible(
   target: string,
   trimIfTargetTrims: string,
   currentContent: string,
-  expectedReplacements: number,
+  expectedReplacements: number
 ) {
   const trimmedTargetString = target.trim();
   if (target.length !== trimmedTargetString.length) {
-    const trimmedTargetOccurrences = countOccurrences(
-      currentContent,
-      trimmedTargetString,
-    );
+    const trimmedTargetOccurrences = countOccurrences(currentContent, trimmedTargetString);
 
     if (trimmedTargetOccurrences === expectedReplacements) {
       const trimmedReactiveString = trimIfTargetTrims.trim();
@@ -710,36 +676,33 @@ export function unescapeStringForGeminiBug(inputString: string): string {
   //        string might have something like "\\\n" (a literal backslash followed by a newline).
   // g : Global flag, to replace all occurrences.
 
-  return inputString.replace(
-    /\\+(n|t|r|'|"|`|\\|\n)/g,
-    (match, capturedChar) => {
-      // 'match' is the entire erroneous sequence, e.g., if the input (in memory) was "\\\\`", match is "\\\\`".
-      // 'capturedChar' is the character that determines the true meaning, e.g., '`'.
+  return inputString.replace(/\\+(n|t|r|'|"|`|\\|\n)/g, (match, capturedChar) => {
+    // 'match' is the entire erroneous sequence, e.g., if the input (in memory) was "\\\\`", match is "\\\\`".
+    // 'capturedChar' is the character that determines the true meaning, e.g., '`'.
 
-      switch (capturedChar) {
-        case 'n':
-          return '\n'; // Correctly escaped: \n (newline character)
-        case 't':
-          return '\t'; // Correctly escaped: \t (tab character)
-        case 'r':
-          return '\r'; // Correctly escaped: \r (carriage return character)
-        case "'":
-          return "'"; // Correctly escaped: ' (apostrophe character)
-        case '"':
-          return '"'; // Correctly escaped: " (quotation mark character)
-        case '`':
-          return '`'; // Correctly escaped: ` (backtick character)
-        case '\\': // This handles when 'capturedChar' is a literal backslash
-          return '\\'; // Replace escaped backslash (e.g., "\\\\") with single backslash
-        case '\n': // This handles when 'capturedChar' is an actual newline
-          return '\n'; // Replace the whole erroneous sequence (e.g., "\\\n" in memory) with a clean newline
-        default:
-          // This fallback should ideally not be reached if the regex captures correctly.
-          // It would return the original matched sequence if an unexpected character was captured.
-          return match;
-      }
-    },
-  );
+    switch (capturedChar) {
+      case 'n':
+        return '\n'; // Correctly escaped: \n (newline character)
+      case 't':
+        return '\t'; // Correctly escaped: \t (tab character)
+      case 'r':
+        return '\r'; // Correctly escaped: \r (carriage return character)
+      case "'":
+        return "'"; // Correctly escaped: ' (apostrophe character)
+      case '"':
+        return '"'; // Correctly escaped: " (quotation mark character)
+      case '`':
+        return '`'; // Correctly escaped: ` (backtick character)
+      case '\\': // This handles when 'capturedChar' is a literal backslash
+        return '\\'; // Replace escaped backslash (e.g., "\\\\") with single backslash
+      case '\n': // This handles when 'capturedChar' is an actual newline
+        return '\n'; // Replace the whole erroneous sequence (e.g., "\\\n" in memory) with a clean newline
+      default:
+        // This fallback should ideally not be reached if the regex captures correctly.
+        // It would return the original matched sequence if an unexpected character was captured.
+        return match;
+    }
+  });
 }
 
 /**

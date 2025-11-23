@@ -157,10 +157,7 @@ function formatSchemaError(error: ZodError, ruleIndex: number): string {
  * Validates shell command convenience syntax rules.
  * Returns an error message if invalid, or null if valid.
  */
-function validateShellCommandSyntax(
-  rule: PolicyRuleToml,
-  ruleIndex: number,
-): string | null {
+function validateShellCommandSyntax(rule: PolicyRuleToml, ruleIndex: number): string | null {
   const hasCommandPrefix = rule.commandPrefix !== undefined;
   const hasCommandRegex = rule.commandRegex !== undefined;
   const hasArgsPattern = rule.argsPattern !== undefined;
@@ -227,7 +224,7 @@ function transformPriority(priority: number, tier: number): number {
 export async function loadPoliciesFromToml(
   approvalMode: ApprovalMode,
   policyDirs: string[],
-  getPolicyTier: (dir: string) => number,
+  getPolicyTier: (dir: string) => number
 ): Promise<PolicyLoadResult> {
   const rules: PolicyRule[] = [];
   const checkers: SafetyCheckerRule[] = [];
@@ -281,8 +278,7 @@ export async function loadPoliciesFromToml(
             errorType: 'toml_parse',
             message: 'TOML parsing failed',
             details: error.message,
-            suggestion:
-              'Check for syntax errors like missing quotes, brackets, or commas',
+            suggestion: 'Check for syntax errors like missing quotes, brackets, or commas',
           });
           continue;
         }
@@ -348,9 +344,7 @@ export async function loadPoliciesFromToml(
             // Expand command prefixes to multiple patterns
             const argsPatterns: Array<string | undefined> =
               commandPrefixes.length > 0
-                ? commandPrefixes.map(
-                    (prefix) => `"command":"${escapeRegex(prefix)}`,
-                  )
+                ? commandPrefixes.map((prefix) => `"command":"${escapeRegex(prefix)}`)
                 : [effectiveArgsPattern];
 
             // For each argsPattern, expand toolName arrays
@@ -409,9 +403,7 @@ export async function loadPoliciesFromToml(
         rules.push(...parsedRules);
 
         // Transform checkers
-        const parsedCheckers: SafetyCheckerRule[] = (
-          validationResult.data.safety_checker ?? []
-        )
+        const parsedCheckers: SafetyCheckerRule[] = (validationResult.data.safety_checker ?? [])
           .filter((checker) => {
             if (!checker.modes || checker.modes.length === 0) {
               return true;
@@ -433,9 +425,7 @@ export async function loadPoliciesFromToml(
 
             const argsPatterns: Array<string | undefined> =
               commandPrefixes.length > 0
-                ? commandPrefixes.map(
-                    (prefix) => `"command":"${escapeRegex(prefix)}`,
-                  )
+                ? commandPrefixes.map((prefix) => `"command":"${escapeRegex(prefix)}`)
                 : [effectiveArgsPattern];
 
             return argsPatterns.flatMap((argsPattern) => {

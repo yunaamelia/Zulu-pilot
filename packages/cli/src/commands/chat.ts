@@ -49,7 +49,10 @@ export class ChatCommand {
    * Initialize adapter with provider registry and router
    * T056: Integrate adapter with Gemini CLI core
    */
-  private async initializeAdapter(providerName?: string, modelName?: string): Promise<void> {
+  private async initializeAdapter(
+    providerName?: string,
+    modelName?: string
+  ): Promise<void> {
     // Load unified configuration
     const configManager = new UnifiedConfigManager();
     const unifiedConfig = await configManager.loadConfig();
@@ -91,7 +94,7 @@ export class ChatCommand {
     // Wire up adapter to config's content generator
     // This ensures the adapter is used instead of the default GoogleGenAI
     this.config.setZuluPilotAdapter(this.adapter);
-
+    
     // Refresh auth to initialize content generator with adapter
     const authType = this.config.getContentGeneratorConfig()?.authType;
     if (authType) {
@@ -149,7 +152,7 @@ export class ChatCommand {
 
   /**
    * T108: Switch provider during interactive chat
-   *
+   * 
    * @param providerName - Name of the provider to switch to
    * @throws {Error} If provider not found or not enabled
    */
@@ -163,16 +166,12 @@ export class ChatCommand {
     const providers = config.providers || {};
 
     if (!providers[providerName]) {
-      throw new Error(
-        `Provider "${providerName}" not found. Available providers: ${Object.keys(providers).join(', ')}`
-      );
+      throw new Error(`Provider "${providerName}" not found. Available providers: ${Object.keys(providers).join(', ')}`);
     }
 
     const provider = providers[providerName];
     if (!provider.enabled) {
-      throw new Error(
-        `Provider "${providerName}" is disabled. Enable it first with: zulu-pilot provider config ${providerName} --enable`
-      );
+      throw new Error(`Provider "${providerName}" is disabled. Enable it first with: zulu-pilot provider config ${providerName} --enable`);
     }
 
     // T108: Switch provider in the router
@@ -189,7 +188,7 @@ export class ChatCommand {
 
   /**
    * T108: Get current provider name
-   *
+   * 
    * @returns Current provider name or null if not set
    */
   getCurrentProvider(): string | null {
@@ -202,19 +201,19 @@ export class ChatCommand {
 
   /**
    * T108: List available providers
-   *
+   * 
    * @returns List of available provider names
    */
   async listProviders(): Promise<string[]> {
     const config = await this.configManager.loadConfig();
     const providers = config.providers || {};
-    return Object.keys(providers).filter((name) => providers[name].enabled !== false);
+    return Object.keys(providers).filter(name => providers[name].enabled !== false);
   }
 
   /**
    * T109: Get ContextManager instance
    * Ensures context can be accessed and persists across provider switches
-   *
+   * 
    * @returns ContextManager instance
    */
   getContextManager(): ContextManager {
@@ -265,3 +264,4 @@ export const chatCommand: CommandModule = {
     console.log('Chat command invoked with options:', argv);
   },
 };
+

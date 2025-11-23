@@ -5,10 +5,7 @@
  */
 
 import type { ToolCallRequestInfo, Config } from '../index.js';
-import {
-  CoreToolScheduler,
-  type CompletedToolCall,
-} from './coreToolScheduler.js';
+import { CoreToolScheduler, type CompletedToolCall } from './coreToolScheduler.js';
 
 /**
  * Executes a single tool call non-interactively by leveraging the CoreToolScheduler.
@@ -16,7 +13,7 @@ import {
 export async function executeToolCall(
   config: Config,
   toolCallRequest: ToolCallRequestInfo,
-  abortSignal: AbortSignal,
+  abortSignal: AbortSignal
 ): Promise<CompletedToolCall> {
   return new Promise<CompletedToolCall>((resolve, reject) => {
     const scheduler = new CoreToolScheduler({

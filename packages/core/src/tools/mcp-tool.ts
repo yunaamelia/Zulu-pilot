@@ -11,12 +11,7 @@ import type {
   ToolMcpConfirmationDetails,
   ToolResult,
 } from './tools.js';
-import {
-  BaseDeclarativeTool,
-  BaseToolInvocation,
-  Kind,
-  ToolConfirmationOutcome,
-} from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind, ToolConfirmationOutcome } from './tools.js';
 import type { CallableTool, FunctionCall, Part } from '@google/genai';
 import { ToolErrorType } from './tool-error.js';
 import type { Config } from '../config/config.js';
@@ -52,16 +47,9 @@ type McpResourceLinkBlock = {
   name?: string;
 };
 
-type McpContentBlock =
-  | McpTextBlock
-  | McpMediaBlock
-  | McpResourceBlock
-  | McpResourceLinkBlock;
+type McpContentBlock = McpTextBlock | McpMediaBlock | McpResourceBlock | McpResourceLinkBlock;
 
-class DiscoveredMCPToolInvocation extends BaseToolInvocation<
-  ToolParams,
-  ToolResult
-> {
+class DiscoveredMCPToolInvocation extends BaseToolInvocation<ToolParams, ToolResult> {
   private static readonly allowlist: Set<string> = new Set();
 
   constructor(
@@ -72,23 +60,17 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
     readonly trust?: boolean,
     params: ToolParams = {},
     private readonly cliConfig?: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     // Use composite format for policy checks: serverName__toolName
     // This enables server wildcards (e.g., "google-workspace__*")
     // while still allowing specific tool rules
 
-    super(
-      params,
-      messageBus,
-      `${serverName}__${serverToolName}`,
-      displayName,
-      serverName,
-    );
+    super(params, messageBus, `${serverName}__${serverToolName}`, displayName, serverName);
   }
 
   protected override async getConfirmationDetails(
-    _abortSignal: AbortSignal,
+    _abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     const serverAllowListKey = this.serverName;
     const toolAllowListKey = `${this.serverName}.${this.serverToolName}`;
@@ -187,7 +169,7 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
       const errorMessage = `MCP tool '${
         this.serverToolName
       }' reported tool error for function call: ${safeJsonStringify(
-        functionCalls[0],
+        functionCalls[0]
       )} with response: ${safeJsonStringify(rawResponseParts)}`;
       return {
         llmContent: errorMessage,
@@ -212,10 +194,7 @@ class DiscoveredMCPToolInvocation extends BaseToolInvocation<
   }
 }
 
-export class DiscoveredMCPTool extends BaseDeclarativeTool<
-  ToolParams,
-  ToolResult
-> {
+export class DiscoveredMCPTool extends BaseDeclarativeTool<ToolParams, ToolResult> {
   constructor(
     private readonly mcpTool: CallableTool,
     readonly serverName: string,
@@ -227,7 +206,7 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
     private readonly cliConfig?: Config,
     override readonly extensionName?: string,
     override readonly extensionId?: string,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       nameOverride ?? generateValidName(serverToolName),
@@ -239,7 +218,7 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
       false, // canUpdateOutput,
       messageBus,
       extensionName,
-      extensionId,
+      extensionId
     );
   }
 
@@ -259,7 +238,7 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
       this.cliConfig,
       this.extensionName,
       this.extensionId,
-      this.messageBus,
+      this.messageBus
     );
   }
 
@@ -267,7 +246,7 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
     params: ToolParams,
     _messageBus?: MessageBus,
     _toolName?: string,
-    _displayName?: string,
+    _displayName?: string
   ): ToolInvocation<ToolParams, ToolResult> {
     return new DiscoveredMCPToolInvocation(
       this.mcpTool,
@@ -277,7 +256,7 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
       this.trust,
       params,
       this.cliConfig,
-      _messageBus,
+      _messageBus
     );
   }
 }
@@ -286,10 +265,7 @@ function transformTextBlock(block: McpTextBlock): Part {
   return { text: block.text };
 }
 
-function transformImageAudioBlock(
-  block: McpMediaBlock,
-  toolName: string,
-): Part[] {
+function transformImageAudioBlock(block: McpMediaBlock, toolName: string): Part[] {
   return [
     {
       text: `[Tool '${toolName}' provided the following ${
@@ -305,10 +281,7 @@ function transformImageAudioBlock(
   ];
 }
 
-function transformResourceBlock(
-  block: McpResourceBlock,
-  toolName: string,
-): Part | Part[] | null {
+function transformResourceBlock(block: McpResourceBlock, toolName: string): Part | Part[] | null {
   const resource = block.resource;
   if (resource?.text) {
     return { text: resource.text };
@@ -351,23 +324,21 @@ function transformMcpContentToParts(sdkResponse: Part[]): Part[] {
     return [{ text: '[Error: Could not parse tool response]' }];
   }
 
-  const transformed = mcpContent.flatMap(
-    (block: McpContentBlock): Part | Part[] | null => {
-      switch (block.type) {
-        case 'text':
-          return transformTextBlock(block);
-        case 'image':
-        case 'audio':
-          return transformImageAudioBlock(block, toolName);
-        case 'resource':
-          return transformResourceBlock(block, toolName);
-        case 'resource_link':
-          return transformResourceLinkBlock(block);
-        default:
-          return null;
-      }
-    },
-  );
+  const transformed = mcpContent.flatMap((block: McpContentBlock): Part | Part[] | null => {
+    switch (block.type) {
+      case 'text':
+        return transformTextBlock(block);
+      case 'image':
+      case 'audio':
+        return transformImageAudioBlock(block, toolName);
+      case 'resource':
+        return transformResourceBlock(block, toolName);
+      case 'resource_link':
+        return transformResourceLinkBlock(block);
+      default:
+        return null;
+    }
+  });
 
   return transformed.filter((part): part is Part => part !== null);
 }
@@ -381,9 +352,7 @@ function transformMcpContentToParts(sdkResponse: Part[]): Part[] {
  * @returns A formatted string representing the tool's output.
  */
 function getStringifiedResultForDisplay(rawResponse: Part[]): string {
-  const mcpContent = rawResponse?.[0]?.functionResponse?.response?.[
-    'content'
-  ] as McpContentBlock[];
+  const mcpContent = rawResponse?.[0]?.functionResponse?.response?.['content'] as McpContentBlock[];
 
   if (!Array.isArray(mcpContent)) {
     return '```json\n' + JSON.stringify(rawResponse, null, 2) + '\n```';
@@ -403,9 +372,7 @@ function getStringifiedResultForDisplay(rawResponse: Part[]): string {
         if (block.resource?.text) {
           return block.resource.text;
         }
-        return `[Embedded Resource: ${
-          block.resource?.mimeType || 'unknown type'
-        }]`;
+        return `[Embedded Resource: ${block.resource?.mimeType || 'unknown type'}]`;
       default:
         return `[Unknown content type: ${(block as { type: string }).type}]`;
     }
@@ -422,8 +389,7 @@ export function generateValidName(name: string) {
   // If longer than 63 characters, replace middle with '___'
   // (Gemini API says max length 64, but actual limit seems to be 63)
   if (validToolname.length > 63) {
-    validToolname =
-      validToolname.slice(0, 28) + '___' + validToolname.slice(-32);
+    validToolname = validToolname.slice(0, 28) + '___' + validToolname.slice(-32);
   }
   return validToolname;
 }

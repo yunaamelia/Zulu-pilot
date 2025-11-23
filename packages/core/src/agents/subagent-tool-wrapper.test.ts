@@ -19,9 +19,7 @@ vi.mock('./invocation.js');
 vi.mock('./schema-utils.js');
 
 const MockedSubagentInvocation = vi.mocked(SubagentInvocation);
-const mockConvertInputConfigToJsonSchema = vi.mocked(
-  convertInputConfigToJsonSchema,
-);
+const mockConvertInputConfigToJsonSchema = vi.mocked(convertInputConfigToJsonSchema);
 
 // Define reusable test data
 let mockConfig: Config;
@@ -68,7 +66,7 @@ describe('SubagentToolWrapper', () => {
       new SubagentToolWrapper(mockDefinition, mockConfig);
 
       expect(convertInputConfigToJsonSchema).toHaveBeenCalledExactlyOnceWith(
-        mockDefinition.inputConfig,
+        mockDefinition.inputConfig
       );
     });
 
@@ -88,10 +86,7 @@ describe('SubagentToolWrapper', () => {
         ...mockDefinition,
         displayName: undefined,
       };
-      const wrapper = new SubagentToolWrapper(
-        definitionWithoutDisplayName,
-        mockConfig,
-      );
+      const wrapper = new SubagentToolWrapper(definitionWithoutDisplayName, mockConfig);
       expect(wrapper.displayName).toBe(definitionWithoutDisplayName.name);
     });
 
@@ -118,17 +113,13 @@ describe('SubagentToolWrapper', () => {
         params,
         mockDefinition,
         mockConfig,
-        undefined,
+        undefined
       );
     });
 
     it('should pass the messageBus to the SubagentInvocation constructor', () => {
       const mockMessageBus = {} as MessageBus;
-      const wrapper = new SubagentToolWrapper(
-        mockDefinition,
-        mockConfig,
-        mockMessageBus,
-      );
+      const wrapper = new SubagentToolWrapper(mockDefinition, mockConfig, mockMessageBus);
       const params: AgentInputs = { goal: 'Test the invocation', priority: 1 };
 
       wrapper.build(params);
@@ -137,7 +128,7 @@ describe('SubagentToolWrapper', () => {
         params,
         mockDefinition,
         mockConfig,
-        mockMessageBus,
+        mockMessageBus
       );
     });
 
@@ -149,7 +140,7 @@ describe('SubagentToolWrapper', () => {
       // The `build` method in the base class performs JSON schema validation
       // before calling the protected `createInvocation` method.
       expect(() => wrapper.build(invalidParams)).toThrow(
-        "params must have required property 'goal'",
+        "params must have required property 'goal'"
       );
       expect(MockedSubagentInvocation).not.toHaveBeenCalled();
     });

@@ -9,10 +9,7 @@ import { spawn } from 'node:child_process';
 import { CheckerRunner } from './checker-runner.js';
 import { ContextBuilder } from './context-builder.js';
 import { CheckerRegistry } from './registry.js';
-import {
-  type InProcessCheckerConfig,
-  InProcessCheckerType,
-} from '../policy/types.js';
+import { type InProcessCheckerConfig, InProcessCheckerType } from '../policy/types.js';
 import type { SafetyCheckResult } from './protocol.js';
 import { SafetyCheckDecision } from './protocol.js';
 import type { Config } from '../config/config.js';
@@ -62,9 +59,7 @@ describe('CheckerRunner', () => {
     const result = await runner.runChecker(mockToolCall, mockInProcessConfig);
 
     expect(result).toEqual(mockResult);
-    expect(mockRegistry.resolveInProcess).toHaveBeenCalledWith(
-      InProcessCheckerType.ALLOWED_PATH,
-    );
+    expect(mockRegistry.resolveInProcess).toHaveBeenCalledWith(InProcessCheckerType.ALLOWED_PATH);
     expect(mockChecker.check).toHaveBeenCalled();
   });
 
@@ -122,9 +117,7 @@ describe('CheckerRunner', () => {
 
     await runner.runChecker(mockToolCall, configWithContext);
 
-    expect(mockContextBuilder.buildMinimalContext).toHaveBeenCalledWith([
-      'environment',
-    ]);
+    expect(mockContextBuilder.buildMinimalContext).toHaveBeenCalledWith(['environment']);
     expect(mockContextBuilder.buildFullContext).not.toHaveBeenCalled();
   });
 
@@ -151,7 +144,7 @@ describe('CheckerRunner', () => {
       expect.objectContaining({
         toolCall: mockToolCall,
         config: mockConfig,
-      }),
+      })
     );
   });
 
@@ -171,11 +164,7 @@ describe('CheckerRunner', () => {
       const mockStdout = {
         on: vi.fn().mockImplementation((event, callback) => {
           if (event === 'data') {
-            callback(
-              Buffer.from(
-                JSON.stringify({ decision: SafetyCheckDecision.ALLOW }),
-              ),
-            );
+            callback(Buffer.from(JSON.stringify({ decision: SafetyCheckDecision.ALLOW })));
           }
         }),
       };
@@ -197,11 +186,7 @@ describe('CheckerRunner', () => {
       const result = await runner.runChecker(mockToolCall, mockExternalConfig);
 
       expect(result.decision).toBe(SafetyCheckDecision.ALLOW);
-      expect(spawn).toHaveBeenCalledWith(
-        mockCheckerPath,
-        [],
-        expect.anything(),
-      );
+      expect(spawn).toHaveBeenCalledWith(mockCheckerPath, [], expect.anything());
     });
 
     it('should include checker name in timeout error message', async () => {
@@ -227,9 +212,7 @@ describe('CheckerRunner', () => {
 
       const result = await runPromise;
       expect(result.decision).toBe(SafetyCheckDecision.DENY);
-      expect(result.reason).toContain(
-        'Safety checker "python-checker" timed out',
-      );
+      expect(result.reason).toContain('Safety checker "python-checker" timed out');
 
       vi.useRealTimers();
     });
@@ -295,9 +278,7 @@ describe('CheckerRunner', () => {
       const result = await runner.runChecker(mockToolCall, mockExternalConfig);
 
       expect(result.decision).toBe(SafetyCheckDecision.DENY);
-      expect(result.reason).toContain(
-        'Safety checker "python-checker" exited with code 1',
-      );
+      expect(result.reason).toContain('Safety checker "python-checker" exited with code 1');
     });
   });
 });

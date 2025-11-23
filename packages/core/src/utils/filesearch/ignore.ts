@@ -41,7 +41,7 @@ export function loadIgnoreRules(options: LoadIgnoreRulesOptions): Ignore {
         return dir;
       }
       return `${dir}/`;
-    }),
+    })
   );
 
   return ignorer;
@@ -72,8 +72,7 @@ export class Ignore {
 
       this.allPatterns.push(pattern);
 
-      const isPositiveDirPattern =
-        pattern.endsWith('/') && !pattern.startsWith('!');
+      const isPositiveDirPattern = pattern.endsWith('/') && !pattern.startsWith('!');
 
       if (isPositiveDirPattern) {
         this.dirIgnorer.add(pattern);

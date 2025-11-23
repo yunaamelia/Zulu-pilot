@@ -7,11 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExportResultCode } from '@opentelemetry/core';
 import type { ReadableLogRecord } from '@opentelemetry/sdk-logs';
-import {
-  GcpTraceExporter,
-  GcpMetricExporter,
-  GcpLogExporter,
-} from './gcp-exporters.js';
+import { GcpTraceExporter, GcpMetricExporter, GcpLogExporter } from './gcp-exporters.js';
 
 const mockLogEntry = { test: 'entry' };
 const mockLogWrite = vi.fn().mockResolvedValue(undefined);
@@ -134,7 +130,7 @@ describe('GCP Exporters', () => {
             'session.id': 'test-session',
             'custom.attribute': 'value',
             'service.name': 'test-service',
-          }),
+          })
         );
 
         expect(mockLog.write).toHaveBeenCalledWith([mockLogEntry]);
@@ -221,7 +217,7 @@ describe('GCP Exporters', () => {
             expect.objectContaining({
               severity: expected,
             }),
-            expect.any(Object),
+            expect.any(Object)
           );
 
           mockLog.entry.mockClear();
@@ -288,9 +284,7 @@ describe('GCP Exporters', () => {
           resolveWrite2 = resolve;
         });
 
-        mockLogWrite
-          .mockReturnValueOnce(writePromise1)
-          .mockReturnValueOnce(writePromise2);
+        mockLogWrite.mockReturnValueOnce(writePromise1).mockReturnValueOnce(writePromise2);
 
         const callback = vi.fn();
 

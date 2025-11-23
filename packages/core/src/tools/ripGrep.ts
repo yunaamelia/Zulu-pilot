@@ -19,10 +19,7 @@ import { fileExists } from '../utils/fileUtils.js';
 import { Storage } from '../config/storage.js';
 import { GREP_TOOL_NAME } from './tool-names.js';
 import { debugLogger } from '../utils/debugLogger.js';
-import {
-  FileExclusions,
-  COMMON_DIRECTORY_EXCLUDES,
-} from '../utils/ignorePatterns.js';
+import { FileExclusions, COMMON_DIRECTORY_EXCLUDES } from '../utils/ignorePatterns.js';
 
 const DEFAULT_TOTAL_MAX_MATCHES = 20000;
 
@@ -86,10 +83,7 @@ export async function ensureRgPath(): Promise<string> {
  * @returns The absolute path if valid and exists, or null if no path specified.
  * @throws {Error} If path is outside root, doesn't exist, or isn't a directory/file.
  */
-function resolveAndValidatePath(
-  config: Config,
-  relativePath?: string,
-): string | null {
+function resolveAndValidatePath(config: Config, relativePath?: string): string | null {
   if (!relativePath) {
     return null;
   }
@@ -102,7 +96,7 @@ function resolveAndValidatePath(
   if (!workspaceContext.isPathWithinWorkspace(targetPath)) {
     const directories = workspaceContext.getDirectories();
     throw new Error(
-      `Path validation failed: Attempted path "${relativePath}" resolves outside the allowed workspace directories: ${directories.join(', ')}`,
+      `Path validation failed: Attempted path "${relativePath}" resolves outside the allowed workspace directories: ${directories.join(', ')}`
     );
   }
 
@@ -110,9 +104,7 @@ function resolveAndValidatePath(
   try {
     const stats = fs.statSync(targetPath);
     if (!stats.isDirectory() && !stats.isFile()) {
-      throw new Error(
-        `Path is not a valid directory or file: ${targetPath} (CWD: ${targetDir})`,
-      );
+      throw new Error(`Path is not a valid directory or file: ${targetPath} (CWD: ${targetDir})`);
     }
   } catch (error: unknown) {
     if (isNodeError(error) && error.code === 'ENOENT') {
@@ -183,16 +175,13 @@ interface GrepMatch {
   line: string;
 }
 
-class GrepToolInvocation extends BaseToolInvocation<
-  RipGrepToolParams,
-  ToolResult
-> {
+class GrepToolInvocation extends BaseToolInvocation<RipGrepToolParams, ToolResult> {
   constructor(
     private readonly config: Config,
     params: RipGrepToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
   }
@@ -246,7 +235,7 @@ class GrepToolInvocation extends BaseToolInvocation<
           acc[fileKey].sort((a, b) => a.lineNumber - b.lineNumber);
           return acc;
         },
-        {} as Record<string, GrepMatch[]>,
+        {} as Record<string, GrepMatch[]>
       );
 
       const matchCount = allMatches.length;
@@ -288,10 +277,7 @@ class GrepToolInvocation extends BaseToolInvocation<
     }
   }
 
-  private parseRipgrepJsonOutput(
-    output: string,
-    basePath: string,
-  ): GrepMatch[] {
+  private parseRipgrepJsonOutput(output: string, basePath: string): GrepMatch[] {
     const results: GrepMatch[] = [];
     if (!output) return results;
 
@@ -417,8 +403,8 @@ class GrepToolInvocation extends BaseToolInvocation<
           options.signal.removeEventListener('abort', cleanup);
           reject(
             new Error(
-              `Failed to start ripgrep: ${err.message}. Please ensure @lvce-editor/ripgrep is properly installed.`,
-            ),
+              `Failed to start ripgrep: ${err.message}. Please ensure @lvce-editor/ripgrep is properly installed.`
+            )
           );
         });
 
@@ -432,9 +418,7 @@ class GrepToolInvocation extends BaseToolInvocation<
           } else if (code === 1) {
             resolve(''); // No matches found
           } else {
-            reject(
-              new Error(`ripgrep exited with code ${code}: ${stderrData}`),
-            );
+            reject(new Error(`ripgrep exited with code ${code}: ${stderrData}`));
           }
         });
       });
@@ -461,10 +445,7 @@ class GrepToolInvocation extends BaseToolInvocation<
     if (resolvedPath === this.config.getTargetDir() || pathParam === '.') {
       description += ` within ./`;
     } else {
-      const relativePath = makeRelative(
-        resolvedPath,
-        this.config.getTargetDir(),
-      );
+      const relativePath = makeRelative(resolvedPath, this.config.getTargetDir());
       description += ` within ${shortenPath(relativePath)}`;
     }
     return description;
@@ -474,15 +455,12 @@ class GrepToolInvocation extends BaseToolInvocation<
 /**
  * Implementation of the Grep tool logic (moved from CLI)
  */
-export class RipGrepTool extends BaseDeclarativeTool<
-  RipGrepToolParams,
-  ToolResult
-> {
+export class RipGrepTool extends BaseDeclarativeTool<RipGrepToolParams, ToolResult> {
   static readonly Name = GREP_TOOL_NAME;
 
   constructor(
     private readonly config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       RipGrepTool.Name,
@@ -542,7 +520,7 @@ export class RipGrepTool extends BaseDeclarativeTool<
       },
       true, // isOutputMarkdown
       false, // canUpdateOutput
-      messageBus,
+      messageBus
     );
   }
 
@@ -552,10 +530,7 @@ export class RipGrepTool extends BaseDeclarativeTool<
    * @returns An error message string if invalid, null otherwise
    */
   override validateToolParams(params: RipGrepToolParams): string | null {
-    const errors = SchemaValidator.validate(
-      this.schema.parametersJsonSchema,
-      params,
-    );
+    const errors = SchemaValidator.validate(this.schema.parametersJsonSchema, params);
     if (errors) {
       return errors;
     }
@@ -576,14 +551,8 @@ export class RipGrepTool extends BaseDeclarativeTool<
     params: RipGrepToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<RipGrepToolParams, ToolResult> {
-    return new GrepToolInvocation(
-      this.config,
-      params,
-      messageBus,
-      _toolName,
-      _toolDisplayName,
-    );
+    return new GrepToolInvocation(this.config, params, messageBus, _toolName, _toolDisplayName);
   }
 }

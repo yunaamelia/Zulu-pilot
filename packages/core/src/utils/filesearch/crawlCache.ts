@@ -17,7 +17,7 @@ const cacheTimers = new Map<string, NodeJS.Timeout>();
 export const getCacheKey = (
   directory: string,
   ignoreContent: string,
-  maxDepth?: number,
+  maxDepth?: number
 ): string => {
   const hash = crypto.createHash('sha256');
   hash.update(directory);

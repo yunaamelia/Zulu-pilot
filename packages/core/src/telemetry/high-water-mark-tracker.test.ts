@@ -27,7 +27,7 @@ describe('HighWaterMarkTracker', () => {
 
     it('should throw on negative threshold', () => {
       expect(() => new HighWaterMarkTracker(-1)).toThrow(
-        'growthThresholdPercent must be non-negative.',
+        'growthThresholdPercent must be non-negative.'
       );
     });
   });
@@ -88,9 +88,7 @@ describe('HighWaterMarkTracker', () => {
 
       expect(tracker.getHighWaterMark('heap_used')).toBeGreaterThan(0);
       expect(tracker.getHighWaterMark('rss')).toBeGreaterThan(0);
-      expect(tracker.getHighWaterMark('heap_used')).not.toBe(
-        tracker.getHighWaterMark('rss'),
-      );
+      expect(tracker.getHighWaterMark('heap_used')).not.toBe(tracker.getHighWaterMark('rss'));
     });
   });
 

@@ -39,7 +39,7 @@ describe('ServiceAccountImpersonationProvider', () => {
   it('should throw an error if no URL is provided', () => {
     const config: MCPServerConfig = {};
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'A url or httpUrl must be provided for the Service Account Impersonation provider',
+      'A url or httpUrl must be provided for the Service Account Impersonation provider'
     );
   });
 
@@ -48,7 +48,7 @@ describe('ServiceAccountImpersonationProvider', () => {
       url: 'https://my-iap-service.run.app',
     };
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'targetAudience must be provided for the Service Account Impersonation provider',
+      'targetAudience must be provided for the Service Account Impersonation provider'
     );
   });
 
@@ -58,7 +58,7 @@ describe('ServiceAccountImpersonationProvider', () => {
       targetAudience: 'my-audience',
     };
     expect(() => new ServiceAccountImpersonationProvider(config)).toThrow(
-      'targetServiceAccount must be provided for the Service Account Impersonation provider',
+      'targetServiceAccount must be provided for the Service Account Impersonation provider'
     );
   });
 

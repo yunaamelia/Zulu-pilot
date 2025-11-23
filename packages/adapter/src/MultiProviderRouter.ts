@@ -112,4 +112,3 @@ export class MultiProviderRouter {
     return this.currentProvider;
   }
 }
-

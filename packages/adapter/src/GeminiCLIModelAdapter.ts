@@ -265,6 +265,8 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
         }
       } catch (error) {
         // Handle errors during streaming
+        const defaultProvider = this.config.defaultProvider;
+        const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
         throw this.handleProviderError(error, providerName, params.model);
       }
     } catch (error) {
@@ -295,6 +297,71 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
   }
 
   /**
+   * T137: Implement model switching in adapter
+   * Switch the model for a specific provider
+   *
+   * @param providerName - Provider name
+   * @param modelName - Model name to switch to
+   * @throws {ValidationError} When provider not found or model not available
+   */
+  async switchModel(providerName: string, modelName: string): Promise<void> {
+    const modelId = `${providerName}:${modelName}`;
+
+    try {
+      // Get provider instance
+      const provider = this.router.getProviderForModel(modelId, providerName);
+
+      // Check if model is available if provider supports discovery
+      if (provider.hasModel) {
+        const isAvailable = await provider.hasModel(modelName);
+        if (!isAvailable && provider.listModels) {
+          const availableModels = await provider.listModels();
+          throw new ValidationError(
+            `Model "${modelName}" is not available for provider "${providerName}". ` +
+              `Available models: ${availableModels.slice(0, 5).join(', ')}${
+                availableModels.length > 5 ? '...' : ''
+              }`,
+            'model'
+          );
+        }
+      }
+
+      // Set model on provider if it supports it
+      if (provider.setModel) {
+        provider.setModel(modelName);
+      } else {
+        throw new ValidationError(
+          `Provider "${providerName}" does not support model switching.`,
+          'provider'
+        );
+      }
+
+      // Update configuration
+      if (!this.config.providers) {
+        this.config.providers = {};
+      }
+      if (!this.config.providers[providerName]) {
+        // Provider config should exist if provider is registered
+        // Get the type from the router's registry or throw error
+        throw new ValidationError(
+          `Provider configuration not found for "${providerName}". Provider must be configured first.`,
+          'provider'
+        );
+      }
+      // Update model property while preserving existing config
+      this.config.providers[providerName] = {
+        ...this.config.providers[providerName],
+        model: modelName,
+      };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw this.handleProviderError(error as Error, providerName, modelName);
+    }
+  }
+
+  /**
    * T091: Set ContextManager for this adapter
    * This allows the adapter to use context added via CLI commands
    *
@@ -320,5 +387,40 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
    */
   getRouter(): MultiProviderRouter {
     return this.router;
+  }
+
+  /**
+   * T141: Check if the current provider supports Google Search
+   * T143: Implement graceful degradation for providers without Google Search
+   * Only Gemini providers (gemini, googleCloud) support Google Search by default
+   *
+   * @returns true if current provider supports Google Search
+   */
+  supportsGoogleSearch(): boolean {
+    const defaultProvider = this.config.defaultProvider;
+    const providerConfig = this.config.providers?.[defaultProvider];
+
+    if (!providerConfig) {
+      return false;
+    }
+
+    // Check if allowAllProviders is enabled in Google Search config
+    const googleSearchConfig = this.config.googleSearch;
+    if (googleSearchConfig?.allowAllProviders) {
+      return true;
+    }
+
+    // Only Gemini providers support Google Search by default
+    const geminiProviders = ['gemini', 'googleCloud'];
+    return geminiProviders.includes(providerConfig.type);
+  }
+
+  /**
+   * T141: Get the current provider name
+   *
+   * @returns Current provider name
+   */
+  getCurrentProvider(): string {
+    return this.config.defaultProvider;
   }
 }

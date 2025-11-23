@@ -20,19 +20,14 @@ import type { Config } from '../config/config.js';
  * @returns A promise that resolves to an array of PartUnion (string | Part).
  * @throws An error if the path is not found or is outside the workspace.
  */
-export async function readPathFromWorkspace(
-  pathStr: string,
-  config: Config,
-): Promise<PartUnion[]> {
+export async function readPathFromWorkspace(pathStr: string, config: Config): Promise<PartUnion[]> {
   const workspace = config.getWorkspaceContext();
   const fileService = config.getFileService();
   let absolutePath: string | null = null;
 
   if (path.isAbsolute(pathStr)) {
     if (!workspace.isPathWithinWorkspace(pathStr)) {
-      throw new Error(
-        `Absolute path is outside of the allowed workspace: ${pathStr}`,
-      );
+      throw new Error(`Absolute path is outside of the allowed workspace: ${pathStr}`);
     }
     absolutePath = pathStr;
   } else {
@@ -69,16 +64,12 @@ export async function readPathFromWorkspace(
       absolute: true,
     });
 
-    const relativeFiles = files.map((p) =>
-      path.relative(config.getTargetDir(), p),
-    );
+    const relativeFiles = files.map((p) => path.relative(config.getTargetDir(), p));
     const filteredFiles = fileService.filterFiles(relativeFiles, {
       respectGitIgnore: config.getFileFilteringRespectGitIgnore(),
       respectGeminiIgnore: config.getFileFilteringRespectGeminiIgnore(),
     });
-    const finalFiles = filteredFiles.map((p) =>
-      path.resolve(config.getTargetDir(), p),
-    );
+    const finalFiles = filteredFiles.map((p) => path.resolve(config.getTargetDir(), p));
 
     for (const filePath of finalFiles) {
       const relativePathForDisplay = path.relative(absolutePath, filePath);
@@ -86,7 +77,7 @@ export async function readPathFromWorkspace(
       const result = await processSingleFileContent(
         filePath,
         config.getTargetDir(),
-        config.getFileSystemService(),
+        config.getFileSystemService()
       );
       allParts.push(result.llmContent);
       allParts.push({ text: '\n' }); // Add a newline for separation
@@ -111,7 +102,7 @@ export async function readPathFromWorkspace(
     const result = await processSingleFileContent(
       absolutePath,
       config.getTargetDir(),
-      config.getFileSystemService(),
+      config.getFileSystemService()
     );
     return [result.llmContent];
   }

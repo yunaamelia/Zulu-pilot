@@ -97,9 +97,7 @@ export interface CaCountTokenResponse {
   totalTokens: number;
 }
 
-export function toCountTokenRequest(
-  req: CountTokensParameters,
-): CaCountTokenRequest {
+export function toCountTokenRequest(req: CountTokensParameters): CaCountTokenRequest {
   return {
     request: {
       model: 'models/' + req.model,
@@ -108,9 +106,7 @@ export function toCountTokenRequest(
   };
 }
 
-export function fromCountTokenResponse(
-  res: CaCountTokenResponse,
-): CountTokensResponse {
+export function fromCountTokenResponse(res: CaCountTokenResponse): CountTokensResponse {
   return {
     totalTokens: res.totalTokens,
   };
@@ -120,7 +116,7 @@ export function toGenerateContentRequest(
   req: GenerateContentParameters,
   userPromptId: string,
   project?: string,
-  sessionId?: string,
+  sessionId?: string
 ): CAGenerateContentRequest {
   return {
     model: req.model,
@@ -131,7 +127,7 @@ export function toGenerateContentRequest(
 }
 
 export function fromGenerateContentResponse(
-  res: CaGenerateContentResponse,
+  res: CaGenerateContentResponse
 ): GenerateContentResponse {
   const inres = res.response;
   const out = new GenerateContentResponse();
@@ -146,7 +142,7 @@ export function fromGenerateContentResponse(
 
 function toVertexGenerateContentRequest(
   req: GenerateContentParameters,
-  sessionId?: string,
+  sessionId?: string
 ): VertexGenerateContentRequest {
   return {
     contents: toContents(req.contents),
@@ -196,9 +192,7 @@ function toContent(content: ContentUnion): Content {
     // it's a Content - process parts to handle thought filtering
     return {
       ...content,
-      parts: content.parts
-        ? toParts(content.parts.filter((p) => p != null))
-        : [],
+      parts: content.parts ? toParts(content.parts.filter((p) => p != null)) : [],
     };
   }
   // it's a Part
@@ -242,9 +236,7 @@ function toPart(part: PartUnion): Part {
     // Combine existing text (if any) with the thought, preserving other properties.
     const text = (newPart as { text?: unknown }).text;
     const existingText = text ? String(text) : '';
-    const combinedText = existingText
-      ? `${existingText}\n${thoughtText}`
-      : thoughtText;
+    const combinedText = existingText ? `${existingText}\n${thoughtText}` : thoughtText;
 
     return {
       ...newPart,
@@ -256,7 +248,7 @@ function toPart(part: PartUnion): Part {
 }
 
 function toVertexGenerationConfig(
-  config?: GenerateContentConfig,
+  config?: GenerateContentConfig
 ): VertexGenerationConfig | undefined {
   if (!config) {
     return undefined;

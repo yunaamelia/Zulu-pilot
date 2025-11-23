@@ -22,8 +22,7 @@ describe('JsonFormatter', () => {
 
   it('should strip ANSI escape sequences from response text', () => {
     const formatter = new JsonFormatter();
-    const responseWithAnsi =
-      '\x1B[31mRed text\x1B[0m and \x1B[32mGreen text\x1B[0m';
+    const responseWithAnsi = '\x1B[31mRed text\x1B[0m and \x1B[32mGreen text\x1B[0m';
     const formatted = formatter.format(responseWithAnsi);
     const parsed = JSON.parse(formatted);
     expect(parsed.response).toBe('Red text and Green text');
@@ -31,8 +30,7 @@ describe('JsonFormatter', () => {
 
   it('should strip control characters from response text', () => {
     const formatter = new JsonFormatter();
-    const responseWithControlChars =
-      'Text with\x07 bell\x08 and\x0B vertical tab';
+    const responseWithControlChars = 'Text with\x07 bell\x08 and\x0B vertical tab';
     const formatted = formatter.format(responseWithControlChars);
     const parsed = JSON.parse(formatted);
     // Only ANSI codes are stripped, other control chars are preserved
@@ -228,9 +226,7 @@ describe('JsonFormatter', () => {
 
   it('should handle error messages containing JSON content', () => {
     const formatter = new JsonFormatter();
-    const errorWithJson = new Error(
-      'API returned: {"error": "Invalid request", "code": 400}',
-    );
+    const errorWithJson = new Error('API returned: {"error": "Invalid request", "code": 400}');
     const formatted = formatter.formatError(errorWithJson, 'API_ERROR');
     const parsed = JSON.parse(formatted);
 
@@ -288,9 +284,7 @@ describe('JsonFormatter', () => {
 
   it('should strip unsafe control characters from error messages', () => {
     const formatter = new JsonFormatter();
-    const errorWithControlChars = new Error(
-      'Error\x07 with\x08 control\x0B chars',
-    );
+    const errorWithControlChars = new Error('Error\x07 with\x08 control\x0B chars');
     const formatted = formatter.formatError(errorWithControlChars);
     const parsed = JSON.parse(formatted);
 

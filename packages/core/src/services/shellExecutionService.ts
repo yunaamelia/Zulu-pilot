@@ -15,10 +15,7 @@ import { getCachedEncodingForBuffer } from '../utils/systemEncoding.js';
 import { getShellConfiguration, type ShellType } from '../utils/shell-utils.js';
 import { isBinary } from '../utils/textUtils.js';
 import pkg from '@xterm/headless';
-import {
-  serializeTerminalToObject,
-  type AnsiOutput,
-} from '../utils/terminalSerializer.js';
+import { serializeTerminalToObject, type AnsiOutput } from '../utils/terminalSerializer.js';
 const { Terminal } = pkg;
 
 const SIGKILL_TIMEOUT_MS = 200;
@@ -140,7 +137,7 @@ export class ShellExecutionService {
     onOutputEvent: (event: ShellOutputEvent) => void,
     abortSignal: AbortSignal,
     shouldUseNodePty: boolean,
-    shellExecutionConfig: ShellExecutionConfig,
+    shellExecutionConfig: ShellExecutionConfig
   ): Promise<ShellExecutionHandle> {
     if (shouldUseNodePty) {
       const ptyInfo = await getPty();
@@ -152,7 +149,7 @@ export class ShellExecutionService {
             onOutputEvent,
             abortSignal,
             shellExecutionConfig,
-            ptyInfo,
+            ptyInfo
           );
         } catch (_e) {
           // Fallback to child_process
@@ -160,18 +157,13 @@ export class ShellExecutionService {
       }
     }
 
-    return this.childProcessFallback(
-      commandToExecute,
-      cwd,
-      onOutputEvent,
-      abortSignal,
-    );
+    return this.childProcessFallback(commandToExecute, cwd, onOutputEvent, abortSignal);
   }
 
   private static appendAndTruncate(
     currentBuffer: string,
     chunk: string,
-    maxSize: number,
+    maxSize: number
   ): { newBuffer: string; truncated: boolean } {
     const chunkLength = chunk.length;
     const currentLength = currentBuffer.length;
@@ -202,7 +194,7 @@ export class ShellExecutionService {
     commandToExecute: string,
     cwd: string,
     onOutputEvent: (event: ShellOutputEvent) => void,
-    abortSignal: AbortSignal,
+    abortSignal: AbortSignal
   ): ShellExecutionHandle {
     try {
       const isWindows = os.platform() === 'win32';
@@ -271,7 +263,7 @@ export class ShellExecutionService {
               const { newBuffer, truncated } = this.appendAndTruncate(
                 stdout,
                 decodedChunk,
-                MAX_CHILD_PROCESS_BUFFER_SIZE,
+                MAX_CHILD_PROCESS_BUFFER_SIZE
               );
               stdout = newBuffer;
               if (truncated) {
@@ -281,7 +273,7 @@ export class ShellExecutionService {
               const { newBuffer, truncated } = this.appendAndTruncate(
                 stderr,
                 decodedChunk,
-                MAX_CHILD_PROCESS_BUFFER_SIZE,
+                MAX_CHILD_PROCESS_BUFFER_SIZE
               );
               stderr = newBuffer;
               if (truncated) {
@@ -291,15 +283,11 @@ export class ShellExecutionService {
           }
         };
 
-        const handleExit = (
-          code: number | null,
-          signal: NodeJS.Signals | null,
-        ) => {
+        const handleExit = (code: number | null, signal: NodeJS.Signals | null) => {
           const { finalBuffer } = cleanup();
           // Ensure we don't add an extra newline if stdout already ends with one.
           const separator = stdout.endsWith('\n') ? '' : '\n';
-          let combinedOutput =
-            stdout + (stderr ? (stdout ? separator : '') + stderr : '');
+          let combinedOutput = stdout + (stderr ? (stdout ? separator : '') + stderr : '');
 
           if (stdoutTruncated || stderrTruncated) {
             const truncationMessage = `\n[GEMINI_CLI_WARNING: Output truncated. The buffer is limited to ${
@@ -411,7 +399,7 @@ export class ShellExecutionService {
     onOutputEvent: (event: ShellOutputEvent) => void,
     abortSignal: AbortSignal,
     shellExecutionConfig: ShellExecutionConfig,
-    ptyInfo: PtyImplementation,
+    ptyInfo: PtyImplementation
   ): ShellExecutionHandle {
     if (!ptyInfo) {
       // This should not happen, but as a safeguard...
@@ -601,17 +589,14 @@ export class ShellExecutionService {
                     resolve();
                   });
                 } else {
-                  const totalBytes = outputChunks.reduce(
-                    (sum, chunk) => sum + chunk.length,
-                    0,
-                  );
+                  const totalBytes = outputChunks.reduce((sum, chunk) => sum + chunk.length, 0);
                   onOutputEvent({
                     type: 'binary_progress',
                     bytesReceived: totalBytes,
                   });
                   resolve();
                 }
-              }),
+              })
           );
         };
 
@@ -620,51 +605,47 @@ export class ShellExecutionService {
           handleOutput(bufferData);
         });
 
-        ptyProcess.onExit(
-          ({ exitCode, signal }: { exitCode: number; signal?: number }) => {
-            exited = true;
-            abortSignal.removeEventListener('abort', abortHandler);
-            this.activePtys.delete(ptyProcess.pid);
+        ptyProcess.onExit(({ exitCode, signal }: { exitCode: number; signal?: number }) => {
+          exited = true;
+          abortSignal.removeEventListener('abort', abortHandler);
+          this.activePtys.delete(ptyProcess.pid);
 
-            const finalize = () => {
-              render(true);
-              const finalBuffer = Buffer.concat(outputChunks);
+          const finalize = () => {
+            render(true);
+            const finalBuffer = Buffer.concat(outputChunks);
 
-              resolve({
-                rawOutput: finalBuffer,
-                output: getFullBufferText(headlessTerminal),
-                exitCode,
-                signal: signal ?? null,
-                error,
-                aborted: abortSignal.aborted,
-                pid: ptyProcess.pid,
-                executionMethod:
-                  (ptyInfo?.name as 'node-pty' | 'lydell-node-pty') ??
-                  'node-pty',
-              });
-            };
+            resolve({
+              rawOutput: finalBuffer,
+              output: getFullBufferText(headlessTerminal),
+              exitCode,
+              signal: signal ?? null,
+              error,
+              aborted: abortSignal.aborted,
+              pid: ptyProcess.pid,
+              executionMethod: (ptyInfo?.name as 'node-pty' | 'lydell-node-pty') ?? 'node-pty',
+            });
+          };
 
+          if (abortSignal.aborted) {
+            finalize();
+            return;
+          }
+
+          const processingComplete = processingChain.then(() => 'processed');
+          const abortFired = new Promise<'aborted'>((res) => {
             if (abortSignal.aborted) {
-              finalize();
+              res('aborted');
               return;
             }
-
-            const processingComplete = processingChain.then(() => 'processed');
-            const abortFired = new Promise<'aborted'>((res) => {
-              if (abortSignal.aborted) {
-                res('aborted');
-                return;
-              }
-              abortSignal.addEventListener('abort', () => res('aborted'), {
-                once: true,
-              });
+            abortSignal.addEventListener('abort', () => res('aborted'), {
+              once: true,
             });
+          });
 
-            Promise.race([processingComplete, abortFired]).then(() => {
-              finalize();
-            });
-          },
-        );
+          Promise.race([processingComplete, abortFired]).then(() => {
+            finalize();
+          });
+        });
 
         const abortHandler = async () => {
           if (ptyProcess.pid && !exited) {
@@ -771,7 +752,7 @@ export class ShellExecutionService {
         const err = e as { code?: string; message?: string };
         const isEsrch = err.code === 'ESRCH';
         const isWindowsPtyError = err.message?.includes(
-          'Cannot resize a pty that has already exited',
+          'Cannot resize a pty that has already exited'
         );
 
         if (isEsrch || isWindowsPtyError) {

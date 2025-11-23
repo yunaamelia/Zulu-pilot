@@ -43,11 +43,7 @@ describe('FixLLMEditWithInstruction', () => {
     // Mock AbortSignal.timeout to use setTimeout so it respects fake timers
     vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms) => {
       const controller = new AbortController();
-      setTimeout(
-        () =>
-          controller.abort(new DOMException('TimeoutError', 'TimeoutError')),
-        ms,
-      );
+      setTimeout(() => controller.abort(new DOMException('TimeoutError', 'TimeoutError')), ms);
       return controller.signal;
     });
     resetLlmEditFixerCaches_TEST_ONLY(); // Ensure cache is cleared before each test
@@ -77,7 +73,7 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
     });
 
@@ -86,15 +82,13 @@ describe('FixLLMEditWithInstruction', () => {
     expect(mockGenerateJson).toHaveBeenCalledWith(
       expect.objectContaining({
         promptId: testPromptId,
-      }),
+      })
     );
   });
 
   it('should generate and use a fallback promptId when context is not available', async () => {
     mockGenerateJson.mockResolvedValue(mockApiResponse);
-    const consoleWarnSpy = vi
-      .spyOn(debugLogger, 'warn')
-      .mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(debugLogger, 'warn').mockImplementation(() => {});
 
     // Run the function outside of any context
     await FixLLMEditWithInstruction(
@@ -104,14 +98,14 @@ describe('FixLLMEditWithInstruction', () => {
       error,
       current_content,
       mockBaseLlmClient,
-      abortSignal,
+      abortSignal
     );
 
     // Verify the warning was logged
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Could not find promptId in context. This is unexpected. Using a fallback ID: llm-fixer-fallback-',
-      ),
+        'Could not find promptId in context. This is unexpected. Using a fallback ID: llm-fixer-fallback-'
+      )
     );
 
     // Verify that generateJson was called with the generated fallback promptId
@@ -119,7 +113,7 @@ describe('FixLLMEditWithInstruction', () => {
     expect(mockGenerateJson).toHaveBeenCalledWith(
       expect.objectContaining({
         promptId: expect.stringContaining('llm-fixer-fallback-'),
-      }),
+      })
     );
 
     // Restore mocks
@@ -138,22 +132,18 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
     });
 
     const generateJsonCall = mockGenerateJson.mock.calls[0][0];
     const userPromptContent = generateJsonCall.contents[0].parts[0].text;
 
-    expect(userPromptContent).toContain(
-      `<instruction>\n${instruction}\n</instruction>`,
-    );
+    expect(userPromptContent).toContain(`<instruction>\n${instruction}\n</instruction>`);
     expect(userPromptContent).toContain(`<search>\n${old_string}\n</search>`);
     expect(userPromptContent).toContain(`<replace>\n${new_string}\n</replace>`);
     expect(userPromptContent).toContain(`<error>\n${error}\n</error>`);
-    expect(userPromptContent).toContain(
-      `<file_content>\n${current_content}\n</file_content>`,
-    );
+    expect(userPromptContent).toContain(`<file_content>\n${current_content}\n</file_content>`);
   });
 
   it('should return a cached result on subsequent identical calls', async () => {
@@ -169,7 +159,7 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
 
       // Second call with identical parameters - should hit the cache
@@ -180,7 +170,7 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(result1).toEqual(mockApiResponse);
@@ -203,7 +193,7 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
 
       // Second call with a different instruction
@@ -214,7 +204,7 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
+        abortSignal
       );
 
       // Verify the underlying service was called TWICE
@@ -241,9 +231,7 @@ describe('FixLLMEditWithInstruction', () => {
         explanation: 'Second edit correction',
       };
 
-      mockGenerateJson
-        .mockResolvedValueOnce(firstResponse)
-        .mockResolvedValueOnce(secondResponse);
+      mockGenerateJson.mockResolvedValueOnce(firstResponse).mockResolvedValueOnce(secondResponse);
 
       const testPromptId = 'cache-collision-test';
 
@@ -257,7 +245,7 @@ describe('FixLLMEditWithInstruction', () => {
           'data', // current_content
           'error', // error
           mockBaseLlmClient,
-          abortSignal,
+          abortSignal
         );
 
         // Scenario 2: Different parameters that would create same cache key with concatenation
@@ -269,7 +257,7 @@ describe('FixLLMEditWithInstruction', () => {
           '', // current_content
           '', // error
           mockBaseLlmClient,
-          abortSignal,
+          abortSignal
         );
 
         // With the fixed JSON.stringify approach, these should be different
@@ -301,9 +289,7 @@ describe('FixLLMEditWithInstruction', () => {
         explanation: 'Updated content',
       };
 
-      mockGenerateJson
-        .mockResolvedValueOnce(yamlResponse)
-        .mockResolvedValueOnce(contentResponse);
+      mockGenerateJson.mockResolvedValueOnce(yamlResponse).mockResolvedValueOnce(contentResponse);
 
       const testPromptId = 'yaml-frontmatter-test';
 
@@ -316,7 +302,7 @@ describe('FixLLMEditWithInstruction', () => {
           'Some markdown content',
           'YAML parse error',
           mockBaseLlmClient,
-          abortSignal,
+          abortSignal
         );
 
         // Call 2: Edit regular content
@@ -327,7 +313,7 @@ describe('FixLLMEditWithInstruction', () => {
           'Different file content',
           'Content not found',
           mockBaseLlmClient,
-          abortSignal,
+          abortSignal
         );
 
         // Verify both calls succeeded with different results
@@ -353,7 +339,7 @@ describe('FixLLMEditWithInstruction', () => {
           abortSignal?.addEventListener('abort', () => {
             reject(new DOMException('Aborted', 'AbortError'));
           });
-        }),
+        })
     );
 
     const testPromptId = 'test-prompt-id-timeout';
@@ -366,8 +352,8 @@ describe('FixLLMEditWithInstruction', () => {
         error,
         current_content,
         mockBaseLlmClient,
-        abortSignal,
-      ),
+        abortSignal
+      )
     );
 
     // Let the timers advance just past the 40000ms default timeout.

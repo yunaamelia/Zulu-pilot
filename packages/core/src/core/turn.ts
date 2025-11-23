@@ -13,19 +13,11 @@ import type {
   FinishReason,
   GenerateContentResponseUsageMetadata,
 } from '@google/genai';
-import type {
-  ToolCallConfirmationDetails,
-  ToolResult,
-  ToolResultDisplay,
-} from '../tools/tools.js';
+import type { ToolCallConfirmationDetails, ToolResult, ToolResultDisplay } from '../tools/tools.js';
 import type { ToolErrorType } from '../tools/tool-error.js';
 import { getResponseText } from '../utils/partUtils.js';
 import { reportError } from '../utils/errorReporting.js';
-import {
-  getErrorMessage,
-  UnauthorizedError,
-  toFriendlyError,
-} from '../utils/errors.js';
+import { getErrorMessage, UnauthorizedError, toFriendlyError } from '../utils/errors.js';
 import type { GeminiChat } from './geminiChat.js';
 import { InvalidStreamError } from './geminiChat.js';
 import { parseThought, type ThoughtSummary } from '../utils/thoughtUtils.js';
@@ -37,13 +29,10 @@ export interface ServerTool {
   name: string;
   schema: FunctionDeclaration;
   // The execute method signature might differ slightly or be wrapped
-  execute(
-    params: Record<string, unknown>,
-    signal?: AbortSignal,
-  ): Promise<ToolResult>;
+  execute(params: Record<string, unknown>, signal?: AbortSignal): Promise<ToolResult>;
   shouldConfirmExecute(
     params: Record<string, unknown>,
-    abortSignal: AbortSignal,
+    abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false>;
 }
 
@@ -231,14 +220,14 @@ export class Turn {
 
   constructor(
     private readonly chat: GeminiChat,
-    private readonly prompt_id: string,
+    private readonly prompt_id: string
   ) {}
 
   // The run method yields simpler events suitable for server logic
   async *run(
     modelConfigKey: ModelConfigKey,
     req: PartListUnion,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ServerGeminiStreamEvent> {
     try {
       // Note: This assumes `sendMessageStream` yields events like
@@ -247,7 +236,7 @@ export class Turn {
         modelConfigKey,
         req,
         this.prompt_id,
-        signal,
+        signal
       );
 
       for await (const streamEvent of responseStream) {
@@ -339,15 +328,12 @@ export class Turn {
         throw error;
       }
 
-      const contextForReport = [
-        ...this.chat.getHistory(/*curated*/ true),
-        createUserContent(req),
-      ];
+      const contextForReport = [...this.chat.getHistory(/*curated*/ true), createUserContent(req)];
       await reportError(
         error,
         'Error when talking to Gemini API',
         contextForReport,
-        'Turn.run-sendMessageStream',
+        'Turn.run-sendMessageStream'
       );
       const status =
         typeof error === 'object' &&
@@ -366,12 +352,9 @@ export class Turn {
     }
   }
 
-  private handlePendingFunctionCall(
-    fnCall: FunctionCall,
-  ): ServerGeminiStreamEvent | null {
+  private handlePendingFunctionCall(fnCall: FunctionCall): ServerGeminiStreamEvent | null {
     const callId =
-      fnCall.id ??
-      `${fnCall.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      fnCall.id ?? `${fnCall.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const name = fnCall.name || 'undefined_tool_name';
     const args = (fnCall.args || {}) as Record<string, unknown>;
 

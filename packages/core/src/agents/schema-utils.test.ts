@@ -135,9 +135,7 @@ describe('convertInputConfigToJsonSchema', () => {
     it('should list all properties in `required` when all are marked as required', () => {
       const result = convertInputConfigToJsonSchema(ALL_REQUIRED_FIELDS_CONFIG);
       expect(result.required).toHaveLength(2);
-      expect(result.required).toEqual(
-        expect.arrayContaining(['paramA', 'paramB']),
-      );
+      expect(result.required).toEqual(expect.arrayContaining(['paramA', 'paramB']));
     });
   });
 
@@ -155,8 +153,7 @@ describe('convertInputConfigToJsonSchema', () => {
 
   describe('error handling', () => {
     it('should throw an informative error for an unsupported input type', () => {
-      const action = () =>
-        convertInputConfigToJsonSchema(UNSUPPORTED_TYPE_CONFIG);
+      const action = () => convertInputConfigToJsonSchema(UNSUPPORTED_TYPE_CONFIG);
 
       expect(action).toThrow(/Unsupported input type 'date'/);
       expect(action).toThrow(/parameter 'invalid_param'/);

@@ -76,9 +76,7 @@ describe('FileTokenStorage', () => {
         updatedAt: Date.now(),
       };
 
-      const encryptedData = storage['encrypt'](
-        JSON.stringify({ 'test-server': credentials }),
-      );
+      const encryptedData = storage['encrypt'](JSON.stringify({ 'test-server': credentials }));
       mockFs.readFile.mockResolvedValue(encryptedData);
 
       const result = await storage.getCredentials('test-server');
@@ -96,9 +94,7 @@ describe('FileTokenStorage', () => {
         updatedAt: Date.now(),
       };
 
-      const encryptedData = storage['encrypt'](
-        JSON.stringify({ 'test-server': credentials }),
-      );
+      const encryptedData = storage['encrypt'](JSON.stringify({ 'test-server': credentials }));
       mockFs.readFile.mockResolvedValue(encryptedData);
 
       const result = await storage.getCredentials('test-server');
@@ -108,16 +104,14 @@ describe('FileTokenStorage', () => {
     it('should throw error for corrupted files', async () => {
       mockFs.readFile.mockResolvedValue('corrupted-data');
 
-      await expect(storage.getCredentials('test-server')).rejects.toThrow(
-        'Token file corrupted',
-      );
+      await expect(storage.getCredentials('test-server')).rejects.toThrow('Token file corrupted');
     });
   });
 
   describe('setCredentials', () => {
     it('should save credentials with encryption', async () => {
       const encryptedData = storage['encrypt'](
-        JSON.stringify({ 'existing-server': existingCredentials }),
+        JSON.stringify({ 'existing-server': existingCredentials })
       );
       mockFs.readFile.mockResolvedValue(encryptedData);
       mockFs.mkdir.mockResolvedValue(undefined);
@@ -134,10 +128,10 @@ describe('FileTokenStorage', () => {
 
       await storage.setCredentials(credentials);
 
-      expect(mockFs.mkdir).toHaveBeenCalledWith(
-        path.join('/home/test', GEMINI_DIR),
-        { recursive: true, mode: 0o700 },
-      );
+      expect(mockFs.mkdir).toHaveBeenCalledWith(path.join('/home/test', GEMINI_DIR), {
+        recursive: true,
+        mode: 0o700,
+      });
       expect(mockFs.writeFile).toHaveBeenCalled();
 
       const writeCall = mockFs.writeFile.mock.calls[0];
@@ -147,7 +141,7 @@ describe('FileTokenStorage', () => {
 
     it('should update existing credentials', async () => {
       const encryptedData = storage['encrypt'](
-        JSON.stringify({ 'existing-server': existingCredentials }),
+        JSON.stringify({ 'existing-server': existingCredentials })
       );
       mockFs.readFile.mockResolvedValue(encryptedData);
       mockFs.writeFile.mockResolvedValue(undefined);
@@ -178,7 +172,7 @@ describe('FileTokenStorage', () => {
       mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
       await expect(storage.deleteCredentials('test-server')).rejects.toThrow(
-        'No credentials found for test-server',
+        'No credentials found for test-server'
       );
     });
 
@@ -192,16 +186,14 @@ describe('FileTokenStorage', () => {
         updatedAt: Date.now(),
       };
 
-      const encryptedData = storage['encrypt'](
-        JSON.stringify({ 'test-server': credentials }),
-      );
+      const encryptedData = storage['encrypt'](JSON.stringify({ 'test-server': credentials }));
       mockFs.readFile.mockResolvedValue(encryptedData);
       mockFs.unlink.mockResolvedValue(undefined);
 
       await storage.deleteCredentials('test-server');
 
       expect(mockFs.unlink).toHaveBeenCalledWith(
-        path.join('/home/test', GEMINI_DIR, 'mcp-oauth-tokens-v2.json'),
+        path.join('/home/test', GEMINI_DIR, 'mcp-oauth-tokens-v2.json')
       );
     });
 
@@ -225,7 +217,7 @@ describe('FileTokenStorage', () => {
       };
 
       const encryptedData = storage['encrypt'](
-        JSON.stringify({ server1: credentials1, server2: credentials2 }),
+        JSON.stringify({ server1: credentials1, server2: credentials2 })
       );
       mockFs.readFile.mockResolvedValue(encryptedData);
       mockFs.writeFile.mockResolvedValue(undefined);
@@ -281,7 +273,7 @@ describe('FileTokenStorage', () => {
       await storage.clearAll();
 
       expect(mockFs.unlink).toHaveBeenCalledWith(
-        path.join('/home/test', GEMINI_DIR, 'mcp-oauth-tokens-v2.json'),
+        path.join('/home/test', GEMINI_DIR, 'mcp-oauth-tokens-v2.json')
       );
     });
 
@@ -314,9 +306,7 @@ describe('FileTokenStorage', () => {
     });
 
     it('should throw on invalid encrypted data format', () => {
-      expect(() => storage['decrypt']('invalid-data')).toThrow(
-        'Invalid encrypted data format',
-      );
+      expect(() => storage['decrypt']('invalid-data')).toThrow('Invalid encrypted data format');
     });
   });
 });

@@ -17,20 +17,12 @@ import type {
   ToolCallConfirmationDetails,
   ToolExecuteConfirmationDetails,
 } from './tools.js';
-import {
-  BaseDeclarativeTool,
-  BaseToolInvocation,
-  ToolConfirmationOutcome,
-  Kind,
-} from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, ToolConfirmationOutcome, Kind } from './tools.js';
 import { ApprovalMode } from '../policy/types.js';
 
 import { getErrorMessage } from '../utils/errors.js';
 import { summarizeToolOutput } from '../utils/summarizer.js';
-import type {
-  ShellExecutionConfig,
-  ShellOutputEvent,
-} from '../services/shellExecutionService.js';
+import type { ShellExecutionConfig, ShellOutputEvent } from '../services/shellExecutionService.js';
 import { ShellExecutionService } from '../services/shellExecutionService.js';
 import { formatMemoryUsage } from '../utils/formatters.js';
 import type { AnsiOutput } from '../utils/terminalSerializer.js';
@@ -52,17 +44,14 @@ export interface ShellToolParams {
   dir_path?: string;
 }
 
-export class ShellToolInvocation extends BaseToolInvocation<
-  ShellToolParams,
-  ToolResult
-> {
+export class ShellToolInvocation extends BaseToolInvocation<ShellToolParams, ToolResult> {
   constructor(
     private readonly config: Config,
     params: ShellToolParams,
     private readonly allowlist: Set<string>,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
   }
@@ -84,7 +73,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
   }
 
   protected override async getConfirmationDetails(
-    _abortSignal: AbortSignal,
+    _abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     const command = stripShellWrapper(this.params.command);
     const rootCommands = [...new Set(getCommandRoots(command))];
@@ -93,23 +82,18 @@ export class ShellToolInvocation extends BaseToolInvocation<
     // waiting for user input. If a tool is not fully allowed (e.g. via
     // --allowed-tools="ShellTool(wc)"), we should throw an error instead of
     // prompting for confirmation. This check is skipped in YOLO mode.
-    if (
-      !this.config.isInteractive() &&
-      this.config.getApprovalMode() !== ApprovalMode.YOLO
-    ) {
+    if (!this.config.isInteractive() && this.config.getApprovalMode() !== ApprovalMode.YOLO) {
       if (this.isInvocationAllowlisted(command)) {
         // If it's an allowed shell command, we don't need to confirm execution.
         return false;
       }
 
       throw new Error(
-        `Command "${command}" is not in the list of allowed tools for non-interactive mode.`,
+        `Command "${command}" is not in the list of allowed tools for non-interactive mode.`
       );
     }
 
-    const commandsToConfirm = rootCommands.filter(
-      (command) => !this.allowlist.has(command),
-    );
+    const commandsToConfirm = rootCommands.filter((command) => !this.allowlist.has(command));
 
     if (commandsToConfirm.length === 0) {
       return false; // already approved and allowlisted
@@ -133,7 +117,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
     signal: AbortSignal,
     updateOutput?: (output: string | AnsiOutput) => void,
     shellExecutionConfig?: ShellExecutionConfig,
-    setPidCallback?: (pid: number) => void,
+    setPidCallback?: (pid: number) => void
   ): Promise<ToolResult> {
     const strippedCommand = stripShellWrapper(this.params.command);
 
@@ -145,9 +129,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
     }
 
     const isWindows = os.platform() === 'win32';
-    const tempFileName = `shell_pgrep_${crypto
-      .randomBytes(6)
-      .toString('hex')}.tmp`;
+    const tempFileName = `shell_pgrep_${crypto.randomBytes(6).toString('hex')}.tmp`;
     const tempFilePath = path.join(os.tmpdir(), tempFileName);
 
     try {
@@ -169,52 +151,50 @@ export class ShellToolInvocation extends BaseToolInvocation<
       let lastUpdateTime = Date.now();
       let isBinaryStream = false;
 
-      const { result: resultPromise, pid } =
-        await ShellExecutionService.execute(
-          commandToExecute,
-          cwd,
-          (event: ShellOutputEvent) => {
-            if (!updateOutput) {
-              return;
-            }
+      const { result: resultPromise, pid } = await ShellExecutionService.execute(
+        commandToExecute,
+        cwd,
+        (event: ShellOutputEvent) => {
+          if (!updateOutput) {
+            return;
+          }
 
-            let shouldUpdate = false;
+          let shouldUpdate = false;
 
-            switch (event.type) {
-              case 'data':
-                if (isBinaryStream) break;
-                cumulativeOutput = event.chunk;
+          switch (event.type) {
+            case 'data':
+              if (isBinaryStream) break;
+              cumulativeOutput = event.chunk;
+              shouldUpdate = true;
+              break;
+            case 'binary_detected':
+              isBinaryStream = true;
+              cumulativeOutput = '[Binary output detected. Halting stream...]';
+              shouldUpdate = true;
+              break;
+            case 'binary_progress':
+              isBinaryStream = true;
+              cumulativeOutput = `[Receiving binary output... ${formatMemoryUsage(
+                event.bytesReceived
+              )} received]`;
+              if (Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS) {
                 shouldUpdate = true;
-                break;
-              case 'binary_detected':
-                isBinaryStream = true;
-                cumulativeOutput =
-                  '[Binary output detected. Halting stream...]';
-                shouldUpdate = true;
-                break;
-              case 'binary_progress':
-                isBinaryStream = true;
-                cumulativeOutput = `[Receiving binary output... ${formatMemoryUsage(
-                  event.bytesReceived,
-                )} received]`;
-                if (Date.now() - lastUpdateTime > OUTPUT_UPDATE_INTERVAL_MS) {
-                  shouldUpdate = true;
-                }
-                break;
-              default: {
-                throw new Error('An unhandled ShellOutputEvent was found.');
               }
+              break;
+            default: {
+              throw new Error('An unhandled ShellOutputEvent was found.');
             }
+          }
 
-            if (shouldUpdate) {
-              updateOutput(cumulativeOutput);
-              lastUpdateTime = Date.now();
-            }
-          },
-          signal,
-          this.config.getEnableInteractiveShell(),
-          shellExecutionConfig ?? {},
-        );
+          if (shouldUpdate) {
+            updateOutput(cumulativeOutput);
+            lastUpdateTime = Date.now();
+          }
+        },
+        signal,
+        this.config.getEnableInteractiveShell(),
+        shellExecutionConfig ?? {}
+      );
 
       if (pid && setPidCallback) {
         setPidCallback(pid);
@@ -225,10 +205,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
       const backgroundPIDs: number[] = [];
       if (os.platform() !== 'win32') {
         if (fs.existsSync(tempFilePath)) {
-          const pgrepLines = fs
-            .readFileSync(tempFilePath, 'utf8')
-            .split(EOL)
-            .filter(Boolean);
+          const pgrepLines = fs.readFileSync(tempFilePath, 'utf8').split(EOL).filter(Boolean);
           for (const line of pgrepLines) {
             if (!/^\d+$/.test(line)) {
               debugLogger.error(`pgrep: ${line}`);
@@ -267,9 +244,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
           `Error: ${finalError}`, // Use the cleaned error string.
           `Exit Code: ${result.exitCode ?? '(none)'}`,
           `Signal: ${result.signal ?? '(none)'}`,
-          `Background PIDs: ${
-            backgroundPIDs.length ? backgroundPIDs.join(', ') : '(none)'
-          }`,
+          `Background PIDs: ${backgroundPIDs.length ? backgroundPIDs.join(', ') : '(none)'}`,
           `Process Group PGID: ${result.pid ?? '(none)'}`,
         ].join('\n');
       }
@@ -286,9 +261,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
           } else if (result.signal) {
             returnDisplayMessage = `Command terminated by signal: ${result.signal}`;
           } else if (result.error) {
-            returnDisplayMessage = `Command failed: ${getErrorMessage(
-              result.error,
-            )}`;
+            returnDisplayMessage = `Command failed: ${getErrorMessage(result.error)}`;
           } else if (result.exitCode !== null && result.exitCode !== 0) {
             returnDisplayMessage = `Command exited with code: ${result.exitCode}`;
           }
@@ -312,7 +285,7 @@ export class ShellToolInvocation extends BaseToolInvocation<
           { model: 'summarizer-shell' },
           llmContent,
           this.config.getGeminiClient(),
-          signal,
+          signal
         );
         return {
           llmContent: summary,
@@ -374,17 +347,14 @@ function getCommandDescription(): string {
   }
 }
 
-export class ShellTool extends BaseDeclarativeTool<
-  ShellToolParams,
-  ToolResult
-> {
+export class ShellTool extends BaseDeclarativeTool<ShellToolParams, ToolResult> {
   static readonly Name = SHELL_TOOL_NAME;
 
   private allowlist: Set<string> = new Set();
 
   constructor(
     private readonly config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     void initializeShellParsers().catch(() => {
       // Errors are surfaced when parsing commands.
@@ -416,13 +386,11 @@ export class ShellTool extends BaseDeclarativeTool<
       },
       false, // output is not markdown
       true, // output can be updated
-      messageBus,
+      messageBus
     );
   }
 
-  protected override validateToolParamValues(
-    params: ShellToolParams,
-  ): string | null {
+  protected override validateToolParamValues(params: ShellToolParams): string | null {
     if (!params.command.trim()) {
       return 'Command cannot be empty.';
     }
@@ -430,9 +398,7 @@ export class ShellTool extends BaseDeclarativeTool<
     const commandCheck = isCommandAllowed(params.command, this.config);
     if (!commandCheck.allowed) {
       if (!commandCheck.reason) {
-        debugLogger.error(
-          'Unexpected: isCommandAllowed returned false without a reason',
-        );
+        debugLogger.error('Unexpected: isCommandAllowed returned false without a reason');
         return `Command is not allowed: ${params.command}`;
       }
       return commandCheck.reason;
@@ -441,10 +407,7 @@ export class ShellTool extends BaseDeclarativeTool<
       return 'Could not identify command root to obtain permission from user.';
     }
     if (params.dir_path) {
-      const resolvedPath = path.resolve(
-        this.config.getTargetDir(),
-        params.dir_path,
-      );
+      const resolvedPath = path.resolve(this.config.getTargetDir(), params.dir_path);
       const workspaceContext = this.config.getWorkspaceContext();
       if (!workspaceContext.isPathWithinWorkspace(resolvedPath)) {
         return `Directory '${resolvedPath}' is not within any of the registered workspace directories.`;
@@ -457,7 +420,7 @@ export class ShellTool extends BaseDeclarativeTool<
     params: ShellToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<ShellToolParams, ToolResult> {
     return new ShellToolInvocation(
       this.config,
@@ -465,7 +428,7 @@ export class ShellTool extends BaseDeclarativeTool<
       this.allowlist,
       messageBus,
       _toolName,
-      _toolDisplayName,
+      _toolDisplayName
     );
   }
 }

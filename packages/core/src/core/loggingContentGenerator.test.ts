@@ -15,7 +15,7 @@ vi.mock('../telemetry/loggers.js', () => ({
 }));
 
 const runInDevTraceSpan = vi.hoisted(() =>
-  vi.fn(async (meta, fn) => fn({ metadata: {}, endSpan: vi.fn() })),
+  vi.fn(async (meta, fn) => fn({ metadata: {}, endSpan: vi.fn() }))
 );
 
 vi.mock('../telemetry/trace.js', () => ({
@@ -23,10 +23,7 @@ vi.mock('../telemetry/trace.js', () => ({
 }));
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type {
-  GenerateContentResponse,
-  EmbedContentResponse,
-} from '@google/genai';
+import type { GenerateContentResponse, EmbedContentResponse } from '@google/genai';
 import type { ContentGenerator } from './contentGenerator.js';
 import { LoggingContentGenerator } from './loggingContentGenerator.js';
 import type { Config } from '../config/config.js';
@@ -84,20 +81,14 @@ describe('LoggingContentGenerator', () => {
       const startTime = new Date('2025-01-01T00:00:00.000Z');
       vi.setSystemTime(startTime);
 
-      const promise = loggingContentGenerator.generateContent(
-        req,
-        userPromptId,
-      );
+      const promise = loggingContentGenerator.generateContent(req, userPromptId);
 
       vi.advanceTimersByTime(1000);
 
       await promise;
 
       expect(wrapped.generateContent).toHaveBeenCalledWith(req, userPromptId);
-      expect(logApiRequest).toHaveBeenCalledWith(
-        config,
-        expect.any(ApiRequestEvent),
-      );
+      expect(logApiRequest).toHaveBeenCalledWith(config, expect.any(ApiRequestEvent));
       const responseEvent = vi.mocked(logApiResponse).mock.calls[0][1];
       expect(responseEvent.duration_ms).toBe(1000);
     });
@@ -113,19 +104,13 @@ describe('LoggingContentGenerator', () => {
       const startTime = new Date('2025-01-01T00:00:00.000Z');
       vi.setSystemTime(startTime);
 
-      const promise = loggingContentGenerator.generateContent(
-        req,
-        userPromptId,
-      );
+      const promise = loggingContentGenerator.generateContent(req, userPromptId);
 
       vi.advanceTimersByTime(1000);
 
       await expect(promise).rejects.toThrow(error);
 
-      expect(logApiRequest).toHaveBeenCalledWith(
-        config,
-        expect.any(ApiRequestEvent),
-      );
+      expect(logApiRequest).toHaveBeenCalledWith(config, expect.any(ApiRequestEvent));
       const errorEvent = vi.mocked(logApiError).mock.calls[0][1];
       expect(errorEvent.duration_ms).toBe(1000);
     });
@@ -151,16 +136,11 @@ describe('LoggingContentGenerator', () => {
         yield response;
       }
 
-      vi.mocked(wrapped.generateContentStream).mockResolvedValue(
-        createAsyncGenerator(),
-      );
+      vi.mocked(wrapped.generateContentStream).mockResolvedValue(createAsyncGenerator());
       const startTime = new Date('2025-01-01T00:00:00.000Z');
       vi.setSystemTime(startTime);
 
-      const stream = await loggingContentGenerator.generateContentStream(
-        req,
-        userPromptId,
-      );
+      const stream = await loggingContentGenerator.generateContentStream(req, userPromptId);
 
       vi.advanceTimersByTime(1000);
 
@@ -168,14 +148,8 @@ describe('LoggingContentGenerator', () => {
         // consume stream
       }
 
-      expect(wrapped.generateContentStream).toHaveBeenCalledWith(
-        req,
-        userPromptId,
-      );
-      expect(logApiRequest).toHaveBeenCalledWith(
-        config,
-        expect.any(ApiRequestEvent),
-      );
+      expect(wrapped.generateContentStream).toHaveBeenCalledWith(req, userPromptId);
+      expect(logApiRequest).toHaveBeenCalledWith(config, expect.any(ApiRequestEvent));
       const responseEvent = vi.mocked(logApiResponse).mock.calls[0][1];
       expect(responseEvent.duration_ms).toBe(1000);
     });
@@ -192,16 +166,11 @@ describe('LoggingContentGenerator', () => {
         yield Promise.reject(error);
       }
 
-      vi.mocked(wrapped.generateContentStream).mockResolvedValue(
-        createAsyncGenerator(),
-      );
+      vi.mocked(wrapped.generateContentStream).mockResolvedValue(createAsyncGenerator());
       const startTime = new Date('2025-01-01T00:00:00.000Z');
       vi.setSystemTime(startTime);
 
-      const stream = await loggingContentGenerator.generateContentStream(
-        req,
-        userPromptId,
-      );
+      const stream = await loggingContentGenerator.generateContentStream(req, userPromptId);
 
       vi.advanceTimersByTime(1000);
 
@@ -211,10 +180,7 @@ describe('LoggingContentGenerator', () => {
         }
       }).rejects.toThrow(error);
 
-      expect(logApiRequest).toHaveBeenCalledWith(
-        config,
-        expect.any(ApiRequestEvent),
-      );
+      expect(logApiRequest).toHaveBeenCalledWith(config, expect.any(ApiRequestEvent));
       const errorEvent = vi.mocked(logApiError).mock.calls[0][1];
       expect(errorEvent.duration_ms).toBe(1000);
     });

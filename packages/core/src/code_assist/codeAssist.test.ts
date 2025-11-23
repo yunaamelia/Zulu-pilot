@@ -9,10 +9,7 @@ import { AuthType } from '../core/contentGenerator.js';
 import { getOauthClient } from './oauth2.js';
 import { setupUser } from './setup.js';
 import { CodeAssistServer } from './server.js';
-import {
-  createCodeAssistContentGenerator,
-  getCodeAssistServer,
-} from './codeAssist.js';
+import { createCodeAssistContentGenerator, getCodeAssistServer } from './codeAssist.js';
 import type { Config } from '../config/config.js';
 import { LoggingContentGenerator } from '../core/loggingContentGenerator.js';
 import { UserTierId } from './types.js';
@@ -50,20 +47,17 @@ describe('codeAssist', () => {
         httpOptions,
         AuthType.LOGIN_WITH_GOOGLE,
         mockConfig,
-        'session-123',
+        'session-123'
       );
 
-      expect(getOauthClient).toHaveBeenCalledWith(
-        AuthType.LOGIN_WITH_GOOGLE,
-        mockConfig,
-      );
+      expect(getOauthClient).toHaveBeenCalledWith(AuthType.LOGIN_WITH_GOOGLE, mockConfig);
       expect(setupUser).toHaveBeenCalledWith(mockAuthClient);
       expect(MockedCodeAssistServer).toHaveBeenCalledWith(
         mockAuthClient,
         'test-project',
         httpOptions,
         'session-123',
-        'free-tier',
+        'free-tier'
       );
       expect(generator).toBeInstanceOf(MockedCodeAssistServer);
     });
@@ -75,20 +69,17 @@ describe('codeAssist', () => {
       const generator = await createCodeAssistContentGenerator(
         httpOptions,
         AuthType.COMPUTE_ADC,
-        mockConfig,
+        mockConfig
       );
 
-      expect(getOauthClient).toHaveBeenCalledWith(
-        AuthType.COMPUTE_ADC,
-        mockConfig,
-      );
+      expect(getOauthClient).toHaveBeenCalledWith(AuthType.COMPUTE_ADC, mockConfig);
       expect(setupUser).toHaveBeenCalledWith(mockAuthClient);
       expect(MockedCodeAssistServer).toHaveBeenCalledWith(
         mockAuthClient,
         'test-project',
         httpOptions,
         undefined, // No session ID
-        'free-tier',
+        'free-tier'
       );
       expect(generator).toBeInstanceOf(MockedCodeAssistServer);
     });
@@ -98,8 +89,8 @@ describe('codeAssist', () => {
         createCodeAssistContentGenerator(
           httpOptions,
           'api-key' as AuthType, // Use literal string to avoid enum resolution issues
-          mockConfig,
-        ),
+          mockConfig
+        )
       ).rejects.toThrow('Unsupported authType: api-key');
     });
   });
@@ -117,10 +108,7 @@ describe('codeAssist', () => {
 
     it('should unwrap and return the server if it is wrapped in a LoggingContentGenerator', () => {
       const mockServer = new MockedCodeAssistServer({} as never, '', {});
-      const mockLogger = new MockedLoggingContentGenerator(
-        {} as never,
-        {} as never,
-      );
+      const mockLogger = new MockedLoggingContentGenerator({} as never, {} as never);
       vi.spyOn(mockLogger, 'getWrapped').mockReturnValue(mockServer);
 
       const mockConfig = {
@@ -144,13 +132,8 @@ describe('codeAssist', () => {
 
     it('should return undefined if the wrapped generator is not a CodeAssistServer', () => {
       const mockGenerator = { a: 'generator' }; // Not a CodeAssistServer
-      const mockLogger = new MockedLoggingContentGenerator(
-        {} as never,
-        {} as never,
-      );
-      vi.spyOn(mockLogger, 'getWrapped').mockReturnValue(
-        mockGenerator as never,
-      );
+      const mockLogger = new MockedLoggingContentGenerator({} as never, {} as never);
+      vi.spyOn(mockLogger, 'getWrapped').mockReturnValue(mockGenerator as never);
 
       const mockConfig = {
         getContentGenerator: () => mockLogger,

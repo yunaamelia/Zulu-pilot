@@ -64,12 +64,7 @@ describe('FileSearch', () => {
     await fileSearch.initialize();
     const results = await fileSearch.search('');
 
-    expect(results).toEqual([
-      'src/',
-      '.geminiignore',
-      '.gitignore',
-      'src/not-ignored.js',
-    ]);
+    expect(results).toEqual(['src/', '.geminiignore', '.gitignore', 'src/not-ignored.js']);
   });
 
   it('should use ignoreDirs option', async () => {
@@ -97,9 +92,7 @@ describe('FileSearch', () => {
 
   it('should handle negated directories', async () => {
     tmpDir = await createTmpDir({
-      '.gitignore': ['build/**', '!build/public', '!build/public/**'].join(
-        '\n',
-      ),
+      '.gitignore': ['build/**', '!build/public', '!build/public/**'].join('\n'),
       build: {
         'private.js': '',
         public: ['index.html'],
@@ -243,13 +236,7 @@ describe('FileSearch', () => {
     await fileSearch.initialize();
     const results = await fileSearch.search('');
 
-    expect(results).toEqual([
-      'dist/',
-      'src/',
-      '.gitignore',
-      'dist/keep.js',
-      'src/main.js',
-    ]);
+    expect(results).toEqual(['dist/', 'src/', '.gitignore', 'dist/keep.js', 'src/main.js']);
   });
 
   // New test cases start here
@@ -378,9 +365,7 @@ describe('FileSearch', () => {
     await fileSearch.initialize();
     const results = await fileSearch.search('fle');
 
-    expect(results).toEqual(
-      expect.arrayContaining(['src/file1.js', 'src/flexible.js']),
-    );
+    expect(results).toEqual(expect.arrayContaining(['src/file1.js', 'src/flexible.js']));
   });
 
   it('should return empty array when no matches are found', async () => {
@@ -431,7 +416,7 @@ describe('FileSearch', () => {
     });
 
     await expect(fileSearch.search('')).rejects.toThrow(
-      'Engine not initialized. Call initialize() first.',
+      'Engine not initialized. Call initialize() first.'
     );
   });
 
@@ -581,23 +566,17 @@ describe('FileSearch', () => {
     // Search with a lowercase pattern
     let results = await fileSearch.search('file*.js');
     expect(results).toHaveLength(3);
-    expect(results).toEqual(
-      expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']),
-    );
+    expect(results).toEqual(expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']));
 
     // Search with an uppercase pattern
     results = await fileSearch.search('FILE*.JS');
     expect(results).toHaveLength(3);
-    expect(results).toEqual(
-      expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']),
-    );
+    expect(results).toEqual(expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']));
 
     // Search with a mixed-case pattern
     results = await fileSearch.search('FiLe*.Js');
     expect(results).toHaveLength(3);
-    expect(results).toEqual(
-      expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']),
-    );
+    expect(results).toEqual(expect.arrayContaining(['File1.Js', 'file2.js', 'FILE3.JS']));
   });
 
   it('should respect maxResults even when the cache returns an exact match', async () => {
@@ -624,13 +603,7 @@ describe('FileSearch', () => {
 
     // 1. Perform a broad search to populate the cache with an exact match.
     const initialResults = await fileSearch.search('*.js');
-    expect(initialResults).toEqual([
-      'file1.js',
-      'file2.js',
-      'file3.js',
-      'file4.js',
-      'file5.js',
-    ]);
+    expect(initialResults).toEqual(['file1.js', 'file2.js', 'file3.js', 'file4.js', 'file5.js']);
 
     // 2. Perform the same search again, but this time with a maxResults limit.
     const limitedResults = await fileSearch.search('*.js', { maxResults: 2 });
@@ -662,9 +635,7 @@ describe('FileSearch', () => {
 
     // Search for the file using a pattern that contains special characters.
     // The `unescapePath` function should handle the escaped path correctly.
-    const results = await fileSearch.search(
-      'src/file with \\(special\\) chars.txt',
-    );
+    const results = await fileSearch.search('src/file with \\(special\\) chars.txt');
 
     expect(results).toEqual(['src/file with (special) chars.txt']);
   });

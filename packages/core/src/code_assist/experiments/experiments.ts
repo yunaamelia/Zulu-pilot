@@ -20,9 +20,7 @@ let experimentsPromise: Promise<Experiments> | undefined;
  *
  * The experiments are cached so that they are only fetched once.
  */
-export async function getExperiments(
-  server: CodeAssistServer,
-): Promise<Experiments> {
+export async function getExperiments(server: CodeAssistServer): Promise<Experiments> {
   if (experimentsPromise) {
     return await experimentsPromise;
   }

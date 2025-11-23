@@ -60,9 +60,7 @@ export interface InProcessCheckerConfig {
 /**
  * A discriminated union for all safety checker configurations.
  */
-export type SafetyCheckerConfig =
-  | ExternalCheckerConfig
-  | InProcessCheckerConfig;
+export type SafetyCheckerConfig = ExternalCheckerConfig | InProcessCheckerConfig;
 
 export interface PolicyRule {
   /**

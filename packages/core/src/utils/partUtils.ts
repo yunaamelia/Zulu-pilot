@@ -4,21 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  GenerateContentResponse,
-  PartListUnion,
-  Part,
-  PartUnion,
-} from '@google/genai';
+import type { GenerateContentResponse, PartListUnion, Part, PartUnion } from '@google/genai';
 
 /**
  * Converts a PartListUnion into a string.
  * If verbose is true, includes summary representations of non-text parts.
  */
-export function partToString(
-  value: PartListUnion,
-  options?: { verbose?: boolean },
-): string {
+export function partToString(value: PartListUnion, options?: { verbose?: boolean }): string {
   if (!value) {
     return '';
   }
@@ -69,17 +61,11 @@ export function partToString(
   return part.text ?? '';
 }
 
-export function getResponseText(
-  response: GenerateContentResponse,
-): string | null {
+export function getResponseText(response: GenerateContentResponse): string | null {
   if (response.candidates && response.candidates.length > 0) {
     const candidate = response.candidates[0];
 
-    if (
-      candidate.content &&
-      candidate.content.parts &&
-      candidate.content.parts.length > 0
-    ) {
+    if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
       return candidate.content.parts
         .filter((part) => part.text)
         .map((part) => part.text)
@@ -101,7 +87,7 @@ export function getResponseText(
  */
 export async function flatMapTextParts(
   parts: PartListUnion,
-  transform: (text: string) => Promise<PartUnion[]>,
+  transform: (text: string) => Promise<PartUnion[]>
 ): Promise<PartUnion[]> {
   const result: PartUnion[] = [];
   const partArray = Array.isArray(parts)
@@ -141,7 +127,7 @@ export async function flatMapTextParts(
 export function appendToLastTextPart(
   prompt: PartUnion[],
   textToAppend: string,
-  separator = '\n\n',
+  separator = '\n\n'
 ): PartUnion[] {
   if (!textToAppend) {
     return prompt;

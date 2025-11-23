@@ -19,9 +19,7 @@ describe('WorkspaceContext with real filesystem', () => {
   beforeEach(() => {
     // os.tmpdir() can return a path using a symlink (this is standard on macOS)
     // Use fs.realpathSync to fully resolve the absolute path.
-    tempDir = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), 'workspace-context-test-')),
-    );
+    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'workspace-context-test-')));
 
     cwd = path.join(tempDir, 'project');
     otherDir = path.join(tempDir, 'other-project');
@@ -84,21 +82,18 @@ describe('WorkspaceContext with real filesystem', () => {
       expect(directories).toHaveLength(2);
     });
 
-    it.skipIf(os.platform() === 'win32')(
-      'should handle symbolic links correctly',
-      () => {
-        const realDir = path.join(tempDir, 'real');
-        fs.mkdirSync(realDir, { recursive: true });
-        const symlinkDir = path.join(tempDir, 'symlink-to-real');
-        fs.symlinkSync(realDir, symlinkDir, 'dir');
-        const workspaceContext = new WorkspaceContext(cwd);
-        workspaceContext.addDirectory(symlinkDir);
+    it.skipIf(os.platform() === 'win32')('should handle symbolic links correctly', () => {
+      const realDir = path.join(tempDir, 'real');
+      fs.mkdirSync(realDir, { recursive: true });
+      const symlinkDir = path.join(tempDir, 'symlink-to-real');
+      fs.symlinkSync(realDir, symlinkDir, 'dir');
+      const workspaceContext = new WorkspaceContext(cwd);
+      workspaceContext.addDirectory(symlinkDir);
 
-        const directories = workspaceContext.getDirectories();
+      const directories = workspaceContext.getDirectories();
 
-        expect(directories).toEqual([cwd, realDir]);
-      },
-    );
+      expect(directories).toEqual([cwd, realDir]);
+    });
   });
 
   describe('path validation', () => {
@@ -157,9 +152,7 @@ describe('WorkspaceContext with real filesystem', () => {
     it('should handle non-existent paths correctly', () => {
       const workspaceContext = new WorkspaceContext(cwd, [otherDir]);
       const nonExistentPath = path.join(cwd, 'does-not-exist.txt');
-      expect(workspaceContext.isPathWithinWorkspace(nonExistentPath)).toBe(
-        true,
-      );
+      expect(workspaceContext.isPathWithinWorkspace(nonExistentPath)).toBe(true);
     });
 
     describe.skipIf(os.platform() === 'win32')('with symbolic link', () => {
@@ -211,9 +204,7 @@ describe('WorkspaceContext with real filesystem', () => {
         it('should reject dir paths', () => {
           const workspaceContext = new WorkspaceContext(cwd);
 
-          expect(workspaceContext.isPathWithinWorkspace(symlinkDir)).toBe(
-            false,
-          );
+          expect(workspaceContext.isPathWithinWorkspace(symlinkDir)).toBe(false);
         });
 
         it('should reject non-existent paths', () => {
@@ -385,7 +376,7 @@ describe('WorkspaceContext with optional directories', () => {
 
   beforeEach(() => {
     tempDir = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), 'workspace-context-optional-')),
+      fs.mkdtempSync(path.join(os.tmpdir(), 'workspace-context-optional-'))
     );
     cwd = path.join(tempDir, 'project');
     existingDir1 = path.join(tempDir, 'existing-dir-1');
@@ -405,15 +396,12 @@ describe('WorkspaceContext with optional directories', () => {
   });
 
   it('should skip a missing optional directory and log a warning', () => {
-    const workspaceContext = new WorkspaceContext(cwd, [
-      nonExistentDir,
-      existingDir1,
-    ]);
+    const workspaceContext = new WorkspaceContext(cwd, [nonExistentDir, existingDir1]);
     const directories = workspaceContext.getDirectories();
     expect(directories).toEqual([cwd, existingDir1]);
     expect(debugLogger.warn).toHaveBeenCalledTimes(1);
     expect(debugLogger.warn).toHaveBeenCalledWith(
-      `[WARN] Skipping unreadable directory: ${nonExistentDir} (Directory does not exist: ${nonExistentDir})`,
+      `[WARN] Skipping unreadable directory: ${nonExistentDir} (Directory does not exist: ${nonExistentDir})`
     );
   });
 

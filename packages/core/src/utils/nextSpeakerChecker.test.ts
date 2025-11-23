@@ -76,7 +76,7 @@ describe('checkNextSpeaker', () => {
         countTokens: vi.fn(),
         embedContent: vi.fn(),
       } as ContentGenerator,
-      mockConfig,
+      mockConfig
     );
 
     // GeminiChat will receive the mocked instances via the mocked GoogleGenAI constructor
@@ -84,7 +84,7 @@ describe('checkNextSpeaker', () => {
       mockConfig,
       '', // empty system instruction
       [], // no tools
-      [], // initial history
+      [] // initial history
     );
 
     // Spy on getHistory for chatInstance
@@ -97,12 +97,7 @@ describe('checkNextSpeaker', () => {
 
   it('should return null if history is empty', async () => {
     (chatInstance.getHistory as Mock).mockReturnValue([]);
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
     expect(mockBaseLlmClient.generateJson).not.toHaveBeenCalled();
   });
@@ -111,12 +106,7 @@ describe('checkNextSpeaker', () => {
     vi.mocked(chatInstance.getHistory).mockReturnValue([
       { role: 'user', parts: [{ text: 'Hello' }] },
     ]);
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
     expect(mockBaseLlmClient.generateJson).not.toHaveBeenCalled();
   });
@@ -131,12 +121,7 @@ describe('checkNextSpeaker', () => {
     };
     (mockBaseLlmClient.generateJson as Mock).mockResolvedValue(mockApiResponse);
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toEqual(mockApiResponse);
     expect(mockBaseLlmClient.generateJson).toHaveBeenCalledTimes(1);
   });
@@ -151,12 +136,7 @@ describe('checkNextSpeaker', () => {
     };
     (mockBaseLlmClient.generateJson as Mock).mockResolvedValue(mockApiResponse);
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toEqual(mockApiResponse);
   });
 
@@ -170,32 +150,18 @@ describe('checkNextSpeaker', () => {
     };
     (mockBaseLlmClient.generateJson as Mock).mockResolvedValue(mockApiResponse);
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toEqual(mockApiResponse);
   });
 
   it('should return null if baseLlmClient.generateJson throws an error', async () => {
-    const consoleWarnSpy = vi
-      .spyOn(console, 'warn')
-      .mockImplementation(() => {});
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     (chatInstance.getHistory as Mock).mockReturnValue([
       { role: 'model', parts: [{ text: 'Some model output.' }] },
     ] as Content[]);
-    (mockBaseLlmClient.generateJson as Mock).mockRejectedValue(
-      new Error('API Error'),
-    );
+    (mockBaseLlmClient.generateJson as Mock).mockRejectedValue(new Error('API Error'));
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
     consoleWarnSpy.mockRestore();
   });
@@ -208,12 +174,7 @@ describe('checkNextSpeaker', () => {
       reasoning: 'This is incomplete.',
     } as unknown as NextSpeakerResponse); // Type assertion to simulate invalid response
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
   });
 
@@ -226,12 +187,7 @@ describe('checkNextSpeaker', () => {
       next_speaker: 123, // Invalid type
     } as unknown as NextSpeakerResponse);
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
   });
 
@@ -244,12 +200,7 @@ describe('checkNextSpeaker', () => {
       next_speaker: 'neither', // Invalid enum value
     } as unknown as NextSpeakerResponse);
 
-    const result = await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    const result = await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
     expect(result).toBeNull();
   });
 
@@ -263,16 +214,10 @@ describe('checkNextSpeaker', () => {
     };
     (mockBaseLlmClient.generateJson as Mock).mockResolvedValue(mockApiResponse);
 
-    await checkNextSpeaker(
-      chatInstance,
-      mockBaseLlmClient,
-      abortSignal,
-      promptId,
-    );
+    await checkNextSpeaker(chatInstance, mockBaseLlmClient, abortSignal, promptId);
 
     expect(mockBaseLlmClient.generateJson).toHaveBeenCalled();
-    const generateJsonCall = (mockBaseLlmClient.generateJson as Mock).mock
-      .calls[0][0];
+    const generateJsonCall = (mockBaseLlmClient.generateJson as Mock).mock.calls[0][0];
     expect(generateJsonCall.modelConfigKey.model).toBe('next-speaker-checker');
     expect(generateJsonCall.promptId).toBe(promptId);
   });

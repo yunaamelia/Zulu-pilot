@@ -207,8 +207,7 @@ describe('classifyGoogleError', () => {
           '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
           violations: [
             {
-              quotaMetric:
-                'generativelanguage.googleapis.com/generate_content_free_tier_requests',
+              quotaMetric: 'generativelanguage.googleapis.com/generate_content_free_tier_requests',
               quotaId: 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier',
               quotaDimensions: {
                 location: 'global',
@@ -242,8 +241,7 @@ describe('classifyGoogleError', () => {
   it('should return RetryableQuotaError for Cloud Code RATE_LIMIT_EXCEEDED with retry delay', () => {
     const apiError: GoogleApiError = {
       code: 429,
-      message:
-        'You have exhausted your capacity on this model. Your quota will reset after 0s.',
+      message: 'You have exhausted your capacity on this model. Your quota will reset after 0s.',
       details: [
         {
           '@type': 'type.googleapis.com/google.rpc.ErrorInfo',
@@ -265,16 +263,13 @@ describe('classifyGoogleError', () => {
     vi.spyOn(errorParser, 'parseGoogleApiError').mockReturnValue(apiError);
     const result = classifyGoogleError(new Error());
     expect(result).toBeInstanceOf(RetryableQuotaError);
-    expect((result as RetryableQuotaError).retryDelayMs).toBeCloseTo(
-      539.477544,
-    );
+    expect((result as RetryableQuotaError).retryDelayMs).toBeCloseTo(539.477544);
   });
 
   it('should return TerminalQuotaError for Cloud Code QUOTA_EXHAUSTED', () => {
     const apiError: GoogleApiError = {
       code: 429,
-      message:
-        'You have exhausted your capacity on this model. Your quota will reset after 0s.',
+      message: 'You have exhausted your capacity on this model. Your quota will reset after 0s.',
       details: [
         {
           '@type': 'type.googleapis.com/google.rpc.ErrorInfo',

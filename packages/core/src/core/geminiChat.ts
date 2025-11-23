@@ -30,18 +30,9 @@ import {
 import { hasCycleInSchema } from '../tools/tools.js';
 import type { StructuredError } from './turn.js';
 import type { CompletedToolCall } from './coreToolScheduler.js';
-import {
-  logContentRetry,
-  logContentRetryFailure,
-} from '../telemetry/loggers.js';
-import {
-  ChatRecordingService,
-  type ResumedSessionData,
-} from '../services/chatRecordingService.js';
-import {
-  ContentRetryEvent,
-  ContentRetryFailureEvent,
-} from '../telemetry/types.js';
+import { logContentRetry, logContentRetryFailure } from '../telemetry/loggers.js';
+import { ChatRecordingService, type ResumedSessionData } from '../services/chatRecordingService.js';
+import { ContentRetryEvent, ContentRetryFailureEvent } from '../telemetry/types.js';
 import { handleFallback } from '../fallback/handler.js';
 import { isFunctionResponse } from '../utils/messageInspectors.js';
 import { partListUnionToString } from './geminiRequest.js';
@@ -174,14 +165,11 @@ function extractCuratedHistory(comprehensiveHistory: Content[]): Content[] {
  * which should trigger a retry.
  */
 export class InvalidStreamError extends Error {
-  readonly type:
-    | 'NO_FINISH_REASON'
-    | 'NO_RESPONSE_TEXT'
-    | 'MALFORMED_FUNCTION_CALL';
+  readonly type: 'NO_FINISH_REASON' | 'NO_RESPONSE_TEXT' | 'MALFORMED_FUNCTION_CALL';
 
   constructor(
     message: string,
-    type: 'NO_FINISH_REASON' | 'NO_RESPONSE_TEXT' | 'MALFORMED_FUNCTION_CALL',
+    type: 'NO_FINISH_REASON' | 'NO_RESPONSE_TEXT' | 'MALFORMED_FUNCTION_CALL'
   ) {
     super(message);
     this.name = 'InvalidStreamError';
@@ -208,14 +196,12 @@ export class GeminiChat {
     private systemInstruction: string = '',
     private tools: Tool[] = [],
     private history: Content[] = [],
-    resumedSessionData?: ResumedSessionData,
+    resumedSessionData?: ResumedSessionData
   ) {
     validateHistory(history);
     this.chatRecordingService = new ChatRecordingService(config);
     this.chatRecordingService.initialize(resumedSessionData);
-    this.lastPromptTokenCount = Math.ceil(
-      JSON.stringify(this.history).length / 4,
-    );
+    this.lastPromptTokenCount = Math.ceil(JSON.stringify(this.history).length / 4);
   }
 
   setSystemInstruction(sysInstr: string) {
@@ -251,7 +237,7 @@ export class GeminiChat {
     modelConfigKey: ModelConfigKey,
     message: PartListUnion,
     prompt_id: string,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<AsyncGenerator<StreamEvent>> {
     await this.sendPromise;
 
@@ -295,10 +281,7 @@ export class GeminiChat {
         let maxAttempts = INVALID_CONTENT_RETRY_OPTIONS.maxAttempts;
         // If we are in Preview Model Fallback Mode, we want to fail fast (1 attempt)
         // when probing the Preview Model.
-        if (
-          self.config.isPreviewModelFallbackMode() &&
-          model === PREVIEW_GEMINI_MODEL
-        ) {
+        if (self.config.isPreviewModelFallbackMode() && model === PREVIEW_GEMINI_MODEL) {
           maxAttempts = 1;
         }
 
@@ -317,7 +300,7 @@ export class GeminiChat {
               model,
               generateContentConfig,
               requestContents,
-              prompt_id,
+              prompt_id
             );
 
             for await (const chunk of stream) {
@@ -339,15 +322,11 @@ export class GeminiChat {
                     attempt,
                     (error as InvalidStreamError).type,
                     INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs,
-                    model,
-                  ),
+                    model
+                  )
                 );
                 await new Promise((res) =>
-                  setTimeout(
-                    res,
-                    INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs *
-                      (attempt + 1),
-                  ),
+                  setTimeout(res, INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs * (attempt + 1))
                 );
                 continue;
               }
@@ -357,27 +336,21 @@ export class GeminiChat {
         }
 
         if (lastError) {
-          if (
-            lastError instanceof InvalidStreamError &&
-            isGemini2Model(model)
-          ) {
+          if (lastError instanceof InvalidStreamError && isGemini2Model(model)) {
             logContentRetryFailure(
               self.config,
               new ContentRetryFailureEvent(
                 maxAttempts,
                 (lastError as InvalidStreamError).type,
-                model,
-              ),
+                model
+              )
             );
           }
           throw lastError;
         } else {
           // Preview Model successfully used, disable fallback mode.
           // We only do this if we didn't bypass Preview Model (i.e. we actually used it).
-          if (
-            model === PREVIEW_GEMINI_MODEL &&
-            !self.config.isPreviewModelBypassMode()
-          ) {
+          if (model === PREVIEW_GEMINI_MODEL && !self.config.isPreviewModelBypassMode()) {
             self.config.setPreviewModelFallbackMode(false);
           }
         }
@@ -391,25 +364,21 @@ export class GeminiChat {
     model: string,
     generateContentConfig: GenerateContentConfig,
     requestContents: Content[],
-    prompt_id: string,
+    prompt_id: string
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
     let effectiveModel = model;
-    const contentsForPreviewModel =
-      this.ensureActiveLoopHasThoughtSignatures(requestContents);
+    const contentsForPreviewModel = this.ensureActiveLoopHasThoughtSignatures(requestContents);
     const apiCall = () => {
       let modelToUse = getEffectiveModel(
         this.config.isInFallbackMode(),
         model,
-        this.config.getPreviewFeatures(),
+        this.config.getPreviewFeatures()
       );
 
       // Preview Model Bypass Logic:
       // If we are in "Preview Model Bypass Mode" (transient failure), we force downgrade to 2.5 Pro
       // IF the effective model is currently Preview Model.
-      if (
-        this.config.isPreviewModelBypassMode() &&
-        modelToUse === PREVIEW_GEMINI_MODEL
-      ) {
+      if (this.config.isPreviewModelBypassMode() && modelToUse === PREVIEW_GEMINI_MODEL) {
         modelToUse = DEFAULT_GEMINI_MODEL;
       }
 
@@ -442,20 +411,15 @@ export class GeminiChat {
       return this.config.getContentGenerator().generateContentStream(
         {
           model: modelToUse,
-          contents:
-            modelToUse === PREVIEW_GEMINI_MODEL
-              ? contentsForPreviewModel
-              : requestContents,
+          contents: modelToUse === PREVIEW_GEMINI_MODEL ? contentsForPreviewModel : requestContents,
           config,
         },
-        prompt_id,
+        prompt_id
       );
     };
 
-    const onPersistent429Callback = async (
-      authType?: string,
-      error?: unknown,
-    ) => await handleFallback(this.config, effectiveModel, authType, error);
+    const onPersistent429Callback = async (authType?: string, error?: unknown) =>
+      await handleFallback(this.config, effectiveModel, authType, error);
 
     const streamResponse = await retryWithBackoff(apiCall, {
       onPersistent429: onPersistent429Callback,
@@ -463,10 +427,7 @@ export class GeminiChat {
       retryFetchErrors: this.config.getRetryFetchErrors(),
       signal: generateContentConfig.abortSignal,
       maxAttempts:
-        this.config.isPreviewModelFallbackMode() &&
-        model === PREVIEW_GEMINI_MODEL
-          ? 1
-          : undefined,
+        this.config.isPreviewModelFallbackMode() && model === PREVIEW_GEMINI_MODEL ? 1 : undefined,
     });
 
     return this.processStreamResponse(model, streamResponse);
@@ -496,9 +457,7 @@ export class GeminiChat {
    * chat session.
    */
   getHistory(curated: boolean = false): Content[] {
-    const history = curated
-      ? extractCuratedHistory(this.history)
-      : this.history;
+    const history = curated ? extractCuratedHistory(this.history) : this.history;
     // Deep copy the history to avoid mutating the history outside of the
     // chat session.
     return structuredClone(history);
@@ -595,10 +554,7 @@ export class GeminiChat {
   async maybeIncludeSchemaDepthContext(error: StructuredError): Promise<void> {
     // Check for potentially problematic cyclic tools with cyclic schemas
     // and include a recommendation to remove potentially problematic tools.
-    if (
-      isSchemaDepthError(error.message) ||
-      isInvalidArgumentError(error.message)
-    ) {
+    if (isSchemaDepthError(error.message) || isInvalidArgumentError(error.message)) {
       const tools = this.config.getToolRegistry().getAllTools();
       const cyclicSchemaTools: string[] = [];
       for (const tool of tools) {
@@ -622,7 +578,7 @@ export class GeminiChat {
 
   private async *processStreamResponse(
     model: string,
-    streamResponse: AsyncGenerator<GenerateContentResponse>,
+    streamResponse: AsyncGenerator<GenerateContentResponse>
   ): AsyncGenerator<GenerateContentResponse> {
     const modelResponseParts: Part[] = [];
 
@@ -630,9 +586,7 @@ export class GeminiChat {
     let finishReason: FinishReason | undefined;
 
     for await (const chunk of streamResponse) {
-      const candidateWithReason = chunk?.candidates?.find(
-        (candidate) => candidate.finishReason,
-      );
+      const candidateWithReason = chunk?.candidates?.find((candidate) => candidate.finishReason);
       if (candidateWithReason) {
         finishReason = candidateWithReason.finishReason as FinishReason;
       }
@@ -648,9 +602,7 @@ export class GeminiChat {
             hasToolCall = true;
           }
 
-          modelResponseParts.push(
-            ...content.parts.filter((part) => !part.thought),
-          );
+          modelResponseParts.push(...content.parts.filter((part) => !part.thought));
         }
       }
 
@@ -707,19 +659,19 @@ export class GeminiChat {
       if (!finishReason) {
         throw new InvalidStreamError(
           'Model stream ended without a finish reason.',
-          'NO_FINISH_REASON',
+          'NO_FINISH_REASON'
         );
       }
       if (finishReason === FinishReason.MALFORMED_FUNCTION_CALL) {
         throw new InvalidStreamError(
           'Model stream ended with malformed function call.',
-          'MALFORMED_FUNCTION_CALL',
+          'MALFORMED_FUNCTION_CALL'
         );
       }
       if (!responseText) {
         throw new InvalidStreamError(
           'Model stream ended with empty response text.',
-          'NO_RESPONSE_TEXT',
+          'NO_RESPONSE_TEXT'
         );
       }
     }
@@ -742,14 +694,10 @@ export class GeminiChat {
    * Records completed tool calls with full metadata.
    * This is called by external components when tool calls complete, before sending responses to Gemini.
    */
-  recordCompletedToolCalls(
-    model: string,
-    toolCalls: CompletedToolCall[],
-  ): void {
+  recordCompletedToolCalls(model: string, toolCalls: CompletedToolCall[]): void {
     const toolCallRecords = toolCalls.map((call) => {
       const resultDisplayRaw = call.response?.resultDisplay;
-      const resultDisplay =
-        typeof resultDisplayRaw === 'string' ? resultDisplayRaw : undefined;
+      const resultDisplay = typeof resultDisplayRaw === 'string' ? resultDisplayRaw : undefined;
 
       return {
         id: call.request.callId,
@@ -778,9 +726,7 @@ export class GeminiChat {
       // Extract subject and description using the same logic as turn.ts
       const rawText = thoughtPart.text;
       const subjectStringMatches = rawText.match(/\*\*(.*?)\*\*/s);
-      const subject = subjectStringMatches
-        ? subjectStringMatches[1].trim()
-        : '';
+      const subject = subjectStringMatches ? subjectStringMatches[1].trim() : '';
       const description = rawText.replace(/\*\*(.*?)\*\*/s, '').trim();
 
       this.chatRecordingService.recordThought({

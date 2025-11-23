@@ -4,15 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  type Mock,
-} from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { GitService } from './gitService.js';
 import { Storage } from '../config/storage.js';
 import * as path from 'node:path';
@@ -138,15 +130,13 @@ describe('GitService', () => {
       (spawnAsync as Mock).mockRejectedValue(new Error('git not found'));
       const service = new GitService(projectRoot, storage);
       await expect(service.initialize()).rejects.toThrow(
-        'Checkpointing is enabled, but Git is not installed. Please install Git or disable checkpointing to continue.',
+        'Checkpointing is enabled, but Git is not installed. Please install Git or disable checkpointing to continue.'
       );
     });
 
     it('should call setupShadowGitRepository if Git is available', async () => {
       const service = new GitService(projectRoot, storage);
-      const setupSpy = vi
-        .spyOn(service, 'setupShadowGitRepository')
-        .mockResolvedValue(undefined);
+      const setupSpy = vi.spyOn(service, 'setupShadowGitRepository').mockResolvedValue(undefined);
 
       await service.initialize();
       expect(setupSpy).toHaveBeenCalled();
@@ -225,7 +215,7 @@ describe('GitService', () => {
       const service = new GitService(projectRoot, storage);
       // EISDIR is the expected error code on Unix-like systems
       await expect(service.setupShadowGitRepository()).rejects.toThrow(
-        /EISDIR: illegal operation on a directory, read|EBUSY: resource busy or locked, read/,
+        /EISDIR: illegal operation on a directory, read|EBUSY: resource busy or locked, read/
       );
     });
 

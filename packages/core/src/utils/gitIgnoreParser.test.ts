@@ -52,9 +52,7 @@ node_modules/
 `;
       await createTestFile('.gitignore', gitignoreContent);
 
-      expect(parser.isIgnored(path.join('node_modules', 'some-lib'))).toBe(
-        true,
-      );
+      expect(parser.isIgnored(path.join('node_modules', 'some-lib'))).toBe(true);
       expect(parser.isIgnored(path.join('src', 'app.log'))).toBe(true);
       expect(parser.isIgnored(path.join('dist', 'index.js'))).toBe(true);
       expect(parser.isIgnored('.env')).toBe(true);
@@ -62,10 +60,7 @@ node_modules/
     });
 
     it('should handle git exclude file', async () => {
-      await createTestFile(
-        path.join('.git', 'info', 'exclude'),
-        'temp/\n*.tmp',
-      );
+      await createTestFile(path.join('.git', 'info', 'exclude'), 'temp/\n*.tmp');
 
       expect(parser.isIgnored(path.join('temp', 'file.txt'))).toBe(true);
       expect(parser.isIgnored(path.join('src', 'file.tmp'))).toBe(true);
@@ -90,15 +85,11 @@ src/*.tmp
     it('should always ignore .git directory', () => {
       expect(parser.isIgnored('.git')).toBe(true);
       expect(parser.isIgnored(path.join('.git', 'config'))).toBe(true);
-      expect(parser.isIgnored(path.join(projectRoot, '.git', 'HEAD'))).toBe(
-        true,
-      );
+      expect(parser.isIgnored(path.join(projectRoot, '.git', 'HEAD'))).toBe(true);
     });
 
     it('should ignore files matching patterns', () => {
-      expect(
-        parser.isIgnored(path.join('node_modules', 'package', 'index.js')),
-      ).toBe(true);
+      expect(parser.isIgnored(path.join('node_modules', 'package', 'index.js'))).toBe(true);
       expect(parser.isIgnored('app.log')).toBe(true);
       expect(parser.isIgnored(path.join('logs', 'app.log'))).toBe(true);
       expect(parser.isIgnored(path.join('dist', 'bundle.js'))).toBe(true);
@@ -131,12 +122,8 @@ src/*.tmp
     });
 
     it('should handle relative paths correctly', () => {
-      expect(parser.isIgnored(path.join('node_modules', 'some-package'))).toBe(
-        true,
-      );
-      expect(
-        parser.isIgnored(path.join('..', 'some', 'other', 'file.txt')),
-      ).toBe(false);
+      expect(parser.isIgnored(path.join('node_modules', 'some-package'))).toBe(true);
+      expect(parser.isIgnored(path.join('..', 'some', 'other', 'file.txt'))).toBe(false);
     });
 
     it('should normalize path separators on Windows', () => {
@@ -229,9 +216,7 @@ src/*.tmp
       expect(parser.isIgnored('some.log')).toBe(true);
       expect(parser.isIgnored('important.log')).toBe(false);
       expect(parser.isIgnored(path.join('subdir', 'some.log'))).toBe(true);
-      expect(parser.isIgnored(path.join('subdir', 'important.log'))).toBe(
-        false,
-      );
+      expect(parser.isIgnored(path.join('subdir', 'important.log'))).toBe(false);
     });
   });
   describe('Escaped Characters', () => {

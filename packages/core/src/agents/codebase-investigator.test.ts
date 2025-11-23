@@ -17,17 +17,11 @@ import { DEFAULT_GEMINI_MODEL } from '../config/models.js';
 describe('CodebaseInvestigatorAgent', () => {
   it('should have the correct agent definition', () => {
     expect(CodebaseInvestigatorAgent.name).toBe('codebase_investigator');
-    expect(CodebaseInvestigatorAgent.displayName).toBe(
-      'Codebase Investigator Agent',
-    );
+    expect(CodebaseInvestigatorAgent.displayName).toBe('Codebase Investigator Agent');
     expect(CodebaseInvestigatorAgent.description).toBeDefined();
-    expect(
-      CodebaseInvestigatorAgent.inputConfig.inputs['objective'].required,
-    ).toBe(true);
+    expect(CodebaseInvestigatorAgent.inputConfig.inputs['objective'].required).toBe(true);
     expect(CodebaseInvestigatorAgent.outputConfig?.outputName).toBe('report');
-    expect(CodebaseInvestigatorAgent.modelConfig?.model).toBe(
-      DEFAULT_GEMINI_MODEL,
-    );
+    expect(CodebaseInvestigatorAgent.modelConfig?.model).toBe(DEFAULT_GEMINI_MODEL);
     expect(CodebaseInvestigatorAgent.toolConfig?.tools).toEqual([
       LS_TOOL_NAME,
       READ_FILE_TOOL_NAME,

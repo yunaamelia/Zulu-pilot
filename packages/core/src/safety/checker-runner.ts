@@ -45,7 +45,7 @@ export class CheckerRunner {
   constructor(
     contextBuilder: ContextBuilder,
     registry: CheckerRegistry,
-    config: CheckerRunnerConfig,
+    config: CheckerRunnerConfig
   ) {
     this.contextBuilder = contextBuilder;
     this.registry = registry;
@@ -57,7 +57,7 @@ export class CheckerRunner {
    */
   async runChecker(
     toolCall: FunctionCall,
-    checkerConfig: SafetyCheckerConfig,
+    checkerConfig: SafetyCheckerConfig
   ): Promise<SafetyCheckResult> {
     if (checkerConfig.type === 'in-process') {
       return this.runInProcessChecker(toolCall, checkerConfig);
@@ -67,14 +67,12 @@ export class CheckerRunner {
 
   private async runInProcessChecker(
     toolCall: FunctionCall,
-    checkerConfig: InProcessCheckerConfig,
+    checkerConfig: InProcessCheckerConfig
   ): Promise<SafetyCheckResult> {
     try {
       const checker = this.registry.resolveInProcess(checkerConfig.name);
       const context = checkerConfig.required_context
-        ? this.contextBuilder.buildMinimalContext(
-            checkerConfig.required_context,
-          )
+        ? this.contextBuilder.buildMinimalContext(checkerConfig.required_context)
         : this.contextBuilder.buildFullContext();
 
       const input: SafetyCheckInput = {
@@ -99,7 +97,7 @@ export class CheckerRunner {
 
   private async runExternalChecker(
     toolCall: FunctionCall,
-    checkerConfig: ExternalCheckerConfig,
+    checkerConfig: ExternalCheckerConfig
   ): Promise<SafetyCheckResult> {
     try {
       // Resolve the checker executable path
@@ -107,9 +105,7 @@ export class CheckerRunner {
 
       // Build the appropriate context
       const context = checkerConfig.required_context
-        ? this.contextBuilder.buildMinimalContext(
-            checkerConfig.required_context,
-          )
+        ? this.contextBuilder.buildMinimalContext(checkerConfig.required_context)
         : this.contextBuilder.buildFullContext();
 
       // Create the input payload
@@ -121,11 +117,7 @@ export class CheckerRunner {
       };
 
       // Run the checker process
-      return await this.executeCheckerProcess(
-        checkerPath,
-        input,
-        checkerConfig.name,
-      );
+      return await this.executeCheckerProcess(checkerPath, input, checkerConfig.name);
     } catch (error) {
       // If anything goes wrong, deny the operation
       return {
@@ -143,7 +135,7 @@ export class CheckerRunner {
   private executeCheckerProcess(
     checkerPath: string,
     input: SafetyCheckInput,
-    checkerName: string,
+    checkerName: string
   ): Promise<SafetyCheckResult> {
     return new Promise((resolve) => {
       const child = spawn(checkerPath, [], {
@@ -215,13 +207,8 @@ export class CheckerRunner {
           const result: SafetyCheckResult = JSON.parse(stdout);
 
           // Validate the result structure
-          if (
-            !result.decision ||
-            !Object.values(SafetyCheckDecision).includes(result.decision)
-          ) {
-            throw new Error(
-              'Invalid result: missing or invalid "decision" field',
-            );
+          if (!result.decision || !Object.values(SafetyCheckDecision).includes(result.decision)) {
+            throw new Error('Invalid result: missing or invalid "decision" field');
           }
 
           resolve(result);
@@ -229,9 +216,7 @@ export class CheckerRunner {
           resolve({
             decision: SafetyCheckDecision.DENY,
             reason: `Failed to parse output from safety checker "${checkerName}": ${
-              parseError instanceof Error
-                ? parseError.message
-                : String(parseError)
+              parseError instanceof Error ? parseError.message : String(parseError)
             }`,
           });
         }
@@ -268,9 +253,7 @@ export class CheckerRunner {
         resolve({
           decision: SafetyCheckDecision.DENY,
           reason: `Failed to write to stdin of safety checker "${checkerName}": ${
-            writeError instanceof Error
-              ? writeError.message
-              : String(writeError)
+            writeError instanceof Error ? writeError.message : String(writeError)
           }`,
         });
       }

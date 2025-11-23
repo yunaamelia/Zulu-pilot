@@ -29,17 +29,14 @@ export class RecordingContentGenerator implements ContentGenerator {
 
   constructor(
     private readonly realGenerator: ContentGenerator,
-    private readonly filePath: string,
+    private readonly filePath: string
   ) {}
 
   async generateContent(
     request: GenerateContentParameters,
-    userPromptId: string,
+    userPromptId: string
   ): Promise<GenerateContentResponse> {
-    const response = await this.realGenerator.generateContent(
-      request,
-      userPromptId,
-    );
+    const response = await this.realGenerator.generateContent(request, userPromptId);
     const recordedResponse: FakeResponse = {
       method: 'generateContent',
       response: {
@@ -53,17 +50,14 @@ export class RecordingContentGenerator implements ContentGenerator {
 
   async generateContentStream(
     request: GenerateContentParameters,
-    userPromptId: string,
+    userPromptId: string
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
     const recordedResponse: FakeResponse = {
       method: 'generateContentStream',
       response: [],
     };
 
-    const realResponses = await this.realGenerator.generateContentStream(
-      request,
-      userPromptId,
-    );
+    const realResponses = await this.realGenerator.generateContentStream(request, userPromptId);
 
     async function* stream(filePath: string) {
       for await (const response of realResponses) {
@@ -79,9 +73,7 @@ export class RecordingContentGenerator implements ContentGenerator {
     return Promise.resolve(stream(this.filePath));
   }
 
-  async countTokens(
-    request: CountTokensParameters,
-  ): Promise<CountTokensResponse> {
+  async countTokens(request: CountTokensParameters): Promise<CountTokensResponse> {
     const response = await this.realGenerator.countTokens(request);
     const recordedResponse: FakeResponse = {
       method: 'countTokens',
@@ -94,9 +86,7 @@ export class RecordingContentGenerator implements ContentGenerator {
     return response;
   }
 
-  async embedContent(
-    request: EmbedContentParameters,
-  ): Promise<EmbedContentResponse> {
+  async embedContent(request: EmbedContentParameters): Promise<EmbedContentResponse> {
     const response = await this.realGenerator.embedContent(request);
 
     const recordedResponse: FakeResponse = {

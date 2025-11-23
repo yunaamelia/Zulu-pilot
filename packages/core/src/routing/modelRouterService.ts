@@ -5,15 +5,8 @@
  */
 
 import type { Config } from '../config/config.js';
-import {
-  PREVIEW_GEMINI_MODEL,
-  DEFAULT_GEMINI_MODEL,
-} from '../config/models.js';
-import type {
-  RoutingContext,
-  RoutingDecision,
-  TerminalStrategy,
-} from './routingStrategy.js';
+import { PREVIEW_GEMINI_MODEL, DEFAULT_GEMINI_MODEL } from '../config/models.js';
+import type { RoutingContext, RoutingDecision, TerminalStrategy } from './routingStrategy.js';
 import { DefaultStrategy } from './strategies/defaultStrategy.js';
 import { ClassifierStrategy } from './strategies/classifierStrategy.js';
 import { CompositeStrategy } from './strategies/compositeStrategy.js';
@@ -45,7 +38,7 @@ export class ModelRouterService {
         new ClassifierStrategy(),
         new DefaultStrategy(),
       ],
-      'agent-router',
+      'agent-router'
     );
   }
 
@@ -60,11 +53,7 @@ export class ModelRouterService {
     let decision: RoutingDecision;
 
     try {
-      decision = await this.strategy.route(
-        context,
-        this.config,
-        this.config.getBaseLlmClient(),
-      );
+      decision = await this.strategy.route(context, this.config, this.config.getBaseLlmClient());
 
       // Unified Preview Model Logic:
       // If the decision is to use 'gemini-2.5-pro' and preview features are enabled,
@@ -89,7 +78,7 @@ export class ModelRouterService {
         decision.metadata.latencyMs,
         decision.metadata.reasoning,
         false, // failed
-        undefined, // error_message
+        undefined // error_message
       );
       logModelRouting(this.config, event);
 
@@ -116,7 +105,7 @@ export class ModelRouterService {
         decision.metadata.latencyMs,
         decision.metadata.reasoning,
         failed,
-        error_message,
+        error_message
       );
 
       logModelRouting(this.config, event);

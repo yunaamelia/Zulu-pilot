@@ -8,11 +8,7 @@
  * Safely replaces text with literal strings, avoiding ECMAScript GetSubstitution issues.
  * Escapes $ characters to prevent template interpretation.
  */
-export function safeLiteralReplace(
-  str: string,
-  oldString: string,
-  newString: string,
-): string {
+export function safeLiteralReplace(str: string, oldString: string, newString: string): string {
   if (oldString === '' || !str.includes(oldString)) {
     return str;
   }
@@ -32,10 +28,7 @@ export function safeLiteralReplace(
  * @param sampleSize The number of bytes from the start of the buffer to test.
  * @returns True if a NULL byte is found, false otherwise.
  */
-export function isBinary(
-  data: Buffer | null | undefined,
-  sampleSize = 512,
-): boolean {
+export function isBinary(data: Buffer | null | undefined, sampleSize = 512): boolean {
   if (!data) {
     return false;
   }

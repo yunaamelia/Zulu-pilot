@@ -24,16 +24,13 @@ export async function handleFallback(
   config: Config,
   failedModel: string,
   authType?: string,
-  error?: unknown,
+  error?: unknown
 ): Promise<string | boolean | null> {
   // Applicability Checks
   if (authType !== AuthType.LOGIN_WITH_GOOGLE) return null;
 
   // Guardrail: If it's a ModelNotFoundError but NOT the preview model, do not handle it.
-  if (
-    error instanceof ModelNotFoundError &&
-    failedModel !== PREVIEW_GEMINI_MODEL
-  ) {
+  if (error instanceof ModelNotFoundError && failedModel !== PREVIEW_GEMINI_MODEL) {
     return null;
   }
 
@@ -51,9 +48,7 @@ export async function handleFallback(
   }
 
   const fallbackModel =
-    failedModel === PREVIEW_GEMINI_MODEL
-      ? DEFAULT_GEMINI_MODEL
-      : DEFAULT_GEMINI_FLASH_MODEL;
+    failedModel === PREVIEW_GEMINI_MODEL ? DEFAULT_GEMINI_MODEL : DEFAULT_GEMINI_FLASH_MODEL;
 
   // Consult UI Handler for Intent
   const fallbackModelHandler = config.fallbackModelHandler;
@@ -61,11 +56,7 @@ export async function handleFallback(
 
   try {
     // Pass the specific failed model to the UI handler.
-    const intent = await fallbackModelHandler(
-      failedModel,
-      fallbackModel,
-      error,
-    );
+    const intent = await fallbackModelHandler(failedModel, fallbackModel, error);
 
     // Process Intent and Update State
     switch (intent) {
@@ -94,7 +85,7 @@ export async function handleFallback(
 
       default:
         throw new Error(
-          `Unexpected fallback intent received from fallbackModelHandler: "${intent}"`,
+          `Unexpected fallback intent received from fallbackModelHandler: "${intent}"`
         );
     }
   } catch (handlerError) {
@@ -107,10 +98,7 @@ async function handleUpgrade() {
   try {
     await openBrowserSecurely(UPGRADE_URL_PAGE);
   } catch (error) {
-    debugLogger.warn(
-      'Failed to open browser automatically:',
-      getErrorMessage(error),
-    );
+    debugLogger.warn('Failed to open browser automatically:', getErrorMessage(error));
   }
 }
 

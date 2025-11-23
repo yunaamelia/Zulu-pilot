@@ -8,16 +8,9 @@ import type { Mock } from 'vitest';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GeminiClient } from '../core/client.js';
 import { Config } from '../config/config.js';
-import {
-  summarizeToolOutput,
-  llmSummarizer,
-  defaultSummarizer,
-} from './summarizer.js';
+import { summarizeToolOutput, llmSummarizer, defaultSummarizer } from './summarizer.js';
 import type { ToolResult } from '../tools/tools.js';
-import type {
-  ModelConfigService,
-  ResolvedModelConfig,
-} from '../services/modelConfigService.js';
+import type { ModelConfigService, ResolvedModelConfig } from '../services/modelConfigService.js';
 import { DEFAULT_GEMINI_MODEL } from '../config/models.js';
 
 // Mock GeminiClient and Config constructor
@@ -48,7 +41,7 @@ describe('summarizers', () => {
       false,
       undefined,
       undefined,
-      undefined,
+      undefined
     );
     (mockConfigInstance.modelConfigService as unknown) = {
       getResolvedConfig: vi.fn().mockReturnValue(mockResolvedConfig),
@@ -73,7 +66,7 @@ describe('summarizers', () => {
         { model: DEFAULT_GEMINI_MODEL },
         shortText,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
       expect(result).toBe(shortText);
       expect(mockGeminiClient.generateContent).not.toHaveBeenCalled();
@@ -86,7 +79,7 @@ describe('summarizers', () => {
         { model: DEFAULT_GEMINI_MODEL },
         emptyText,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
       expect(result).toBe(emptyText);
       expect(mockGeminiClient.generateContent).not.toHaveBeenCalled();
@@ -103,7 +96,7 @@ describe('summarizers', () => {
         { model: DEFAULT_GEMINI_MODEL },
         longText,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(1);
@@ -120,7 +113,7 @@ describe('summarizers', () => {
         { model: DEFAULT_GEMINI_MODEL },
         longText,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(1);
@@ -149,7 +142,7 @@ describe('summarizers', () => {
         { model: 'gemini-pro-limited' },
         longText,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       const expectedPrompt = `Summarize the following tool output to be a maximum of 1000 tokens. The summary should be concise and capture the main points of the tool output.
@@ -165,8 +158,7 @@ Text to summarize:
 
 Return the summary string which should first contain an overall summarization of text followed by the full stack trace of errors and warnings in the tool output.
 `;
-      const calledWith = (mockGeminiClient.generateContent as Mock).mock
-        .calls[0];
+      const calledWith = (mockGeminiClient.generateContent as Mock).mock.calls[0];
       const contents = calledWith[1];
       expect(contents[0].parts[0].text).toBe(expectedPrompt);
     });
@@ -187,7 +179,7 @@ Return the summary string which should first contain an overall summarization of
         mockConfigInstance,
         toolResult,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(1);
@@ -209,12 +201,11 @@ Return the summary string which should first contain an overall summarization of
         mockConfigInstance,
         toolResult,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(mockGeminiClient.generateContent).toHaveBeenCalledTimes(1);
-      const calledWith = (mockGeminiClient.generateContent as Mock).mock
-        .calls[0];
+      const calledWith = (mockGeminiClient.generateContent as Mock).mock.calls[0];
       const contents = calledWith[1];
       expect(contents[0].parts[0].text).toContain(`"${longText}"`);
       expect(result).toBe(summary);
@@ -232,7 +223,7 @@ Return the summary string which should first contain an overall summarization of
         mockConfigInstance,
         toolResult,
         mockGeminiClient,
-        abortSignal,
+        abortSignal
       );
 
       expect(result).toBe(JSON.stringify({ text: 'some data' }));

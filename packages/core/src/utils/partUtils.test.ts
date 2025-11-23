@@ -14,11 +14,9 @@ import {
 import type { GenerateContentResponse, Part, PartUnion } from '@google/genai';
 
 const mockResponse = (
-  parts?: Array<{ text?: string; functionCall?: unknown }>,
+  parts?: Array<{ text?: string; functionCall?: unknown }>
 ): GenerateContentResponse => ({
-  candidates: parts
-    ? [{ content: { parts: parts as Part[], role: 'model' }, index: 0 }]
-    : [],
+  candidates: parts ? [{ content: { parts: parts as Part[], role: 'model' }, index: 0 }] : [],
   promptFeedback: { safetyRatings: [] },
   text: undefined,
   data: undefined,
@@ -92,9 +90,7 @@ describe('partUtils', () => {
 
     it('should return descriptive string for codeExecutionResult part', () => {
       const part = { codeExecutionResult: {} } as Part;
-      expect(partToString(part, verboseOptions)).toBe(
-        '[Code Execution Result]',
-      );
+      expect(partToString(part, verboseOptions)).toBe('[Code Execution Result]');
     });
 
     it('should return descriptive string for executableCode part', () => {
@@ -109,16 +105,12 @@ describe('partUtils', () => {
 
     it('should return descriptive string for functionCall part', () => {
       const part = { functionCall: { name: 'myFunction' } } as Part;
-      expect(partToString(part, verboseOptions)).toBe(
-        '[Function Call: myFunction]',
-      );
+      expect(partToString(part, verboseOptions)).toBe('[Function Call: myFunction]');
     });
 
     it('should return descriptive string for functionResponse part', () => {
       const part = { functionResponse: { name: 'myFunction' } } as Part;
-      expect(partToString(part, verboseOptions)).toBe(
-        '[Function Response: myFunction]',
-      );
+      expect(partToString(part, verboseOptions)).toBe('[Function Response: myFunction]');
     });
 
     it('should return descriptive string for inlineData part', () => {
@@ -142,7 +134,7 @@ describe('partUtils', () => {
         ],
       ];
       expect(partToString(parts as Part, verboseOptions)).toBe(
-        'start middle[Function Call: func1] end<audio/mp3>',
+        'start middle[Function Call: func1] end<audio/mp3>'
       );
     });
   });
@@ -202,10 +194,7 @@ describe('partUtils', () => {
     });
 
     it('should transform a single text part object', async () => {
-      const result = await flatMapTextParts(
-        { text: 'cat' },
-        splitCharsTransform,
-      );
+      const result = await flatMapTextParts({ text: 'cat' }, splitCharsTransform);
       expect(result).toEqual([{ text: 'c' }, { text: 'a' }, { text: 't' }]);
     });
 
@@ -217,12 +206,7 @@ describe('partUtils', () => {
       ];
       const parts = [{ text: 'a' }, { text: 'b' }];
       const result = await flatMapTextParts(parts, duplicateTransform);
-      expect(result).toEqual([
-        { text: 'a' },
-        { text: 'a' },
-        { text: 'b' },
-        { text: 'b' },
-      ]);
+      expect(result).toEqual([{ text: 'a' }, { text: 'a' }, { text: 'b' }, { text: 'b' }]);
     });
 
     it('should pass through non-text parts unmodified', async () => {
@@ -251,10 +235,7 @@ describe('partUtils', () => {
 
     it('should handle a transform that returns an empty array', async () => {
       const removeTransform = async (_text: string): Promise<PartUnion[]> => [];
-      const parts: PartUnion[] = [
-        { text: 'remove' },
-        { functionCall: { name: 'keep' } },
-      ];
+      const parts: PartUnion[] = [{ text: 'remove' }, { functionCall: { name: 'keep' } }];
       const result = await flatMapTextParts(parts, removeTransform);
       expect(result).toEqual([{ functionCall: { name: 'keep' } }]);
     });

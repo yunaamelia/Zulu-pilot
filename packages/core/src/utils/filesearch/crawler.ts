@@ -32,7 +32,7 @@ export async function crawl(options: CrawlOptions): Promise<string[]> {
     const cacheKey = cache.getCacheKey(
       options.crawlDirectory,
       options.ignore.getFingerprint(),
-      options.maxDepth,
+      options.maxDepth
     );
     const cachedResults = cache.read(cacheKey);
 
@@ -68,15 +68,13 @@ export async function crawl(options: CrawlOptions): Promise<string[]> {
 
   const relativeToCrawlDir = path.posix.relative(posixCwd, posixCrawlDirectory);
 
-  const relativeToCwdResults = results.map((p) =>
-    path.posix.join(relativeToCrawlDir, p),
-  );
+  const relativeToCwdResults = results.map((p) => path.posix.join(relativeToCrawlDir, p));
 
   if (options.cache) {
     const cacheKey = cache.getCacheKey(
       options.crawlDirectory,
       options.ignore.getFingerprint(),
-      options.maxDepth,
+      options.maxDepth
     );
     cache.write(cacheKey, relativeToCwdResults, options.cacheTtl * 1000);
   }

@@ -4,15 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  type Mock,
-} from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
 import type { Content, GenerateContentResponse, Part } from '@google/genai';
 import { GeminiClient } from './client.js';
@@ -23,12 +15,7 @@ import {
 } from './contentGenerator.js';
 import { type GeminiChat } from './geminiChat.js';
 import type { Config } from '../config/config.js';
-import {
-  CompressionStatus,
-  GeminiEventType,
-  Turn,
-  type ChatCompressionInfo,
-} from './turn.js';
+import { CompressionStatus, GeminiEventType, Turn, type ChatCompressionInfo } from './turn.js';
 import { getCoreSystemPrompt } from './prompts.js';
 import { DEFAULT_GEMINI_FLASH_MODEL } from '../config/models.js';
 import { FileDiscoveryService } from '../services/fileDiscoveryService.js';
@@ -38,10 +25,7 @@ import { ideContextStore } from '../ide/ideContext.js';
 import type { ModelRouterService } from '../routing/modelRouterService.js';
 import { uiTelemetryService } from '../telemetry/uiTelemetry.js';
 import { ChatCompressionService } from '../services/chatCompressionService.js';
-import type {
-  ModelConfigKey,
-  ResolvedModelConfig,
-} from '../services/modelConfigService.js';
+import type { ModelConfigKey, ResolvedModelConfig } from '../services/modelConfigService.js';
 import { ClearcutLogger } from '../telemetry/clearcut-logger/clearcut-logger.js';
 
 vi.mock('../services/chatCompressionService.js');
@@ -105,8 +89,7 @@ vi.mock('../utils/nextSpeakerChecker', () => ({
 }));
 vi.mock('../utils/generateContentResponseUtilities', () => ({
   getResponseText: (result: GenerateContentResponse) =>
-    result.candidates?.[0]?.content?.parts?.map((part) => part.text).join('') ||
-    undefined,
+    result.candidates?.[0]?.content?.parts?.map((part) => part.text).join('') || undefined,
 }));
 vi.mock('../telemetry/index.js', () => ({
   logApiRequest: vi.fn(),
@@ -180,9 +163,7 @@ describe('Gemini Client (client.ts)', () => {
       authType: AuthType.USE_GEMINI,
     };
     mockConfig = {
-      getContentGeneratorConfig: vi
-        .fn()
-        .mockReturnValue(contentGeneratorConfig),
+      getContentGeneratorConfig: vi.fn().mockReturnValue(contentGeneratorConfig),
       getToolRegistry: vi.fn().mockReturnValue(mockToolRegistry),
       getModel: vi.fn().mockReturnValue('test-model'),
       getEmbeddingModel: vi.fn().mockReturnValue('test-embedding-model'),
@@ -282,9 +263,7 @@ describe('Gemini Client (client.ts)', () => {
         parts: [{ text: 'some old message' }],
       });
       const historyWithOldMessage = await client.getHistory();
-      expect(historyWithOldMessage.length).toBeGreaterThan(
-        initialHistory.length,
-      );
+      expect(historyWithOldMessage.length).toBeGreaterThan(initialHistory.length);
 
       // 2. Call resetChat.
       await client.resetChat();
@@ -313,9 +292,7 @@ describe('Gemini Client (client.ts)', () => {
       // The first message should be the environment context
       expect(history[0].role).toBe('user');
       expect(history[0].parts?.[0]?.text).toContain('This is the Gemini CLI');
-      expect(history[0].parts?.[0]?.text).toContain(
-        "The project's temporary directory is:",
-      );
+      expect(history[0].parts?.[0]?.text).toContain("The project's temporary directory is:");
 
       // The subsequent messages should be the extra history
       expect(history[1]).toEqual(extraHistory[0]);
@@ -355,9 +332,7 @@ describe('Gemini Client (client.ts)', () => {
       };
       client['chat'] = mockOriginalChat as GeminiChat;
 
-      vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(
-        originalTokenCount,
-      );
+      vi.mocked(uiTelemetryService.getLastPromptTokenCount).mockReturnValue(originalTokenCount);
 
       const newHistory: Content[] = [
         { role: 'user', parts: [{ text: 'Summary' }] },
@@ -365,10 +340,7 @@ describe('Gemini Client (client.ts)', () => {
       ];
 
       vi.mocked(ChatCompressionService.prototype.compress).mockResolvedValue({
-        newHistory:
-          compressionStatus === CompressionStatus.COMPRESSED
-            ? newHistory
-            : null,
+        newHistory: compressionStatus === CompressionStatus.COMPRESSED ? newHistory : null,
         info: {
           originalTokenCount,
           newTokenCount,
@@ -382,9 +354,7 @@ describe('Gemini Client (client.ts)', () => {
         getLastPromptTokenCount: vi.fn().mockReturnValue(newTokenCount),
       };
 
-      client['startChat'] = vi
-        .fn()
-        .mockResolvedValue(mockNewChat as GeminiChat);
+      client['startChat'] = vi.fn().mockResolvedValue(mockNewChat as GeminiChat);
 
       return {
         client,
@@ -400,8 +370,7 @@ describe('Gemini Client (client.ts)', () => {
         setup({
           originalTokenCount: 100,
           newTokenCount: 200,
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
         });
 
         await client.tryCompressChat('prompt-id-4', false); // Fails
@@ -426,30 +395,25 @@ describe('Gemini Client (client.ts)', () => {
         const { client, estimatedNewTokenCount } = setup({
           originalTokenCount: 100,
           newTokenCount: 200,
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
         });
 
         const result = await client.tryCompressChat('prompt-id-4', false);
 
         expect(result).toEqual({
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
           newTokenCount: estimatedNewTokenCount,
           originalTokenCount: 100,
         });
         // IMPORTANT: The change in client.ts means setLastPromptTokenCount is NOT called on failure
-        expect(
-          uiTelemetryService.setLastPromptTokenCount,
-        ).not.toHaveBeenCalled();
+        expect(uiTelemetryService.setLastPromptTokenCount).not.toHaveBeenCalled();
       });
 
       it('does not manipulate the source chat', async () => {
         const { client, mockOriginalChat } = setup({
           originalTokenCount: 100,
           newTokenCount: 200,
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
         });
 
         await client.tryCompressChat('prompt-id-4', false);
@@ -462,16 +426,13 @@ describe('Gemini Client (client.ts)', () => {
         const { client } = setup({
           originalTokenCount: 100,
           newTokenCount: 200,
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
         });
 
         await client.tryCompressChat('prompt-id-4', false); // This fails and sets hasFailedCompressionAttempt = true
 
         // Mock the next call to return NOOP
-        vi.mocked(
-          ChatCompressionService.prototype.compress,
-        ).mockResolvedValueOnce({
+        vi.mocked(ChatCompressionService.prototype.compress).mockResolvedValueOnce({
           newHistory: null,
           info: {
             originalTokenCount: 0,
@@ -484,18 +445,14 @@ describe('Gemini Client (client.ts)', () => {
         const result = await client.tryCompressChat('prompt-id-5', false);
 
         expect(result.compressionStatus).toBe(CompressionStatus.NOOP);
-        expect(ChatCompressionService.prototype.compress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(
-          ChatCompressionService.prototype.compress,
-        ).toHaveBeenLastCalledWith(
+        expect(ChatCompressionService.prototype.compress).toHaveBeenCalledTimes(2);
+        expect(ChatCompressionService.prototype.compress).toHaveBeenLastCalledWith(
           expect.anything(),
           'prompt-id-5',
           false,
           expect.anything(),
           expect.anything(),
-          true, // hasFailedCompressionAttempt
+          true // hasFailedCompressionAttempt
         );
       });
     });
@@ -549,7 +506,7 @@ describe('Gemini Client (client.ts)', () => {
       mockTurnRunFn.mockReturnValue(
         (async function* () {
           yield { type: 'content', value: 'Hello' };
-        })(),
+        })()
       );
 
       const compressionInfo: ChatCompressionInfo = {
@@ -558,15 +515,13 @@ describe('Gemini Client (client.ts)', () => {
         newTokenCount: 500,
       };
 
-      vi.spyOn(client, 'tryCompressChat').mockResolvedValueOnce(
-        compressionInfo,
-      );
+      vi.spyOn(client, 'tryCompressChat').mockResolvedValueOnce(compressionInfo);
 
       // Act
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-1',
+        'prompt-id-1'
       );
 
       const events = await fromAsync(stream);
@@ -580,8 +535,7 @@ describe('Gemini Client (client.ts)', () => {
 
     it.each([
       {
-        compressionStatus:
-          CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+        compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
       },
       { compressionStatus: CompressionStatus.NOOP },
     ])(
@@ -599,15 +553,13 @@ describe('Gemini Client (client.ts)', () => {
           newTokenCount: 500,
         };
 
-        vi.spyOn(client, 'tryCompressChat').mockResolvedValueOnce(
-          compressionInfo,
-        );
+        vi.spyOn(client, 'tryCompressChat').mockResolvedValueOnce(compressionInfo);
 
         // Act
         const stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-id-1',
+          'prompt-id-1'
         );
 
         const events = await fromAsync(stream);
@@ -617,7 +569,7 @@ describe('Gemini Client (client.ts)', () => {
           type: GeminiEventType.ChatCompressed,
           value: expect.anything(),
         });
-      },
+      }
     );
 
     it('should include editor context when ideMode is enabled', async () => {
@@ -655,7 +607,7 @@ describe('Gemini Client (client.ts)', () => {
       mockTurnRunFn.mockReturnValue(
         (async function* () {
           yield { type: 'content', value: 'Hello' };
-        })(),
+        })()
       );
 
       const mockChat = {
@@ -671,7 +623,7 @@ describe('Gemini Client (client.ts)', () => {
       const stream = client.sendMessageStream(
         initialRequest,
         new AbortController().signal,
-        'prompt-id-ide',
+        'prompt-id-ide'
       );
       for await (const _ of stream) {
         // consume stream
@@ -695,7 +647,7 @@ ${JSON.stringify(
     otherOpenFiles: ['/path/to/recent/file1.ts', '/path/to/recent/file2.ts'],
   },
   null,
-  2,
+  2
 )}
 \`\`\`
       `.trim();
@@ -734,7 +686,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         initialRequest,
         new AbortController().signal,
-        'prompt-id-ide',
+        'prompt-id-ide'
       );
       for await (const _ of stream) {
         // consume stream
@@ -745,7 +697,7 @@ ${JSON.stringify(
       expect(mockTurnRunFn).toHaveBeenCalledWith(
         { model: 'default-routed-model' },
         initialRequest,
-        expect.any(AbortSignal),
+        expect.any(AbortSignal)
       );
     });
 
@@ -791,7 +743,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         initialRequest,
         new AbortController().signal,
-        'prompt-id-ide',
+        'prompt-id-ide'
       );
       for await (const _ of stream) {
         // consume stream
@@ -814,7 +766,7 @@ ${JSON.stringify(
     },
   },
   null,
-  2,
+  2
 )}
 \`\`\`
       `.trim();
@@ -868,7 +820,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         initialRequest,
         new AbortController().signal,
-        'prompt-id-ide',
+        'prompt-id-ide'
       );
       for await (const _ of stream) {
         // consume stream
@@ -884,7 +836,7 @@ ${JSON.stringify(
     otherOpenFiles: ['/path/to/recent/file1.ts', '/path/to/recent/file2.ts'],
   },
   null,
-  2,
+  2
 )}
 \`\`\`
       `.trim();
@@ -913,7 +865,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-1',
+        'prompt-id-1'
       );
 
       // Consume the stream manually to get the final return value.
@@ -931,13 +883,9 @@ ${JSON.stringify(
     });
 
     it('should stop infinite loop after MAX_TURNS when nextSpeaker always returns model', async () => {
-      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(
-        true,
-      );
+      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(true);
       // Get the mocked checkNextSpeaker function and configure it to trigger infinite loop
-      const { checkNextSpeaker } = await import(
-        '../utils/nextSpeakerChecker.js'
-      );
+      const { checkNextSpeaker } = await import('../utils/nextSpeakerChecker.js');
       const mockCheckNextSpeaker = vi.mocked(checkNextSpeaker);
       mockCheckNextSpeaker.mockResolvedValue({
         next_speaker: 'model',
@@ -965,7 +913,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Start conversation' }],
         signal,
-        'prompt-id-2',
+        'prompt-id-2'
       );
 
       // Count how many stream events we get
@@ -984,9 +932,7 @@ ${JSON.stringify(
         // Safety check to prevent actual infinite loop in test
         if (eventCount > 200) {
           abortController.abort();
-          throw new Error(
-            'Test exceeded expected event limit - possible actual infinite loop',
-          );
+          throw new Error('Test exceeded expected event limit - possible actual infinite loop');
         }
       }
 
@@ -1006,9 +952,7 @@ ${JSON.stringify(
     it('should yield MaxSessionTurns and stop when session turn limit is reached', async () => {
       // Arrange
       const MAX_SESSION_TURNS = 5;
-      vi.spyOn(client['config'], 'getMaxSessionTurns').mockReturnValue(
-        MAX_SESSION_TURNS,
-      );
+      vi.spyOn(client['config'], 'getMaxSessionTurns').mockReturnValue(MAX_SESSION_TURNS);
 
       const mockStream = (async function* () {
         yield { type: 'content', value: 'Hello' };
@@ -1028,7 +972,7 @@ ${JSON.stringify(
         const stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-id-4',
+          'prompt-id-4'
         );
         // consume stream
         for await (const _event of stream) {
@@ -1040,7 +984,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-5',
+        'prompt-id-5'
       );
 
       const events = [];
@@ -1057,9 +1001,7 @@ ${JSON.stringify(
       // someone tries to bypass it by calling with a very large turns value
 
       // Get the mocked checkNextSpeaker function and configure it to trigger infinite loop
-      const { checkNextSpeaker } = await import(
-        '../utils/nextSpeakerChecker.js'
-      );
+      const { checkNextSpeaker } = await import('../utils/nextSpeakerChecker.js');
       const mockCheckNextSpeaker = vi.mocked(checkNextSpeaker);
       mockCheckNextSpeaker.mockResolvedValue({
         next_speaker: 'model',
@@ -1089,7 +1031,7 @@ ${JSON.stringify(
         [{ text: 'Start conversation' }],
         signal,
         'prompt-id-3',
-        Number.MAX_SAFE_INTEGER, // Bypass the MAX_TURNS protection
+        Number.MAX_SAFE_INTEGER // Bypass the MAX_TURNS protection
       );
 
       // Count how many stream events we get
@@ -1143,9 +1085,7 @@ ${JSON.stringify(
       // A string of length 400 is roughly 100 tokens.
       const longText = 'a'.repeat(400);
       const request: Part[] = [{ text: longText }];
-      const estimatedRequestTokenCount = Math.floor(
-        JSON.stringify(request).length / 4,
-      );
+      const estimatedRequestTokenCount = Math.floor(JSON.stringify(request).length / 4);
       const remainingTokenCount = MOCKED_TOKEN_LIMIT - lastPromptTokenCount;
 
       // Mock tryCompressChat to not compress
@@ -1159,7 +1099,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         request,
         new AbortController().signal,
-        'prompt-id-overflow',
+        'prompt-id-overflow'
       );
 
       const events = await fromAsync(stream);
@@ -1203,9 +1143,7 @@ ${JSON.stringify(
       // We need a request > 95 tokens.
       const longText = 'a'.repeat(400);
       const request: Part[] = [{ text: longText }];
-      const estimatedRequestTokenCount = Math.floor(
-        JSON.stringify(request).length / 4,
-      );
+      const estimatedRequestTokenCount = Math.floor(JSON.stringify(request).length / 4);
       const remainingTokenCount = STICKY_MODEL_LIMIT - lastPromptTokenCount;
 
       vi.spyOn(client, 'tryCompressChat').mockResolvedValue({
@@ -1218,7 +1156,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         request,
         new AbortController().signal,
-        'test-session-id', // Use the same ID as the session to keep stickiness
+        'test-session-id' // Use the same ID as the session to keep stickiness
       );
 
       const events = await fromAsync(stream);
@@ -1241,18 +1179,16 @@ ${JSON.stringify(
 
       beforeEach(() => {
         mockRouterService = {
-          route: vi
-            .fn()
-            .mockResolvedValue({ model: 'routed-model', reason: 'test' }),
+          route: vi.fn().mockResolvedValue({ model: 'routed-model', reason: 'test' }),
         };
         vi.mocked(mockConfig.getModelRouterService).mockReturnValue(
-          mockRouterService as unknown as ModelRouterService,
+          mockRouterService as unknown as ModelRouterService
         );
 
         mockTurnRunFn.mockReturnValue(
           (async function* () {
             yield { type: 'content', value: 'Hello' };
-          })(),
+          })()
         );
 
         const mockChat: Partial<GeminiChat> = {
@@ -1267,7 +1203,7 @@ ${JSON.stringify(
         const stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-1',
+          'prompt-1'
         );
         await fromAsync(stream); // consume stream
 
@@ -1276,7 +1212,7 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: 'routed-model' },
           [{ text: 'Hi' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
       });
 
@@ -1285,7 +1221,7 @@ ${JSON.stringify(
         let stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-1',
+          'prompt-1'
         );
         await fromAsync(stream);
 
@@ -1293,14 +1229,14 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: 'routed-model' },
           [{ text: 'Hi' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
 
         // Second turn
         stream = client.sendMessageStream(
           [{ text: 'Continue' }],
           new AbortController().signal,
-          'prompt-1',
+          'prompt-1'
         );
         await fromAsync(stream);
 
@@ -1310,7 +1246,7 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: 'routed-model' },
           [{ text: 'Continue' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
       });
 
@@ -1319,7 +1255,7 @@ ${JSON.stringify(
         let stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-1',
+          'prompt-1'
         );
         await fromAsync(stream);
 
@@ -1327,7 +1263,7 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: 'routed-model' },
           [{ text: 'Hi' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
 
         // New prompt
@@ -1338,7 +1274,7 @@ ${JSON.stringify(
         stream = client.sendMessageStream(
           [{ text: 'A new topic' }],
           new AbortController().signal,
-          'prompt-2',
+          'prompt-2'
         );
         await fromAsync(stream);
 
@@ -1348,7 +1284,7 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: 'new-routed-model' },
           [{ text: 'A new topic' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
       });
 
@@ -1362,14 +1298,14 @@ ${JSON.stringify(
         const stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-1',
+          'prompt-1'
         );
         await fromAsync(stream);
 
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: DEFAULT_GEMINI_FLASH_MODEL },
           [{ text: 'Hi' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
       });
 
@@ -1383,7 +1319,7 @@ ${JSON.stringify(
         let stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-fallback-stickiness',
+          'prompt-fallback-stickiness'
         );
         await fromAsync(stream);
 
@@ -1391,7 +1327,7 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenCalledWith(
           { model: DEFAULT_GEMINI_FLASH_MODEL },
           [{ text: 'Hi' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
 
         // End fallback mode
@@ -1401,7 +1337,7 @@ ${JSON.stringify(
         stream = client.sendMessageStream(
           [{ text: 'Continue' }],
           new AbortController().signal,
-          'prompt-fallback-stickiness',
+          'prompt-fallback-stickiness'
         );
         await fromAsync(stream);
 
@@ -1410,15 +1346,13 @@ ${JSON.stringify(
         expect(mockTurnRunFn).toHaveBeenLastCalledWith(
           { model: DEFAULT_GEMINI_FLASH_MODEL }, // Still the fallback model
           [{ text: 'Continue' }],
-          expect.any(AbortSignal),
+          expect.any(AbortSignal)
         );
       });
     });
 
     it('should recursively call sendMessageStream with "Please continue." when InvalidStream event is received', async () => {
-      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(
-        true,
-      );
+      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(true);
       // Arrange
       const mockStream1 = (async function* () {
         yield { type: GeminiEventType.InvalidStream };
@@ -1427,9 +1361,7 @@ ${JSON.stringify(
         yield { type: GeminiEventType.Content, value: 'Continued content' };
       })();
 
-      mockTurnRunFn
-        .mockReturnValueOnce(mockStream1)
-        .mockReturnValueOnce(mockStream2);
+      mockTurnRunFn.mockReturnValueOnce(mockStream1).mockReturnValueOnce(mockStream2);
 
       const mockChat: Partial<GeminiChat> = {
         addHistory: vi.fn(),
@@ -1461,7 +1393,7 @@ ${JSON.stringify(
         1,
         { model: 'default-routed-model' },
         initialRequest,
-        expect.any(AbortSignal),
+        expect.any(AbortSignal)
       );
 
       // Second call with "Please continue."
@@ -1469,14 +1401,12 @@ ${JSON.stringify(
         2,
         { model: 'default-routed-model' },
         [{ text: 'System: Please continue.' }],
-        expect.any(AbortSignal),
+        expect.any(AbortSignal)
       );
     });
 
     it('should not recursively call sendMessageStream with "Please continue." when InvalidStream event is received and flag is false', async () => {
-      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(
-        false,
-      );
+      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(false);
       // Arrange
       const mockStream1 = (async function* () {
         yield { type: GeminiEventType.InvalidStream };
@@ -1510,15 +1440,13 @@ ${JSON.stringify(
     });
 
     it('should stop recursing after one retry when InvalidStream events are repeatedly received', async () => {
-      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(
-        true,
-      );
+      vi.spyOn(client['config'], 'getContinueOnFailedApiCall').mockReturnValue(true);
       // Arrange
       // Always return a new invalid stream
       mockTurnRunFn.mockImplementation(() =>
         (async function* () {
           yield { type: GeminiEventType.InvalidStream };
-        })(),
+        })()
       );
 
       const mockChat: Partial<GeminiChat> = {
@@ -1542,7 +1470,7 @@ ${JSON.stringify(
       expect(
         events
           .filter((e) => e.type !== GeminiEventType.ModelInfo)
-          .every((e) => e.type === GeminiEventType.InvalidStream),
+          .every((e) => e.type === GeminiEventType.InvalidStream)
       ).toBe(true);
 
       // Verify that turn.run was called twice
@@ -1570,9 +1498,7 @@ ${JSON.stringify(
           // Assume history is not empty for delta checks
           getHistory: vi
             .fn()
-            .mockReturnValue([
-              { role: 'user', parts: [{ text: 'previous message' }] },
-            ]),
+            .mockReturnValue([{ role: 'user', parts: [{ text: 'previous message' }] }]),
           getLastPromptTokenCount: vi.fn(),
         };
         client['chat'] = mockChat as GeminiChat;
@@ -1679,11 +1605,7 @@ ${JSON.stringify(
 
       it.each(testCases)(
         '$description',
-        async ({
-          previousActiveFile,
-          currentActiveFile,
-          shouldSendContext,
-        }) => {
+        async ({ previousActiveFile, currentActiveFile, shouldSendContext }) => {
           // Setup previous context
           client['lastSentIdeContext'] = {
             workspaceState: {
@@ -1715,7 +1637,7 @@ ${JSON.stringify(
           const stream = client.sendMessageStream(
             [{ text: 'Hi' }],
             new AbortController().signal,
-            'prompt-id-delta',
+            'prompt-id-delta'
           );
           for await (const _ of stream) {
             // consume stream
@@ -1731,16 +1653,16 @@ ${JSON.stringify(
                 parts: expect.arrayContaining([
                   expect.objectContaining({
                     text: expect.stringContaining(
-                      "Here is a summary of changes in the user's editor context",
+                      "Here is a summary of changes in the user's editor context"
                     ),
                   }),
                 ]),
-              }),
+              })
             );
           } else {
             expect(mockChat.addHistory).not.toHaveBeenCalled();
           }
-        },
+        }
       );
 
       it('sends full context when history is cleared, even if editor state is unchanged', async () => {
@@ -1768,9 +1690,7 @@ ${JSON.stringify(
         // Setup current context (same as previous)
         vi.mocked(ideContextStore.get).mockReturnValue({
           workspaceState: {
-            openFiles: [
-              { ...activeFile, isActive: true, timestamp: Date.now() },
-            ],
+            openFiles: [{ ...activeFile, isActive: true, timestamp: Date.now() }],
           },
         });
 
@@ -1784,7 +1704,7 @@ ${JSON.stringify(
         const stream = client.sendMessageStream(
           [{ text: 'Hi' }],
           new AbortController().signal,
-          'prompt-id-history-cleared',
+          'prompt-id-history-cleared'
         );
         for await (const _ of stream) {
           // consume stream
@@ -1794,20 +1714,16 @@ ${JSON.stringify(
           expect.objectContaining({
             parts: expect.arrayContaining([
               expect.objectContaining({
-                text: expect.stringContaining(
-                  "Here is the user's editor context",
-                ),
+                text: expect.stringContaining("Here is the user's editor context"),
               }),
             ]),
-          }),
+          })
         );
 
         // Also verify it's the full context, not a delta.
         const call = mockChat.addHistory.mock.calls[0][0];
         const contextText = call.parts[0].text;
-        const contextJson = JSON.parse(
-          contextText.match(/```json\n(.*)\n```/s)![1],
-        );
+        const contextJson = JSON.parse(contextText.match(/```json\n(.*)\n```/s)![1]);
         expect(contextJson).toHaveProperty('activeFile');
         expect(contextJson.activeFile.path).toBe('/path/to/active/file.ts');
       });
@@ -1866,7 +1782,7 @@ ${JSON.stringify(
             },
           ],
           new AbortController().signal,
-          'prompt-id-tool-response',
+          'prompt-id-tool-response'
         );
         for await (const _ of stream) {
           // consume stream to complete the call
@@ -1880,7 +1796,7 @@ ${JSON.stringify(
                 text: expect.stringContaining("user's editor context"),
               }),
             ]),
-          }),
+          })
         );
       });
 
@@ -1896,7 +1812,7 @@ ${JSON.stringify(
         const stream = client.sendMessageStream(
           [{ text: 'Another normal message' }],
           new AbortController().signal,
-          'prompt-id-normal',
+          'prompt-id-normal'
         );
         for await (const _ of stream) {
           // consume stream
@@ -1911,7 +1827,7 @@ ${JSON.stringify(
                 text: expect.stringContaining("user's editor context"),
               }),
             ]),
-          }),
+          })
         );
       });
 
@@ -1947,7 +1863,7 @@ ${JSON.stringify(
             },
           ],
           new AbortController().signal,
-          'prompt-id-tool-response',
+          'prompt-id-tool-response'
         );
         for await (const _ of stream) {
           /* consume */
@@ -1961,7 +1877,7 @@ ${JSON.stringify(
                 text: expect.stringContaining("user's editor context"),
               }),
             ]),
-          }),
+          })
         );
 
         // --- Step 2: A new message is sent, latest context should be included ---
@@ -1982,9 +1898,7 @@ ${JSON.stringify(
           },
           { role: 'model', parts: [{ text: 'The tool ran successfully.' }] },
         ];
-        vi.mocked(mockChat.getHistory!).mockReturnValue(
-          historyAfterToolResponse,
-        );
+        vi.mocked(mockChat.getHistory!).mockReturnValue(historyAfterToolResponse);
         vi.mocked(mockChat.addHistory!).mockClear(); // Clear previous calls for the next assertion
 
         // Arrange: The IDE context has now changed
@@ -1999,7 +1913,7 @@ ${JSON.stringify(
         stream = client.sendMessageStream(
           [{ text: 'Thanks!' }],
           new AbortController().signal,
-          'prompt-id-final',
+          'prompt-id-final'
         );
         for await (const _ of stream) {
           /* consume */
@@ -2008,11 +1922,11 @@ ${JSON.stringify(
         // Assert: The NEW context was sent as a FULL context because there was no previously sent context.
         const addHistoryCalls = vi.mocked(mockChat.addHistory!).mock.calls;
         const contextCall = addHistoryCalls.find((call) =>
-          JSON.stringify(call[0]).includes("user's editor context"),
+          JSON.stringify(call[0]).includes("user's editor context")
         );
         expect(contextCall).toBeDefined();
         expect(JSON.stringify(contextCall![0])).toContain(
-          "Here is the user's editor context as a JSON object",
+          "Here is the user's editor context as a JSON object"
         );
         // Check that the sent context is the new one (fileB.ts)
         expect(JSON.stringify(contextCall![0])).toContain('fileB.ts');
@@ -2040,7 +1954,7 @@ ${JSON.stringify(
         let stream = client.sendMessageStream(
           [{ text: 'Initial message' }],
           new AbortController().signal,
-          'prompt-id-initial',
+          'prompt-id-initial'
         );
         for await (const _ of stream) {
           /* consume */
@@ -2048,9 +1962,7 @@ ${JSON.stringify(
 
         // Assert: Full context for fileA.ts was sent and stored.
         const initialCall = vi.mocked(mockChat.addHistory!).mock.calls[0][0];
-        expect(JSON.stringify(initialCall)).toContain(
-          "user's editor context as a JSON object",
-        );
+        expect(JSON.stringify(initialCall)).toContain("user's editor context as a JSON object");
         expect(JSON.stringify(initialCall)).toContain('fileA.ts');
         // This implicitly tests that `lastSentIdeContext` is now set internally by the client.
         vi.mocked(mockChat.addHistory!).mockClear();
@@ -2090,7 +2002,7 @@ ${JSON.stringify(
             },
           ],
           new AbortController().signal,
-          'prompt-id-tool-response',
+          'prompt-id-tool-response'
         );
         for await (const _ of stream) {
           /* consume */
@@ -2115,9 +2027,7 @@ ${JSON.stringify(
           },
           { role: 'model', parts: [{ text: 'The tool ran successfully.' }] },
         ];
-        vi.mocked(mockChat.getHistory!).mockReturnValue(
-          historyAfterToolResponse,
-        );
+        vi.mocked(mockChat.getHistory!).mockReturnValue(historyAfterToolResponse);
 
         // Arrange: The IDE context has changed again
         const contextC = {
@@ -2138,7 +2048,7 @@ ${JSON.stringify(
         stream = client.sendMessageStream(
           [{ text: 'Thanks!' }],
           new AbortController().signal,
-          'prompt-id-final',
+          'prompt-id-final'
         );
         for await (const _ of stream) {
           /* consume */
@@ -2157,9 +2067,7 @@ ${JSON.stringify(
 
     it('should not call checkNextSpeaker when turn.run() yields an error', async () => {
       // Arrange
-      const { checkNextSpeaker } = await import(
-        '../utils/nextSpeakerChecker.js'
-      );
+      const { checkNextSpeaker } = await import('../utils/nextSpeakerChecker.js');
       const mockCheckNextSpeaker = vi.mocked(checkNextSpeaker);
 
       const mockStream = (async function* () {
@@ -2181,7 +2089,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-error',
+        'prompt-id-error'
       );
       for await (const _ of stream) {
         // consume stream
@@ -2193,9 +2101,7 @@ ${JSON.stringify(
 
     it('should not call checkNextSpeaker when turn.run() yields a value then an error', async () => {
       // Arrange
-      const { checkNextSpeaker } = await import(
-        '../utils/nextSpeakerChecker.js'
-      );
+      const { checkNextSpeaker } = await import('../utils/nextSpeakerChecker.js');
       const mockCheckNextSpeaker = vi.mocked(checkNextSpeaker);
 
       const mockStream = (async function* () {
@@ -2218,7 +2124,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-error',
+        'prompt-id-error'
       );
       for await (const _ of stream) {
         // consume stream
@@ -2255,7 +2161,7 @@ ${JSON.stringify(
       const stream = client.sendMessageStream(
         [{ text: 'Hi' }],
         new AbortController().signal,
-        'prompt-id-loop',
+        'prompt-id-loop'
       );
 
       const events = [];
@@ -2274,11 +2180,7 @@ ${JSON.stringify(
       const contents = [{ role: 'user', parts: [{ text: 'hello' }] }];
       const abortSignal = new AbortController().signal;
 
-      await client.generateContent(
-        { model: DEFAULT_GEMINI_FLASH_MODEL },
-        contents,
-        abortSignal,
-      );
+      await client.generateContent({ model: DEFAULT_GEMINI_FLASH_MODEL }, contents, abortSignal);
 
       expect(mockContentGenerator.generateContent).toHaveBeenCalledWith(
         {
@@ -2291,7 +2193,7 @@ ${JSON.stringify(
           },
           contents,
         },
-        'test-session-id',
+        'test-session-id'
       );
     });
 
@@ -2305,7 +2207,7 @@ ${JSON.stringify(
       await client.generateContent(
         { model: DEFAULT_GEMINI_FLASH_MODEL },
         contents,
-        new AbortController().signal,
+        new AbortController().signal
       );
 
       expect(mockContentGenerator.generateContent).not.toHaveBeenCalledWith({
@@ -2319,7 +2221,7 @@ ${JSON.stringify(
           config: expect.any(Object),
           contents,
         },
-        'test-session-id',
+        'test-session-id'
       );
     });
 
@@ -2331,17 +2233,13 @@ ${JSON.stringify(
       // Mock config to be in fallback mode
       vi.spyOn(client['config'], 'isInFallbackMode').mockReturnValue(true);
 
-      await client.generateContent(
-        { model: requestedModel },
-        contents,
-        abortSignal,
-      );
+      await client.generateContent({ model: requestedModel }, contents, abortSignal);
 
       expect(mockGenerateContentFn).toHaveBeenCalledWith(
         expect.objectContaining({
           model: DEFAULT_GEMINI_FLASH_MODEL,
         }),
-        'test-session-id',
+        'test-session-id'
       );
     });
   });

@@ -15,13 +15,7 @@ import {
   toOutputType,
   OTelOutputType,
 } from './semantic.js';
-import {
-  Language,
-  type Content,
-  Outcome,
-  type Candidate,
-  FinishReason,
-} from '@google/genai';
+import { Language, type Content, Outcome, type Candidate, FinishReason } from '@google/genai';
 
 describe('toChatMessage', () => {
   it('should correctly handle text parts', () => {
@@ -414,9 +408,7 @@ describe('toOutputType', () => {
   });
 
   it('should return the custom mime type for other strings', () => {
-    expect(toOutputType('application/vnd.custom-type')).toBe(
-      'application/vnd.custom-type',
-    );
+    expect(toOutputType('application/vnd.custom-type')).toBe('application/vnd.custom-type');
   });
 
   it('should return undefined for undefined input', () => {

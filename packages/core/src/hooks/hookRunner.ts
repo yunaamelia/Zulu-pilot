@@ -42,17 +42,12 @@ export class HookRunner {
   async executeHook(
     hookConfig: HookConfig,
     eventName: HookEventName,
-    input: HookInput,
+    input: HookInput
   ): Promise<HookExecutionResult> {
     const startTime = Date.now();
 
     try {
-      return await this.executeCommandHook(
-        hookConfig,
-        eventName,
-        input,
-        startTime,
-      );
+      return await this.executeCommandHook(hookConfig, eventName, input, startTime);
     } catch (error) {
       const duration = Date.now() - startTime;
       const hookSource = hookConfig.command || 'unknown';
@@ -75,11 +70,9 @@ export class HookRunner {
   async executeHooksParallel(
     hookConfigs: HookConfig[],
     eventName: HookEventName,
-    input: HookInput,
+    input: HookInput
   ): Promise<HookExecutionResult[]> {
-    const promises = hookConfigs.map((config) =>
-      this.executeHook(config, eventName, input),
-    );
+    const promises = hookConfigs.map((config) => this.executeHook(config, eventName, input));
 
     return await Promise.all(promises);
   }
@@ -90,7 +83,7 @@ export class HookRunner {
   async executeHooksSequential(
     hookConfigs: HookConfig[],
     eventName: HookEventName,
-    input: HookInput,
+    input: HookInput
   ): Promise<HookExecutionResult[]> {
     const results: HookExecutionResult[] = [];
     let currentInput = input;
@@ -101,11 +94,7 @@ export class HookRunner {
 
       // If the hook succeeded and has output, use it to modify the input for the next hook
       if (result.success && result.output) {
-        currentInput = this.applyHookOutputToInput(
-          currentInput,
-          result.output,
-          eventName,
-        );
+        currentInput = this.applyHookOutputToInput(currentInput, result.output, eventName);
       }
     }
 
@@ -118,7 +107,7 @@ export class HookRunner {
   private applyHookOutputToInput(
     originalInput: HookInput,
     hookOutput: HookOutput,
-    eventName: HookEventName,
+    eventName: HookEventName
   ): HookInput {
     // Create a copy of the original input
     const modifiedInput = { ...originalInput };
@@ -129,14 +118,9 @@ export class HookRunner {
         case HookEventName.BeforeAgent:
           if ('additionalContext' in hookOutput.hookSpecificOutput) {
             // For BeforeAgent, we could modify the prompt with additional context
-            const additionalContext =
-              hookOutput.hookSpecificOutput['additionalContext'];
-            if (
-              typeof additionalContext === 'string' &&
-              'prompt' in modifiedInput
-            ) {
-              (modifiedInput as BeforeAgentInput).prompt +=
-                '\n\n' + additionalContext;
+            const additionalContext = hookOutput.hookSpecificOutput['additionalContext'];
+            if (typeof additionalContext === 'string' && 'prompt' in modifiedInput) {
+              (modifiedInput as BeforeAgentInput).prompt += '\n\n' + additionalContext;
             }
           }
           break;
@@ -150,10 +134,8 @@ export class HookRunner {
               'llm_request' in modifiedInput
             ) {
               // Merge the partial request with the existing request
-              const currentRequest = (modifiedInput as BeforeModelInput)
-                .llm_request;
-              const partialRequest =
-                hookBeforeModelOutput.hookSpecificOutput.llm_request;
+              const currentRequest = (modifiedInput as BeforeModelInput).llm_request;
+              const partialRequest = hookBeforeModelOutput.hookSpecificOutput.llm_request;
               (modifiedInput as BeforeModelInput).llm_request = {
                 ...currentRequest,
                 ...partialRequest,
@@ -178,16 +160,14 @@ export class HookRunner {
     hookConfig: HookConfig,
     eventName: HookEventName,
     input: HookInput,
-    startTime: number,
+    startTime: number
   ): Promise<HookExecutionResult> {
     const timeout = hookConfig.timeout ?? DEFAULT_HOOK_TIMEOUT;
 
     return new Promise((resolve) => {
       if (!hookConfig.command) {
         const errorMessage = 'Command hook missing command';
-        debugLogger.warn(
-          `Hook configuration error (non-fatal): ${errorMessage}`,
-        );
+        debugLogger.warn(`Hook configuration error (non-fatal): ${errorMessage}`);
         resolve({
           hookConfig,
           eventName,
@@ -285,7 +265,7 @@ export class HookRunner {
           // Convert error output to structured format
           output = this.convertPlainTextToHookOutput(
             stderr.trim(),
-            exitCode || EXIT_CODE_NON_BLOCKING_ERROR,
+            exitCode || EXIT_CODE_NON_BLOCKING_ERROR
           );
         }
 
@@ -331,10 +311,7 @@ export class HookRunner {
   /**
    * Convert plain text output to structured HookOutput
    */
-  private convertPlainTextToHookOutput(
-    text: string,
-    exitCode: number,
-  ): HookOutput {
+  private convertPlainTextToHookOutput(text: string, exitCode: number): HookOutput {
     if (exitCode === EXIT_CODE_SUCCESS) {
       // Success - treat as system message or additional context
       return {

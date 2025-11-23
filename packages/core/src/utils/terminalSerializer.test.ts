@@ -6,11 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Terminal } from '@xterm/headless';
-import {
-  serializeTerminalToObject,
-  convertColorToHex,
-  ColorMode,
-} from './terminalSerializer.js';
+import { serializeTerminalToObject, convertColorToHex, ColorMode } from './terminalSerializer.js';
 
 const RED_FG = '\x1b[31m';
 const RESET = '\x1b[0m';

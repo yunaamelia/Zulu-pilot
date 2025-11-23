@@ -372,7 +372,7 @@ describe('ModelConfigService', () => {
       };
       const service = new ModelConfigService(config);
       expect(() => service.getResolvedConfig({ model: 'a' })).toThrow(
-        'Circular alias dependency: a -> b -> a',
+        'Circular alias dependency: a -> b -> a'
       );
     });
 
@@ -419,10 +419,8 @@ describe('ModelConfigService', () => {
           },
         };
         const service = new ModelConfigService(config);
-        expect(() =>
-          service.getResolvedConfig({ model: 'abstract-base' }),
-        ).toThrow(
-          'Could not resolve a model name for alias "abstract-base". Please ensure the alias chain or a matching override specifies a model.',
+        expect(() => service.getResolvedConfig({ model: 'abstract-base' })).toThrow(
+          'Could not resolve a model name for alias "abstract-base". Please ensure the alias chain or a matching override specifies a model.'
         );
       });
 
@@ -467,7 +465,7 @@ describe('ModelConfigService', () => {
       };
       const service = new ModelConfigService(config);
       expect(() => service.getResolvedConfig({ model: 'bad-alias' })).toThrow(
-        'Alias "non-existent" not found.',
+        'Alias "non-existent" not found.'
       );
     });
   });
@@ -545,9 +543,7 @@ describe('ModelConfigService', () => {
       const resolved = service.getResolvedConfig({ model: 'base' });
 
       expect(resolved.model).toBe('gemini-pro');
-      expect(resolved.generateContentConfig.stopSequences).toEqual([
-        'overrideFoo',
-      ]);
+      expect(resolved.generateContentConfig.stopSequences).toEqual(['overrideFoo']);
     });
   });
 

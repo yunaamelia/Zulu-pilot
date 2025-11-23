@@ -46,7 +46,7 @@ export abstract class ExtensionLoader {
       await Promise.all(
         this.getExtensions()
           .filter((e) => e.isActive)
-          .map(this.startExtension.bind(this)),
+          .map(this.startExtension.bind(this))
       );
     } finally {
       this.isStarting = false;
@@ -98,9 +98,7 @@ export abstract class ExtensionLoader {
 
   private async maybeRefreshMemories(): Promise<void> {
     if (!this.config) {
-      throw new Error(
-        'Cannot refresh gemini memories prior to calling `start`.',
-      );
+      throw new Error('Cannot refresh gemini memories prior to calling `start`.');
     }
     if (
       !this.isStarting && // Don't refresh memories on the first call to `start`.
@@ -118,9 +116,7 @@ export abstract class ExtensionLoader {
    * Refreshes the gemini tools list if it is initialized and the extension has
    * any excludeTools settings.
    */
-  private async maybeRefreshGeminiTools(
-    extension: GeminiCLIExtension,
-  ): Promise<void> {
+  private async maybeRefreshGeminiTools(extension: GeminiCLIExtension): Promise<void> {
     if (extension.excludeTools && extension.excludeTools.length > 0) {
       const geminiClient = this.config?.getGeminiClient();
       if (geminiClient?.isInitialized()) {
@@ -134,9 +130,7 @@ export abstract class ExtensionLoader {
    * then calls `startExtension` to include all extension features into the
    * program.
    */
-  protected maybeStartExtension(
-    extension: GeminiCLIExtension,
-  ): Promise<void> | undefined {
+  protected maybeStartExtension(extension: GeminiCLIExtension): Promise<void> | undefined {
     if (this.config && this.config.getEnableExtensionReloading()) {
       return this.startExtension(extension);
     }
@@ -192,9 +186,7 @@ export abstract class ExtensionLoader {
    * then this also performs all necessary steps to remove all extension
    * features from the rest of the system.
    */
-  protected maybeStopExtension(
-    extension: GeminiCLIExtension,
-  ): Promise<void> | undefined {
+  protected maybeStopExtension(extension: GeminiCLIExtension): Promise<void> | undefined {
     if (this.config && this.config.getEnableExtensionReloading()) {
       return this.stopExtension(extension);
     }
@@ -225,7 +217,7 @@ export interface ExtensionsStoppingEvent {
 export class SimpleExtensionLoader extends ExtensionLoader {
   constructor(
     protected readonly extensions: GeminiCLIExtension[],
-    eventEmitter?: EventEmitter<ExtensionEvents>,
+    eventEmitter?: EventEmitter<ExtensionEvents>
   ) {
     super(eventEmitter);
   }

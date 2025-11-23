@@ -28,7 +28,7 @@ export class WorkspaceContext {
    */
   constructor(
     readonly targetDir: string,
-    additionalDirectories: string[] = [],
+    additionalDirectories: string[] = []
   ) {
     this.addDirectory(targetDir);
     for (const additionalDirectory of additionalDirectories) {
@@ -57,7 +57,7 @@ export class WorkspaceContext {
       } catch (e) {
         // Don't let one listener break others.
         debugLogger.warn(
-          `Error in WorkspaceContext listener: (${e instanceof Error ? e.message : String(e)})`,
+          `Error in WorkspaceContext listener: (${e instanceof Error ? e.message : String(e)})`
         );
       }
     }
@@ -78,7 +78,7 @@ export class WorkspaceContext {
       this.notifyDirectoriesChanged();
     } catch (err) {
       debugLogger.warn(
-        `[WARN] Skipping unreadable directory: ${directory} (${err instanceof Error ? err.message : String(err)})`,
+        `[WARN] Skipping unreadable directory: ${directory} (${err instanceof Error ? err.message : String(err)})`
       );
     }
   }
@@ -174,16 +174,9 @@ export class WorkspaceContext {
    * @param rootDirectory The absolute root directory
    * @returns True if the path is within the root directory, false otherwise
    */
-  private isPathWithinRoot(
-    pathToCheck: string,
-    rootDirectory: string,
-  ): boolean {
+  private isPathWithinRoot(pathToCheck: string, rootDirectory: string): boolean {
     const relative = path.relative(rootDirectory, pathToCheck);
-    return (
-      !relative.startsWith(`..${path.sep}`) &&
-      relative !== '..' &&
-      !path.isAbsolute(relative)
-    );
+    return !relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative);
   }
 
   /**

@@ -35,9 +35,7 @@ export async function loadApiKey(): Promise<string | null> {
 /**
  * Save API key
  */
-export async function saveApiKey(
-  apiKey: string | null | undefined,
-): Promise<void> {
+export async function saveApiKey(apiKey: string | null | undefined): Promise<void> {
   if (!apiKey || apiKey.trim() === '') {
     try {
       await storage.deleteCredentials(DEFAULT_API_KEY_ENTRY);

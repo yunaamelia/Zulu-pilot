@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  loadApiKey,
-  saveApiKey,
-  clearApiKey,
-} from './apiKeyCredentialStorage.js';
+import { loadApiKey, saveApiKey, clearApiKey } from './apiKeyCredentialStorage.js';
 
 const getCredentialsMock = vi.hoisted(() => vi.fn());
 const setCredentialsMock = vi.hoisted(() => vi.fn());
@@ -59,7 +55,7 @@ describe('ApiKeyCredentialStorage', () => {
           accessToken: 'new-key',
           tokenType: 'ApiKey',
         }),
-      }),
+      })
     );
   });
 

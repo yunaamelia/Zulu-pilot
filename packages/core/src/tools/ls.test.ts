@@ -24,14 +24,11 @@ describe('LSTool', () => {
   beforeEach(async () => {
     const realTmp = await fs.realpath(os.tmpdir());
     tempRootDir = await fs.mkdtemp(path.join(realTmp, 'ls-tool-root-'));
-    tempSecondaryDir = await fs.mkdtemp(
-      path.join(realTmp, 'ls-tool-secondary-'),
-    );
+    tempSecondaryDir = await fs.mkdtemp(path.join(realTmp, 'ls-tool-secondary-'));
 
     mockConfig = {
       getTargetDir: () => tempRootDir,
-      getWorkspaceContext: () =>
-        new WorkspaceContext(tempRootDir, [tempSecondaryDir]),
+      getWorkspaceContext: () => new WorkspaceContext(tempRootDir, [tempSecondaryDir]),
       getFileService: () => new FileDiscoveryService(tempRootDir),
       getFileFilteringOptions: () => ({
         respectGitIgnore: true,
@@ -69,7 +66,7 @@ describe('LSTool', () => {
 
     it('should reject paths outside workspace with clear error message', () => {
       expect(() => lsTool.build({ dir_path: '/etc/passwd' })).toThrow(
-        `Path must be within one of the workspace directories: ${tempRootDir}, ${tempSecondaryDir}`,
+        `Path must be within one of the workspace directories: ${tempRootDir}, ${tempSecondaryDir}`
       );
     });
 
@@ -87,10 +84,7 @@ describe('LSTool', () => {
     it('should list files in a directory', async () => {
       await fs.writeFile(path.join(tempRootDir, 'file1.txt'), 'content1');
       await fs.mkdir(path.join(tempRootDir, 'subdir'));
-      await fs.writeFile(
-        path.join(tempSecondaryDir, 'secondary-file.txt'),
-        'secondary',
-      );
+      await fs.writeFile(path.join(tempSecondaryDir, 'secondary-file.txt'), 'secondary');
 
       const invocation = lsTool.build({ dir_path: tempRootDir });
       const result = await invocation.execute(abortSignal);
@@ -103,10 +97,7 @@ describe('LSTool', () => {
     it('should list files from secondary workspace directory', async () => {
       await fs.writeFile(path.join(tempRootDir, 'file1.txt'), 'content1');
       await fs.mkdir(path.join(tempRootDir, 'subdir'));
-      await fs.writeFile(
-        path.join(tempSecondaryDir, 'secondary-file.txt'),
-        'secondary',
-      );
+      await fs.writeFile(path.join(tempSecondaryDir, 'secondary-file.txt'), 'secondary');
 
       const invocation = lsTool.build({ dir_path: tempSecondaryDir });
       const result = await invocation.execute(abortSignal);
@@ -197,9 +188,7 @@ describe('LSTool', () => {
       const invocation = lsTool.build({ dir_path: tempRootDir });
       const result = await invocation.execute(abortSignal);
 
-      const lines = (
-        typeof result.llmContent === 'string' ? result.llmContent : ''
-      )
+      const lines = (typeof result.llmContent === 'string' ? result.llmContent : '')
         .split('\n')
         .filter(Boolean);
       const entries = lines.slice(1); // Skip header
@@ -296,15 +285,12 @@ describe('LSTool', () => {
     it('should reject paths outside all workspace directories', () => {
       const params = { dir_path: '/etc/passwd' };
       expect(() => lsTool.build(params)).toThrow(
-        'Path must be within one of the workspace directories',
+        'Path must be within one of the workspace directories'
       );
     });
 
     it('should list files from secondary workspace directory', async () => {
-      await fs.writeFile(
-        path.join(tempSecondaryDir, 'secondary-file.txt'),
-        'secondary',
-      );
+      await fs.writeFile(path.join(tempSecondaryDir, 'secondary-file.txt'), 'secondary');
 
       const invocation = lsTool.build({ dir_path: tempSecondaryDir });
       const result = await invocation.execute(abortSignal);

@@ -12,9 +12,7 @@ import type { ConversationTurn } from './protocol.js';
 describe('ContextBuilder', () => {
   let contextBuilder: ContextBuilder;
   let mockConfig: Config;
-  const mockHistory: ConversationTurn[] = [
-    { user: { text: 'hello' }, model: { text: 'hi' } },
-  ];
+  const mockHistory: ConversationTurn[] = [{ user: { text: 'hello' }, model: { text: 'hi' } }];
   const mockCwd = '/home/user/project';
   const mockWorkspaces = ['/home/user/project'];
 

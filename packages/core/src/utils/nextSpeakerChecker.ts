@@ -43,7 +43,7 @@ export async function checkNextSpeaker(
   chat: GeminiChat,
   baseLlmClient: BaseLlmClient,
   abortSignal: AbortSignal,
-  promptId: string,
+  promptId: string
 ): Promise<NextSpeakerResponse | null> {
   // We need to capture the curated history because there are many moments when the model will return invalid turns
   // that when passed back up to the endpoint will break subsequent calls. An example of this is when the model decides
@@ -64,18 +64,13 @@ export async function checkNextSpeaker(
   if (comprehensiveHistory.length === 0) {
     return null;
   }
-  const lastComprehensiveMessage =
-    comprehensiveHistory[comprehensiveHistory.length - 1];
+  const lastComprehensiveMessage = comprehensiveHistory[comprehensiveHistory.length - 1];
 
   // If the last message is a user message containing only function_responses,
   // then the model should speak next.
-  if (
-    lastComprehensiveMessage &&
-    isFunctionResponse(lastComprehensiveMessage)
-  ) {
+  if (lastComprehensiveMessage && isFunctionResponse(lastComprehensiveMessage)) {
     return {
-      reasoning:
-        'The last message was a function response, so the model should speak next.',
+      reasoning: 'The last message was a function response, so the model should speak next.',
       next_speaker: 'model',
     };
   }
@@ -128,7 +123,7 @@ export async function checkNextSpeaker(
   } catch (error) {
     debugLogger.warn(
       'Failed to talk to Gemini endpoint when seeing if conversation should continue.',
-      error,
+      error
     );
     return null;
   }

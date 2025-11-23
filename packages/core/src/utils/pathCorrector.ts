@@ -26,13 +26,8 @@ type FailedPathCorrection = {
  * @param config The application configuration.
  * @returns A `PathCorrectionResult` object with either a `correctedPath` or an `error`.
  */
-export type PathCorrectionResult =
-  | SuccessfulPathCorrection
-  | FailedPathCorrection;
-export function correctPath(
-  filePath: string,
-  config: Config,
-): PathCorrectionResult {
+export type PathCorrectionResult = SuccessfulPathCorrection | FailedPathCorrection;
+export function correctPath(filePath: string, config: Config): PathCorrectionResult {
   // Check for direct path relative to the primary target directory.
   const directPath = path.join(config.getTargetDir(), filePath);
   if (fs.existsSync(directPath)) {

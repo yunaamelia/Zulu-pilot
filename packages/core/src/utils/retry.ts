@@ -16,8 +16,7 @@ import { delay, createAbortError } from './delay.js';
 import { debugLogger } from './debugLogger.js';
 import { getErrorStatus, ModelNotFoundError } from './httpErrors.js';
 
-const FETCH_FAILED_MESSAGE =
-  'exception TypeError: fetch failed sending request';
+const FETCH_FAILED_MESSAGE = 'exception TypeError: fetch failed sending request';
 
 export interface RetryOptions {
   maxAttempts: number;
@@ -25,10 +24,7 @@ export interface RetryOptions {
   maxDelayMs: number;
   shouldRetryOnError: (error: Error, retryFetchErrors?: boolean) => boolean;
   shouldRetryOnContent?: (content: GenerateContentResponse) => boolean;
-  onPersistent429?: (
-    authType?: string,
-    error?: unknown,
-  ) => Promise<string | boolean | null>;
+  onPersistent429?: (authType?: string, error?: unknown) => Promise<string | boolean | null>;
   authType?: string;
   retryFetchErrors?: boolean;
   signal?: AbortSignal;
@@ -48,15 +44,8 @@ const DEFAULT_RETRY_OPTIONS: RetryOptions = {
  * @param retryFetchErrors Whether to retry on specific fetch errors.
  * @returns True if the error is a transient error, false otherwise.
  */
-function defaultShouldRetry(
-  error: Error | unknown,
-  retryFetchErrors?: boolean,
-): boolean {
-  if (
-    retryFetchErrors &&
-    error instanceof Error &&
-    error.message.includes(FETCH_FAILED_MESSAGE)
-  ) {
+function defaultShouldRetry(error: Error | unknown, retryFetchErrors?: boolean): boolean {
+  if (retryFetchErrors && error instanceof Error && error.message.includes(FETCH_FAILED_MESSAGE)) {
     return true;
   }
 
@@ -85,7 +74,7 @@ function defaultShouldRetry(
  */
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  options?: Partial<RetryOptions>,
+  options?: Partial<RetryOptions>
 ): Promise<T> {
   if (options?.signal?.aborted) {
     throw createAbortError();
@@ -125,10 +114,7 @@ export async function retryWithBackoff<T>(
     try {
       const result = await fn();
 
-      if (
-        shouldRetryOnContent &&
-        shouldRetryOnContent(result as GenerateContentResponse)
-      ) {
+      if (shouldRetryOnContent && shouldRetryOnContent(result as GenerateContentResponse)) {
         const jitter = currentDelay * 0.3 * (Math.random() * 2 - 1);
         const delayWithJitter = Math.max(0, currentDelay + jitter);
         await delay(delayWithJitter, signal);
@@ -151,10 +137,7 @@ export async function retryWithBackoff<T>(
       ) {
         if (onPersistent429 && authType === AuthType.LOGIN_WITH_GOOGLE) {
           try {
-            const fallbackModel = await onPersistent429(
-              authType,
-              classifiedError,
-            );
+            const fallbackModel = await onPersistent429(authType, classifiedError);
             if (fallbackModel) {
               attempt = 0; // Reset attempts and retry with the new model.
               currentDelay = initialDelayMs;
@@ -167,17 +150,13 @@ export async function retryWithBackoff<T>(
         throw classifiedError; // Throw if no fallback or fallback failed.
       }
 
-      const is500 =
-        errorCode !== undefined && errorCode >= 500 && errorCode < 600;
+      const is500 = errorCode !== undefined && errorCode >= 500 && errorCode < 600;
 
       if (classifiedError instanceof RetryableQuotaError || is500) {
         if (attempt >= maxAttempts) {
           if (onPersistent429 && authType === AuthType.LOGIN_WITH_GOOGLE) {
             try {
-              const fallbackModel = await onPersistent429(
-                authType,
-                classifiedError,
-              );
+              const fallbackModel = await onPersistent429(authType, classifiedError);
               if (fallbackModel) {
                 attempt = 0; // Reset attempts and retry with the new model.
                 currentDelay = initialDelayMs;
@@ -187,14 +166,12 @@ export async function retryWithBackoff<T>(
               console.warn('Model fallback failed:', fallbackError);
             }
           }
-          throw classifiedError instanceof RetryableQuotaError
-            ? classifiedError
-            : error;
+          throw classifiedError instanceof RetryableQuotaError ? classifiedError : error;
         }
 
         if (classifiedError instanceof RetryableQuotaError) {
           console.warn(
-            `Attempt ${attempt} failed: ${classifiedError.message}. Retrying after ${classifiedError.retryDelayMs}ms...`,
+            `Attempt ${attempt} failed: ${classifiedError.message}. Retrying after ${classifiedError.retryDelayMs}ms...`
           );
           await delay(classifiedError.retryDelayMs, signal);
           continue;
@@ -212,10 +189,7 @@ export async function retryWithBackoff<T>(
       }
 
       // Generic retry logic for other errors
-      if (
-        attempt >= maxAttempts ||
-        !shouldRetryOnError(error as Error, retryFetchErrors)
-      ) {
+      if (attempt >= maxAttempts || !shouldRetryOnError(error as Error, retryFetchErrors)) {
         throw error;
       }
 
@@ -239,11 +213,7 @@ export async function retryWithBackoff<T>(
  * @param error The error that caused the retry.
  * @param errorStatus The HTTP status code of the error, if available.
  */
-function logRetryAttempt(
-  attempt: number,
-  error: unknown,
-  errorStatus?: number,
-): void {
+function logRetryAttempt(attempt: number, error: unknown, errorStatus?: number): void {
   let message = `Attempt ${attempt} failed. Retrying with backoff...`;
   if (errorStatus) {
     message = `Attempt ${attempt} failed with status ${errorStatus}. Retrying with backoff...`;
@@ -258,13 +228,10 @@ function logRetryAttempt(
     if (error.message.includes('429')) {
       debugLogger.warn(
         `Attempt ${attempt} failed with 429 error (no Retry-After header). Retrying with backoff...`,
-        error,
+        error
       );
     } else if (error.message.match(/5\d{2}/)) {
-      console.error(
-        `Attempt ${attempt} failed with 5xx error. Retrying with backoff...`,
-        error,
-      );
+      console.error(`Attempt ${attempt} failed with 5xx error. Retrying with backoff...`, error);
     } else {
       debugLogger.warn(message, error); // Default to warn for other errors
     }

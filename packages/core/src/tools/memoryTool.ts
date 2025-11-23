@@ -5,12 +5,7 @@
  */
 
 import type { ToolEditConfirmationDetails, ToolResult } from './tools.js';
-import {
-  BaseDeclarativeTool,
-  BaseToolInvocation,
-  Kind,
-  ToolConfirmationOutcome,
-} from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind, ToolConfirmationOutcome } from './tools.js';
 import type { FunctionDeclaration } from '@google/genai';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -18,10 +13,7 @@ import { Storage } from '../config/storage.js';
 import * as Diff from 'diff';
 import { DEFAULT_DIFF_OPTIONS } from './diffOptions.js';
 import { tildeifyPath } from '../utils/paths.js';
-import type {
-  ModifiableDeclarativeTool,
-  ModifyContext,
-} from './modifiable-tool.js';
+import type { ModifiableDeclarativeTool, ModifyContext } from './modifiable-tool.js';
 import { ToolErrorType } from './tool-error.js';
 import { MEMORY_TOOL_NAME } from './tool-names.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
@@ -107,10 +99,8 @@ export function getGlobalMemoryFilePath(): string {
  */
 function ensureNewlineSeparation(currentContent: string): string {
   if (currentContent.length === 0) return '';
-  if (currentContent.endsWith('\n\n') || currentContent.endsWith('\r\n\r\n'))
-    return '';
-  if (currentContent.endsWith('\n') || currentContent.endsWith('\r\n'))
-    return '\n';
+  if (currentContent.endsWith('\n\n') || currentContent.endsWith('\r\n\r\n')) return '';
+  if (currentContent.endsWith('\n') || currentContent.endsWith('\r\n')) return '\n';
   return '\n\n';
 }
 
@@ -140,24 +130,16 @@ function computeNewContent(currentContent: string, fact: string): string {
   if (headerIndex === -1) {
     // Header not found, append header and then the entry
     const separator = ensureNewlineSeparation(currentContent);
-    return (
-      currentContent +
-      `${separator}${MEMORY_SECTION_HEADER}\n${newMemoryItem}\n`
-    );
+    return currentContent + `${separator}${MEMORY_SECTION_HEADER}\n${newMemoryItem}\n`;
   } else {
     // Header found, find where to insert the new memory entry
     const startOfSectionContent = headerIndex + MEMORY_SECTION_HEADER.length;
-    let endOfSectionIndex = currentContent.indexOf(
-      '\n## ',
-      startOfSectionContent,
-    );
+    let endOfSectionIndex = currentContent.indexOf('\n## ', startOfSectionContent);
     if (endOfSectionIndex === -1) {
       endOfSectionIndex = currentContent.length; // End of file
     }
 
-    const beforeSectionMarker = currentContent
-      .substring(0, startOfSectionContent)
-      .trimEnd();
+    const beforeSectionMarker = currentContent.substring(0, startOfSectionContent).trimEnd();
     let sectionContent = currentContent
       .substring(startOfSectionContent, endOfSectionIndex)
       .trimEnd();
@@ -171,17 +153,14 @@ function computeNewContent(currentContent: string, fact: string): string {
   }
 }
 
-class MemoryToolInvocation extends BaseToolInvocation<
-  SaveMemoryParams,
-  ToolResult
-> {
+class MemoryToolInvocation extends BaseToolInvocation<SaveMemoryParams, ToolResult> {
   private static readonly allowlist: Set<string> = new Set();
 
   constructor(
     params: SaveMemoryParams,
     messageBus?: MessageBus,
     toolName?: string,
-    displayName?: string,
+    displayName?: string
   ) {
     super(params, messageBus, toolName, displayName);
   }
@@ -192,7 +171,7 @@ class MemoryToolInvocation extends BaseToolInvocation<
   }
 
   protected override async getConfirmationDetails(
-    _abortSignal: AbortSignal,
+    _abortSignal: AbortSignal
   ): Promise<ToolEditConfirmationDetails | false> {
     const memoryFilePath = getGlobalMemoryFilePath();
     const allowlistKey = memoryFilePath;
@@ -211,7 +190,7 @@ class MemoryToolInvocation extends BaseToolInvocation<
       newContent,
       'Current',
       'Proposed',
-      DEFAULT_DIFF_OPTIONS,
+      DEFAULT_DIFF_OPTIONS
     );
 
     const confirmationDetails: ToolEditConfirmationDetails = {
@@ -240,11 +219,7 @@ class MemoryToolInvocation extends BaseToolInvocation<
         await fs.mkdir(path.dirname(getGlobalMemoryFilePath()), {
           recursive: true,
         });
-        await fs.writeFile(
-          getGlobalMemoryFilePath(),
-          modified_content,
-          'utf-8',
-        );
+        await fs.writeFile(getGlobalMemoryFilePath(), modified_content, 'utf-8');
         const successMessage = `Okay, I've updated the memory file with your modifications.`;
         return {
           llmContent: JSON.stringify({
@@ -255,15 +230,11 @@ class MemoryToolInvocation extends BaseToolInvocation<
         };
       } else {
         // Use the normal memory entry logic
-        await MemoryTool.performAddMemoryEntry(
-          fact,
-          getGlobalMemoryFilePath(),
-          {
-            readFile: fs.readFile,
-            writeFile: fs.writeFile,
-            mkdir: fs.mkdir,
-          },
-        );
+        await MemoryTool.performAddMemoryEntry(fact, getGlobalMemoryFilePath(), {
+          readFile: fs.readFile,
+          writeFile: fs.writeFile,
+          mkdir: fs.mkdir,
+        });
         const successMessage = `Okay, I've remembered that: "${fact}"`;
         return {
           llmContent: JSON.stringify({
@@ -274,11 +245,8 @@ class MemoryToolInvocation extends BaseToolInvocation<
         };
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.warn(
-        `[MemoryTool] Error executing save_memory for fact "${fact}": ${errorMessage}`,
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[MemoryTool] Error executing save_memory for fact "${fact}": ${errorMessage}`);
       return {
         llmContent: JSON.stringify({
           success: false,
@@ -309,13 +277,11 @@ export class MemoryTool
       memoryToolSchemaData.parametersJsonSchema as Record<string, unknown>,
       true,
       false,
-      messageBus,
+      messageBus
     );
   }
 
-  protected override validateToolParamValues(
-    params: SaveMemoryParams,
-  ): string | null {
+  protected override validateToolParamValues(params: SaveMemoryParams): string | null {
     if (params.fact.trim() === '') {
       return 'Parameter "fact" must be a non-empty string.';
     }
@@ -327,13 +293,13 @@ export class MemoryTool
     params: SaveMemoryParams,
     messageBus?: MessageBus,
     toolName?: string,
-    displayName?: string,
+    displayName?: string
   ) {
     return new MemoryToolInvocation(
       params,
       messageBus ?? this.messageBus,
       toolName ?? this.name,
-      displayName ?? this.displayName,
+      displayName ?? this.displayName
     );
   }
 
@@ -342,16 +308,9 @@ export class MemoryTool
     memoryFilePath: string,
     fsAdapter: {
       readFile: (path: string, encoding: 'utf-8') => Promise<string>;
-      writeFile: (
-        path: string,
-        data: string,
-        encoding: 'utf-8',
-      ) => Promise<void>;
-      mkdir: (
-        path: string,
-        options: { recursive: boolean },
-      ) => Promise<string | undefined>;
-    },
+      writeFile: (path: string, data: string, encoding: 'utf-8') => Promise<void>;
+      mkdir: (path: string, options: { recursive: boolean }) => Promise<string | undefined>;
+    }
   ): Promise<void> {
     try {
       await fsAdapter.mkdir(path.dirname(memoryFilePath), { recursive: true });
@@ -366,12 +325,9 @@ export class MemoryTool
 
       await fsAdapter.writeFile(memoryFilePath, newContent, 'utf-8');
     } catch (error) {
-      console.error(
-        `[MemoryTool] Error adding memory entry to ${memoryFilePath}:`,
-        error,
-      );
+      console.error(`[MemoryTool] Error adding memory entry to ${memoryFilePath}:`, error);
       throw new Error(
-        `[MemoryTool] Failed to add memory entry: ${error instanceof Error ? error.message : String(error)}`,
+        `[MemoryTool] Failed to add memory entry: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -388,7 +344,7 @@ export class MemoryTool
       createUpdatedParams: (
         _oldContent: string,
         modifiedProposedContent: string,
-        originalParams: SaveMemoryParams,
+        originalParams: SaveMemoryParams
       ): SaveMemoryParams => ({
         ...originalParams,
         modified_by_user: true,

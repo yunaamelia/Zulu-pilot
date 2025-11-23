@@ -57,10 +57,7 @@ describe('GlobTool', () => {
 
     // Deeper subdirectory
     await fs.mkdir(path.join(tempRootDir, 'sub', 'deep'));
-    await fs.writeFile(
-      path.join(tempRootDir, 'sub', 'deep', 'fileE.log'),
-      'contentE',
-    );
+    await fs.writeFile(path.join(tempRootDir, 'sub', 'deep', 'fileE.log'), 'contentE');
 
     // Files for mtime sorting test
     await fs.writeFile(path.join(tempRootDir, 'older.sortme'), 'older_content');
@@ -91,9 +88,7 @@ describe('GlobTool', () => {
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toContain('Found 1 file(s)');
       expect(result.llmContent).toContain(path.join(tempRootDir, 'fileA.txt'));
-      expect(result.llmContent).not.toContain(
-        path.join(tempRootDir, 'FileB.TXT'),
-      );
+      expect(result.llmContent).not.toContain(path.join(tempRootDir, 'FileB.TXT'));
     });
 
     it('should find files case-insensitively by default (pattern: *.TXT)', async () => {
@@ -122,12 +117,8 @@ describe('GlobTool', () => {
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toContain('Found 2 file(s)');
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'sub', 'fileC.md'),
-      );
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'sub', 'FileD.MD'),
-      );
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'sub', 'fileC.md'));
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'sub', 'FileD.MD'));
     });
 
     it('should find files in a specified relative path (relative to rootDir)', async () => {
@@ -135,12 +126,8 @@ describe('GlobTool', () => {
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toContain('Found 2 file(s)');
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'sub', 'fileC.md'),
-      );
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'sub', 'FileD.MD'),
-      );
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'sub', 'fileC.md'));
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'sub', 'FileD.MD'));
     });
 
     it('should find files using a deep globstar pattern (e.g., **/*.log)', async () => {
@@ -148,18 +135,14 @@ describe('GlobTool', () => {
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toContain('Found 1 file(s)');
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'sub', 'deep', 'fileE.log'),
-      );
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'sub', 'deep', 'fileE.log'));
     });
 
     it('should return "No files found" message when pattern matches nothing', async () => {
       const params: GlobToolParams = { pattern: '*.nonexistent' };
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
-      expect(result.llmContent).toContain(
-        'No files found matching pattern "*.nonexistent"',
-      );
+      expect(result.llmContent).toContain('No files found matching pattern "*.nonexistent"');
       expect(result.returnDisplay).toBe('No files found');
     });
 
@@ -169,15 +152,13 @@ describe('GlobTool', () => {
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toContain('Found 1 file(s)');
-      expect(result.llmContent).toContain(
-        path.join(tempRootDir, 'file[1].txt'),
-      );
+      expect(result.llmContent).toContain(path.join(tempRootDir, 'file[1].txt'));
     });
 
     it('should find files with special characters like [] and () in the path', async () => {
       const filePath = path.join(
         tempRootDir,
-        'src/app/[test]/(dashboard)/testing/components/code.tsx',
+        'src/app/[test]/(dashboard)/testing/components/code.tsx'
       );
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, 'content');
@@ -209,12 +190,8 @@ describe('GlobTool', () => {
         .filter(Boolean);
 
       expect(filesListed).toHaveLength(2);
-      expect(path.resolve(filesListed[0])).toBe(
-        path.resolve(tempRootDir, 'newer.sortme'),
-      );
-      expect(path.resolve(filesListed[1])).toBe(
-        path.resolve(tempRootDir, 'older.sortme'),
-      );
+      expect(path.resolve(filesListed[0])).toBe(path.resolve(tempRootDir, 'newer.sortme'));
+      expect(path.resolve(filesListed[1])).toBe(path.resolve(tempRootDir, 'older.sortme'));
     });
 
     it('should return a PATH_NOT_IN_WORKSPACE error if path is outside workspace', async () => {
@@ -233,9 +210,7 @@ describe('GlobTool', () => {
       const invocation = globTool.build(params);
       const result = await invocation.execute(abortSignal);
       expect(result.error?.type).toBe(ToolErrorType.GLOB_EXECUTION_ERROR);
-      expect(result.llmContent).toContain(
-        'Error during glob search operation: Glob failed',
-      );
+      expect(result.llmContent).toContain('Error during glob search operation: Glob failed');
       // Reset glob.
       vi.mocked(glob.glob).mockReset();
     });
@@ -319,7 +294,7 @@ describe('GlobTool', () => {
 
       expect(globTool.validateToolParams(validPath)).toBeNull();
       expect(globTool.validateToolParams(invalidPath)).toContain(
-        'resolves outside the allowed workspace directories',
+        'resolves outside the allowed workspace directories'
       );
     });
 
@@ -327,9 +302,7 @@ describe('GlobTool', () => {
       const invalidPath = { pattern: '*.ts', dir_path: '/etc' };
       const error = globTool.validateToolParams(invalidPath);
 
-      expect(error).toContain(
-        'resolves outside the allowed workspace directories',
-      );
+      expect(error).toContain('resolves outside the allowed workspace directories');
       expect(error).toContain(tempRootDir);
     });
 
@@ -398,10 +371,7 @@ describe('GlobTool', () => {
         expectedToContain,
         notExpectedToContain,
       }) => {
-        await fs.writeFile(
-          path.join(tempRootDir, ignoreFile.name),
-          ignoreFile.content,
-        );
+        await fs.writeFile(path.join(tempRootDir, ignoreFile.name), ignoreFile.content);
         for (const file of filesToCreate) {
           await fs.writeFile(path.join(tempRootDir, file), 'content');
         }
@@ -421,7 +391,7 @@ describe('GlobTool', () => {
             expect(result.llmContent).not.toContain(file);
           }
         }
-      },
+      }
     );
   });
 });
@@ -510,27 +480,20 @@ describe('sortFileEntries', () => {
     },
   ];
 
-  it.each(testCases)(
-    '$name',
-    ({ entries, expected, expectedUnordered, recencyThresholdMs }) => {
-      const globPaths = entries.map((e) => createFileEntry(e.name, e.mtime));
-      const sorted = sortFileEntries(
-        globPaths,
-        nowTimestamp,
-        recencyThresholdMs ?? oneDayInMs,
-      );
-      const sortedPaths = sorted.map((e) => e.fullpath());
+  it.each(testCases)('$name', ({ entries, expected, expectedUnordered, recencyThresholdMs }) => {
+    const globPaths = entries.map((e) => createFileEntry(e.name, e.mtime));
+    const sorted = sortFileEntries(globPaths, nowTimestamp, recencyThresholdMs ?? oneDayInMs);
+    const sortedPaths = sorted.map((e) => e.fullpath());
 
-      if (expected) {
-        expect(sortedPaths).toEqual(expected);
-      } else if (expectedUnordered) {
-        expect(sortedPaths).toHaveLength(expectedUnordered.length);
-        for (const path of expectedUnordered) {
-          expect(sortedPaths).toContain(path);
-        }
-      } else {
-        throw new Error('Test case must have expected or expectedUnordered');
+    if (expected) {
+      expect(sortedPaths).toEqual(expected);
+    } else if (expectedUnordered) {
+      expect(sortedPaths).toHaveLength(expectedUnordered.length);
+      for (const path of expectedUnordered) {
+        expect(sortedPaths).toContain(path);
       }
-    },
-  );
+    } else {
+      throw new Error('Test case must have expected or expectedUnordered');
+    }
+  });
 });

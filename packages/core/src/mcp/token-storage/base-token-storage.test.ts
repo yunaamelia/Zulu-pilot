@@ -117,9 +117,9 @@ describe('BaseTokenStorage', () => {
         expectedError: 'Token type is required',
       },
     ])('should throw for $desc', ({ credentials, expectedError }) => {
-      expect(() =>
-        storage.validateCredentials(credentials as OAuthCredentials),
-      ).toThrow(expectedError);
+      expect(() => storage.validateCredentials(credentials as OAuthCredentials)).toThrow(
+        expectedError
+      );
     });
   });
 
@@ -128,11 +128,7 @@ describe('BaseTokenStorage', () => {
       ['tokens without expiry', undefined, false],
       ['valid tokens', Date.now() + 3600000, false],
       ['expired tokens', Date.now() - 3600000, true],
-      [
-        'tokens within 5-minute buffer (4 minutes from now)',
-        Date.now() + 4 * 60 * 1000,
-        true,
-      ],
+      ['tokens within 5-minute buffer (4 minutes from now)', Date.now() + 4 * 60 * 1000, true],
     ])('should return %s for %s', (_, expiresAt, expected) => {
       const credentials: OAuthCredentials = {
         serverName: 'test-server',
@@ -150,21 +146,13 @@ describe('BaseTokenStorage', () => {
 
   describe('sanitizeServerName', () => {
     it.each([
-      [
-        'valid characters',
-        'test-server.example_123',
-        'test-server.example_123',
-      ],
+      ['valid characters', 'test-server.example_123', 'test-server.example_123'],
       [
         'invalid characters with underscore replacement',
         'test@server#example',
         'test_server_example',
       ],
-      [
-        'special characters',
-        'test server/example:123',
-        'test_server_example_123',
-      ],
+      ['special characters', 'test server/example:123', 'test_server_example_123'],
     ])('should handle %s', (_, input, expected) => {
       expect(storage.sanitizeServerName(input)).toBe(expected);
     });

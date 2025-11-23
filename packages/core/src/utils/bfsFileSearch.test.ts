@@ -28,9 +28,7 @@ describe('bfsFileSearch', () => {
   }
 
   beforeEach(async () => {
-    testRootDir = await fsPromises.mkdtemp(
-      path.join(os.tmpdir(), 'bfs-file-search-test-'),
-    );
+    testRootDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'bfs-file-search-test-'));
   });
 
   afterEach(async () => {
@@ -44,12 +42,7 @@ describe('bfsFileSearch', () => {
   });
 
   it('should find a file in a nested directory', async () => {
-    const targetFilePath = await createTestFile(
-      'content',
-      'a',
-      'b',
-      'target.txt',
-    );
+    const targetFilePath = await createTestFile('content', 'a', 'b', 'target.txt');
     const result = await bfsFileSearch(testRootDir, { fileName: 'target.txt' });
     expect(result).toEqual([targetFilePath]);
   });
@@ -70,11 +63,7 @@ describe('bfsFileSearch', () => {
 
   it('should ignore directories specified in ignoreDirs', async () => {
     await createTestFile('content', 'ignored', 'target.txt');
-    const targetFilePath = await createTestFile(
-      'content',
-      'not-ignored',
-      'target.txt',
-    );
+    const targetFilePath = await createTestFile('content', 'not-ignored', 'target.txt');
     const result = await bfsFileSearch(testRootDir, {
       fileName: 'target.txt',
       ignoreDirs: ['ignored'],
@@ -92,13 +81,7 @@ describe('bfsFileSearch', () => {
   });
 
   it('should respect the maxDirs limit and find the file', async () => {
-    const targetFilePath = await createTestFile(
-      'content',
-      'a',
-      'b',
-      'c',
-      'target.txt',
-    );
+    const targetFilePath = await createTestFile('content', 'a', 'b', 'c', 'target.txt');
     const result = await bfsFileSearch(testRootDir, {
       fileName: 'target.txt',
       maxDirs: 4,
@@ -121,7 +104,7 @@ describe('bfsFileSearch', () => {
         'content',
         'project',
         'not-ignored',
-        'target.txt',
+        'target.txt'
       );
 
       const fileService = new FileDiscoveryService(projectRoot);
@@ -144,7 +127,7 @@ describe('bfsFileSearch', () => {
         'content',
         'project',
         'not-ignored',
-        'target.txt',
+        'target.txt'
       );
 
       const fileService = new FileDiscoveryService(projectRoot);
@@ -163,18 +146,8 @@ describe('bfsFileSearch', () => {
     it('should not ignore files if respect flags are false', async () => {
       await createEmptyDir('project', '.git');
       await createTestFile('node_modules/', 'project', '.gitignore');
-      const target1 = await createTestFile(
-        'content',
-        'project',
-        'node_modules',
-        'target.txt',
-      );
-      const target2 = await createTestFile(
-        'content',
-        'project',
-        'not-ignored',
-        'target.txt',
-      );
+      const target1 = await createTestFile('content', 'project', 'node_modules', 'target.txt');
+      const target2 = await createTestFile('content', 'project', 'not-ignored', 'target.txt');
 
       const fileService = new FileDiscoveryService(projectRoot);
       const result = await bfsFileSearch(projectRoot, {
@@ -209,12 +182,8 @@ describe('bfsFileSearch', () => {
     const fileCreationPromises: Array<Promise<string>> = [];
     for (let i = 0; i < numTargetDirs; i++) {
       // Add target files in some directories
-      fileCreationPromises.push(
-        createTestFile('content', `dir${i}`, 'GEMINI.md'),
-      );
-      fileCreationPromises.push(
-        createTestFile('content', `dir${i}`, 'subdir1', 'GEMINI.md'),
-      );
+      fileCreationPromises.push(createTestFile('content', `dir${i}`, 'GEMINI.md'));
+      fileCreationPromises.push(createTestFile('content', `dir${i}`, 'subdir1', 'GEMINI.md'));
     }
     const expectedFiles = await Promise.all(fileCreationPromises);
 

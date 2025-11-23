@@ -59,11 +59,9 @@ describe('abortableDelay', () => {
     const removeEventListener = vi.fn();
     const mockSignal = {
       aborted: false,
-      addEventListener: vi
-        .fn()
-        .mockImplementation((_type: string, listener: () => void) => {
-          mockSignal.__listener = listener;
-        }),
+      addEventListener: vi.fn().mockImplementation((_type: string, listener: () => void) => {
+        mockSignal.__listener = listener;
+      }),
       removeEventListener,
       __listener: undefined as (() => void) | undefined,
     } as unknown as AbortSignal & { __listener?: () => void };
@@ -80,10 +78,7 @@ describe('abortableDelay', () => {
   // Technically unnecessary due to `onceTrue` but good sanity check
   it('cleans up signal listeners when aborted before completion', async () => {
     const controller = new AbortController();
-    const removeEventListenerSpy = vi.spyOn(
-      controller.signal,
-      'removeEventListener',
-    );
+    const removeEventListenerSpy = vi.spyOn(controller.signal, 'removeEventListener');
 
     const promise = delay(400, controller.signal);
 

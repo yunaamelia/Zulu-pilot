@@ -12,17 +12,11 @@ import { type HttpError, ModelNotFoundError } from './httpErrors.js';
 import { retryWithBackoff } from './retry.js';
 import { setSimulate429 } from './testUtils.js';
 import { debugLogger } from './debugLogger.js';
-import {
-  TerminalQuotaError,
-  RetryableQuotaError,
-} from './googleQuotaErrors.js';
+import { TerminalQuotaError, RetryableQuotaError } from './googleQuotaErrors.js';
 import { PREVIEW_GEMINI_MODEL } from '../config/models.js';
 
 // Helper to create a mock function that fails a certain number of times
-const createFailingFunction = (
-  failures: number,
-  successValue: string = 'success',
-) => {
+const createFailingFunction = (failures: number, successValue: string = 'success') => {
   let attempts = 0;
   return vi.fn(async () => {
     attempts++;
@@ -132,8 +126,7 @@ describe('retryWithBackoff', () => {
     const mockFn = vi.fn(async () => {
       throw new NonRetryableError('Non-retryable error');
     });
-    const shouldRetryOnError = (error: Error) =>
-      !(error instanceof NonRetryableError);
+    const shouldRetryOnError = (error: Error) => !(error instanceof NonRetryableError);
 
     const promise = retryWithBackoff(mockFn, {
       shouldRetryOnError,
@@ -149,7 +142,7 @@ describe('retryWithBackoff', () => {
 
     // Test with 0
     await expect(retryWithBackoff(mockFn, { maxAttempts: 0 })).rejects.toThrow(
-      'maxAttempts must be a positive number.',
+      'maxAttempts must be a positive number.'
     );
 
     // The function should not be called at all if validation fails
@@ -265,14 +258,9 @@ describe('retryWithBackoff', () => {
     // We expect rejections as mockFn fails 5 times
     const promise1 = runRetry();
     // Run timers and await expectation in parallel.
-    await Promise.all([
-      expect(promise1).rejects.toThrow(),
-      vi.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise1).rejects.toThrow(), vi.runAllTimersAsync()]);
 
-    const firstDelaySet = setTimeoutSpy.mock.calls.map(
-      (call) => call[1] as number,
-    );
+    const firstDelaySet = setTimeoutSpy.mock.calls.map((call) => call[1] as number);
     setTimeoutSpy.mockClear(); // Clear calls for the next run
 
     // Reset mockFn to reset its internal attempt counter for the next run
@@ -280,14 +268,9 @@ describe('retryWithBackoff', () => {
 
     const promise2 = runRetry();
     // Run timers and await expectation in parallel.
-    await Promise.all([
-      expect(promise2).rejects.toThrow(),
-      vi.runAllTimersAsync(),
-    ]);
+    await Promise.all([expect(promise2).rejects.toThrow(), vi.runAllTimersAsync()]);
 
-    const secondDelaySet = setTimeoutSpy.mock.calls.map(
-      (call) => call[1] as number,
-    );
+    const secondDelaySet = setTimeoutSpy.mock.calls.map((call) => call[1] as number);
 
     // Check that the delays are not exactly the same due to jitter
     // This is a probabilistic test, but with +/-30% jitter, it's highly likely they differ.
@@ -337,7 +320,7 @@ describe('retryWithBackoff', () => {
 
         await expect(promise).rejects.toThrow(fetchErrorMsg);
         expect(mockFn).toHaveBeenCalledTimes(1);
-      },
+      }
     );
   });
 
@@ -368,7 +351,7 @@ describe('retryWithBackoff', () => {
       await expect(promise).resolves.toBe('success');
       expect(fallbackCallback).toHaveBeenCalledWith(
         'oauth-personal',
-        expect.any(TerminalQuotaError),
+        expect.any(TerminalQuotaError)
       );
       expect(mockFn).toHaveBeenCalledTimes(2);
     });
@@ -410,7 +393,7 @@ describe('retryWithBackoff', () => {
         await expect(promise).rejects.toThrow('Daily limit reached');
         expect(fallbackCallback).not.toHaveBeenCalled();
         expect(mockFn).toHaveBeenCalledTimes(1);
-      },
+      }
     );
   });
   it('should abort the retry loop when the signal is aborted', async () => {
@@ -429,9 +412,7 @@ describe('retryWithBackoff', () => {
     await vi.advanceTimersByTimeAsync(50);
     abortController.abort();
 
-    await expect(promise).rejects.toThrow(
-      expect.objectContaining({ name: 'AbortError' }),
-    );
+    await expect(promise).rejects.toThrow(expect.objectContaining({ name: 'AbortError' }));
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
   it('should trigger fallback for OAuth personal users on persistent 500 errors', async () => {
@@ -462,7 +443,7 @@ describe('retryWithBackoff', () => {
     await expect(promise).resolves.toBe('success');
     expect(fallbackCallback).toHaveBeenCalledWith(
       AuthType.LOGIN_WITH_GOOGLE,
-      expect.objectContaining({ status: 500 }),
+      expect.objectContaining({ status: 500 })
     );
     // 3 attempts (initial + 2 retries) fail with 500, then fallback triggers, then 1 success
     expect(mockFn).toHaveBeenCalledTimes(4);
@@ -494,7 +475,7 @@ describe('retryWithBackoff', () => {
     await expect(promise).resolves.toBe('success');
     expect(fallbackCallback).toHaveBeenCalledWith(
       AuthType.LOGIN_WITH_GOOGLE,
-      expect.any(ModelNotFoundError),
+      expect.any(ModelNotFoundError)
     );
     expect(mockFn).toHaveBeenCalledTimes(2);
   });

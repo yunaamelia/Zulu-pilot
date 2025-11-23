@@ -15,7 +15,7 @@ import type { ModelConfigAlias } from '../services/modelConfigService.js';
  * Returns the model config alias for a given agent definition.
  */
 export function getModelConfigAlias<TOutput extends z.ZodTypeAny>(
-  definition: AgentDefinition<TOutput>,
+  definition: AgentDefinition<TOutput>
 ): string {
   return `${definition.name}-config`;
 }
@@ -37,9 +37,7 @@ export class AgentRegistry {
     this.loadBuiltInAgents();
 
     if (this.config.getDebugMode()) {
-      debugLogger.log(
-        `[AgentRegistry] Initialized with ${this.agents.size} agents.`,
-      );
+      debugLogger.log(`[AgentRegistry] Initialized with ${this.agents.size} agents.`);
     }
   }
 
@@ -52,9 +50,7 @@ export class AgentRegistry {
         ...CodebaseInvestigatorAgent,
         modelConfig: {
           ...CodebaseInvestigatorAgent.modelConfig,
-          model:
-            investigatorSettings.model ??
-            CodebaseInvestigatorAgent.modelConfig.model,
+          model: investigatorSettings.model ?? CodebaseInvestigatorAgent.modelConfig.model,
           thinkingBudget:
             investigatorSettings.thinkingBudget ??
             CodebaseInvestigatorAgent.modelConfig.thinkingBudget,
@@ -65,8 +61,7 @@ export class AgentRegistry {
             investigatorSettings.maxTimeMinutes ??
             CodebaseInvestigatorAgent.runConfig.max_time_minutes,
           max_turns:
-            investigatorSettings.maxNumTurns ??
-            CodebaseInvestigatorAgent.runConfig.max_turns,
+            investigatorSettings.maxNumTurns ?? CodebaseInvestigatorAgent.runConfig.max_turns,
         },
       };
       this.registerAgent(agentDef);
@@ -79,12 +74,12 @@ export class AgentRegistry {
    * initialization order.
    */
   protected registerAgent<TOutput extends z.ZodTypeAny>(
-    definition: AgentDefinition<TOutput>,
+    definition: AgentDefinition<TOutput>
   ): void {
     // Basic validation
     if (!definition.name || !definition.description) {
       debugLogger.warn(
-        `[AgentRegistry] Skipping invalid agent definition. Missing name or description.`,
+        `[AgentRegistry] Skipping invalid agent definition. Missing name or description.`
       );
       return;
     }
@@ -115,7 +110,7 @@ export class AgentRegistry {
 
     this.config.modelConfigService.registerRuntimeModelConfig(
       getModelConfigAlias(definition),
-      runtimeAlias,
+      runtimeAlias
     );
   }
 

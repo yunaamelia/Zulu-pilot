@@ -24,9 +24,7 @@ export function getErrorStatus(error: unknown): number | undefined {
       typeof (error as { response?: unknown }).response === 'object' &&
       (error as { response?: unknown }).response !== null
     ) {
-      const response = (
-        error as { response: { status?: unknown; headers?: unknown } }
-      ).response;
+      const response = (error as { response: { status?: unknown; headers?: unknown } }).response;
       if ('status' in response && typeof response.status === 'number') {
         return response.status;
       }

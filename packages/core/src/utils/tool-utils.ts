@@ -23,7 +23,7 @@ import { SHELL_TOOL_NAMES } from './shell-utils.js';
 export function doesToolInvocationMatch(
   toolOrToolName: AnyDeclarativeTool | string,
   invocation: AnyToolInvocation | string,
-  patterns: string[],
+  patterns: string[]
 ): boolean {
   let toolNames: string[];
   if (isTool(toolOrToolName)) {

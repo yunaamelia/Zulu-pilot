@@ -38,9 +38,7 @@ describe('OverrideStrategy', () => {
     expect(decision).not.toBeNull();
     expect(decision?.model).toBe(overrideModel);
     expect(decision?.metadata.source).toBe('override');
-    expect(decision?.metadata.reasoning).toContain(
-      'Routing bypassed by forced model directive',
-    );
+    expect(decision?.metadata.reasoning).toContain('Routing bypassed by forced model directive');
     expect(decision?.metadata.reasoning).toContain(overrideModel);
   });
 

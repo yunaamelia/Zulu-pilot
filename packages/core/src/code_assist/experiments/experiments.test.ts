@@ -53,9 +53,7 @@ describe('experiments', () => {
 
     // Verify that the dependencies were called
     expect(getClientMetadata).toHaveBeenCalled();
-    expect(mockServer.listExperiments).toHaveBeenCalledWith(
-      await getClientMetadata(),
-    );
+    expect(mockServer.listExperiments).toHaveBeenCalledWith(await getClientMetadata());
 
     // Verify that the response was parsed correctly
     expect(experiments.flags[234]).toEqual({

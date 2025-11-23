@@ -7,11 +7,7 @@
 import { describe, it, expect, vi, beforeEach, type Mocked } from 'vitest';
 import { SubagentInvocation } from './invocation.js';
 import { AgentExecutor } from './executor.js';
-import type {
-  AgentDefinition,
-  SubagentActivityEvent,
-  AgentInputs,
-} from './types.js';
+import type { AgentDefinition, SubagentActivityEvent, AgentInputs } from './types.js';
 import { AgentTerminateMode } from './types.js';
 import { makeFakeConfig } from '../test-utils/config.js';
 import { ToolErrorType } from '../tools/tool-error.js';
@@ -52,7 +48,7 @@ describe('SubagentInvocation', () => {
     } as unknown as Mocked<AgentExecutor<z.ZodUnknown>>;
 
     MockAgentExecutor.create.mockResolvedValue(
-      mockExecutorInstance as unknown as AgentExecutor<z.ZodTypeAny>,
+      mockExecutorInstance as unknown as AgentExecutor<z.ZodTypeAny>
     );
   });
 
@@ -63,7 +59,7 @@ describe('SubagentInvocation', () => {
       params,
       testDefinition,
       mockConfig,
-      mockMessageBus,
+      mockMessageBus
     );
 
     // Access the protected messageBus property by casting to any
@@ -74,29 +70,21 @@ describe('SubagentInvocation', () => {
   describe('getDescription', () => {
     it('should format the description with inputs', () => {
       const params = { task: 'Analyze data', priority: 5 };
-      const invocation = new SubagentInvocation<z.ZodUnknown>(
-        params,
-        testDefinition,
-        mockConfig,
-      );
+      const invocation = new SubagentInvocation<z.ZodUnknown>(params, testDefinition, mockConfig);
       const description = invocation.getDescription();
       expect(description).toBe(
-        "Running subagent 'MockAgent' with inputs: { task: Analyze data, priority: 5 }",
+        "Running subagent 'MockAgent' with inputs: { task: Analyze data, priority: 5 }"
       );
     });
 
     it('should truncate long input values', () => {
       const longTask = 'A'.repeat(100);
       const params = { task: longTask };
-      const invocation = new SubagentInvocation<z.ZodUnknown>(
-        params,
-        testDefinition,
-        mockConfig,
-      );
+      const invocation = new SubagentInvocation<z.ZodUnknown>(params, testDefinition, mockConfig);
       const description = invocation.getDescription();
       // Default INPUT_PREVIEW_MAX_LENGTH is 50
       expect(description).toBe(
-        `Running subagent 'MockAgent' with inputs: { task: ${'A'.repeat(50)} }`,
+        `Running subagent 'MockAgent' with inputs: { task: ${'A'.repeat(50)} }`
       );
     });
 
@@ -110,19 +98,13 @@ describe('SubagentInvocation', () => {
       for (let i = 0; i < 20; i++) {
         params[`input${i}`] = `value${i}`;
       }
-      const invocation = new SubagentInvocation<z.ZodUnknown>(
-        params,
-        longNameDef,
-        mockConfig,
-      );
+      const invocation = new SubagentInvocation<z.ZodUnknown>(params, longNameDef, mockConfig);
       const description = invocation.getDescription();
       // Default DESCRIPTION_MAX_LENGTH is 200
       expect(description.length).toBe(200);
-      expect(
-        description.startsWith(
-          "Running subagent 'VeryLongAgentNameThatTakesUpSpace'",
-        ),
-      ).toBe(true);
+      expect(description.startsWith("Running subagent 'VeryLongAgentNameThatTakesUpSpace'")).toBe(
+        true
+      );
     });
   });
 
@@ -135,11 +117,7 @@ describe('SubagentInvocation', () => {
     beforeEach(() => {
       signal = new AbortController().signal;
       updateOutput = vi.fn();
-      invocation = new SubagentInvocation<z.ZodUnknown>(
-        params,
-        testDefinition,
-        mockConfig,
-      );
+      invocation = new SubagentInvocation<z.ZodUnknown>(params, testDefinition, mockConfig);
     });
 
     it('should initialize and run the executor successfully', async () => {
@@ -154,7 +132,7 @@ describe('SubagentInvocation', () => {
       expect(MockAgentExecutor.create).toHaveBeenCalledWith(
         testDefinition,
         mockConfig,
-        expect.any(Function),
+        expect.any(Function)
       );
       expect(updateOutput).toHaveBeenCalledWith('Subagent starting...\n');
 
@@ -163,7 +141,7 @@ describe('SubagentInvocation', () => {
       expect(result.llmContent).toEqual([
         {
           text: expect.stringContaining(
-            "Subagent 'MockAgent' finished.\nTermination Reason: GOAL\nResult:\nAnalysis complete.",
+            "Subagent 'MockAgent' finished.\nTermination Reason: GOAL\nResult:\nAnalysis complete."
           ),
         },
       ]);
@@ -259,12 +237,8 @@ describe('SubagentInvocation', () => {
         message: error.message,
         type: ToolErrorType.EXECUTION_FAILED,
       });
-      expect(result.returnDisplay).toBe(
-        `Subagent Failed: MockAgent\nError: ${error.message}`,
-      );
-      expect(result.llmContent).toBe(
-        `Subagent 'MockAgent' failed. Error: ${error.message}`,
-      );
+      expect(result.returnDisplay).toBe(`Subagent Failed: MockAgent\nError: ${error.message}`);
+      expect(result.llmContent).toBe(`Subagent 'MockAgent' failed. Error: ${error.message}`);
     });
 
     it('should handle executor creation failure', async () => {
@@ -290,17 +264,11 @@ describe('SubagentInvocation', () => {
       mockExecutorInstance.run.mockRejectedValue(abortError);
 
       const controller = new AbortController();
-      const executePromise = invocation.execute(
-        controller.signal,
-        updateOutput,
-      );
+      const executePromise = invocation.execute(controller.signal, updateOutput);
       controller.abort();
       const result = await executePromise;
 
-      expect(mockExecutorInstance.run).toHaveBeenCalledWith(
-        params,
-        controller.signal,
-      );
+      expect(mockExecutorInstance.run).toHaveBeenCalledWith(params, controller.signal);
       expect(result.error?.message).toBe('Aborted');
       expect(result.error?.type).toBe(ToolErrorType.EXECUTION_FAILED);
     });

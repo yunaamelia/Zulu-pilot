@@ -14,12 +14,7 @@ import type {
   ToolLocation,
   ToolResult,
 } from './tools.js';
-import {
-  BaseDeclarativeTool,
-  BaseToolInvocation,
-  Kind,
-  ToolConfirmationOutcome,
-} from './tools.js';
+import { BaseDeclarativeTool, BaseToolInvocation, Kind, ToolConfirmationOutcome } from './tools.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import { ToolErrorType } from './tool-error.js';
 import { makeRelative, shortenPath } from '../utils/paths.js';
@@ -34,10 +29,7 @@ import { FileOperationEvent } from '../telemetry/types.js';
 import { FileOperation } from '../telemetry/metrics.js';
 import { getSpecificMimeType } from '../utils/fileUtils.js';
 import { getLanguageFromFilePath } from '../utils/language-detection.js';
-import type {
-  ModifiableDeclarativeTool,
-  ModifyContext,
-} from './modifiable-tool.js';
+import type { ModifiableDeclarativeTool, ModifyContext } from './modifiable-tool.js';
 import { IdeClient } from '../ide/ide-client.js';
 import { safeLiteralReplace } from '../utils/textUtils.js';
 import { EDIT_TOOL_NAME, READ_FILE_TOOL_NAME } from './tool-names.js';
@@ -47,7 +39,7 @@ export function applyReplacement(
   currentContent: string | null,
   oldString: string,
   newString: string,
-  isNewFile: boolean,
+  isNewFile: boolean
 ): string {
   if (isNewFile) {
     return newString;
@@ -120,13 +112,10 @@ class EditToolInvocation
     params: EditToolParams,
     messageBus?: MessageBus,
     toolName?: string,
-    displayName?: string,
+    displayName?: string
   ) {
     super(params, messageBus, toolName, displayName);
-    this.resolvedPath = path.resolve(
-      this.config.getTargetDir(),
-      this.params.file_path,
-    );
+    this.resolvedPath = path.resolve(this.config.getTargetDir(), this.params.file_path);
   }
 
   override toolLocations(): ToolLocation[] {
@@ -141,7 +130,7 @@ class EditToolInvocation
    */
   private async calculateEdit(
     params: EditToolParams,
-    abortSignal: AbortSignal,
+    abortSignal: AbortSignal
   ): Promise<CalculatedEdit> {
     const expectedReplacements = params.expected_replacements ?? 1;
     let currentContent: string | null = null;
@@ -150,14 +139,10 @@ class EditToolInvocation
     let finalNewString = params.new_string;
     let finalOldString = params.old_string;
     let occurrences = 0;
-    let error:
-      | { display: string; raw: string; type: ToolErrorType }
-      | undefined = undefined;
+    let error: { display: string; raw: string; type: ToolErrorType } | undefined = undefined;
 
     try {
-      currentContent = await this.config
-        .getFileSystemService()
-        .readTextFile(this.resolvedPath);
+      currentContent = await this.config.getFileSystemService().readTextFile(this.resolvedPath);
       // Normalize line endings to LF for consistent processing.
       currentContent = currentContent.replace(/\r\n/g, '\n');
       fileExists = true;
@@ -187,7 +172,7 @@ class EditToolInvocation
         params,
         this.config.getGeminiClient(),
         this.config.getBaseLlmClient(),
-        abortSignal,
+        abortSignal
       );
       finalOldString = correctedEdit.params.old_string;
       finalNewString = correctedEdit.params.new_string;
@@ -207,8 +192,7 @@ class EditToolInvocation
           type: ToolErrorType.EDIT_NO_OCCURRENCE_FOUND,
         };
       } else if (occurrences !== expectedReplacements) {
-        const occurrenceTerm =
-          expectedReplacements === 1 ? 'occurrence' : 'occurrences';
+        const occurrenceTerm = expectedReplacements === 1 ? 'occurrence' : 'occurrences';
 
         error = {
           display: `Failed to edit, expected ${expectedReplacements} ${occurrenceTerm} but found ${occurrences}.`,
@@ -232,18 +216,12 @@ class EditToolInvocation
     }
 
     const newContent = !error
-      ? applyReplacement(
-          currentContent,
-          finalOldString,
-          finalNewString,
-          isNewFile,
-        )
+      ? applyReplacement(currentContent, finalOldString, finalNewString, isNewFile)
       : (currentContent ?? '');
 
     if (!error && fileExists && currentContent === newContent) {
       error = {
-        display:
-          'No changes to apply. The new content is identical to the current content.',
+        display: 'No changes to apply. The new content is identical to the current content.',
         raw: `No changes to apply. The new content is identical to the current content in file: ${this.resolvedPath}`,
         type: ToolErrorType.EDIT_NO_CHANGE,
       };
@@ -263,7 +241,7 @@ class EditToolInvocation
    * It needs to calculate the diff to show the user.
    */
   protected override async getConfirmationDetails(
-    abortSignal: AbortSignal,
+    abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     if (this.config.getApprovalMode() === ApprovalMode.AUTO_EDIT) {
       return false;
@@ -293,7 +271,7 @@ class EditToolInvocation
       editData.newContent,
       'Current',
       'Proposed',
-      DEFAULT_DIFF_OPTIONS,
+      DEFAULT_DIFF_OPTIONS
     );
     const ideClient = await IdeClient.getInstance();
     const ideConfirmation =
@@ -330,10 +308,7 @@ class EditToolInvocation
   }
 
   getDescription(): string {
-    const relativePath = makeRelative(
-      this.params.file_path,
-      this.config.getTargetDir(),
-    );
+    const relativePath = makeRelative(this.params.file_path, this.config.getTargetDir());
     if (this.params.old_string === '') {
       return `Create ${shortenPath(relativePath)}`;
     }
@@ -393,13 +368,12 @@ class EditToolInvocation
         .writeTextFile(this.resolvedPath, editData.newContent);
 
       const fileName = path.basename(this.resolvedPath);
-      const originallyProposedContent =
-        this.params.ai_proposed_content || editData.newContent;
+      const originallyProposedContent = this.params.ai_proposed_content || editData.newContent;
       const diffStat = getDiffStat(
         fileName,
         editData.currentContent ?? '',
         originallyProposedContent,
-        editData.newContent,
+        editData.newContent
       );
 
       const fileDiff = Diff.createPatch(
@@ -408,7 +382,7 @@ class EditToolInvocation
         editData.newContent,
         'Current',
         'Proposed',
-        DEFAULT_DIFF_OPTIONS,
+        DEFAULT_DIFF_OPTIONS
       );
       const displayResult = {
         fileDiff,
@@ -422,9 +396,7 @@ class EditToolInvocation
       const mimetype = getSpecificMimeType(this.resolvedPath);
       const programmingLanguage = getLanguageFromFilePath(this.resolvedPath);
       const extension = path.extname(this.resolvedPath);
-      const operation = editData.isNewFile
-        ? FileOperation.CREATE
-        : FileOperation.UPDATE;
+      const operation = editData.isNewFile ? FileOperation.CREATE : FileOperation.UPDATE;
 
       logFileOperation(
         this.config,
@@ -434,8 +406,8 @@ class EditToolInvocation
           editData.newContent.split('\n').length,
           mimetype,
           extension,
-          programmingLanguage,
-        ),
+          programmingLanguage
+        )
       );
 
       const llmSuccessMessageParts = [
@@ -445,7 +417,7 @@ class EditToolInvocation
       ];
       if (this.params.modified_by_user) {
         llmSuccessMessageParts.push(
-          `User modified the \`new_string\` content to be: ${this.params.new_string}.`,
+          `User modified the \`new_string\` content to be: ${this.params.new_string}.`
         );
       }
 
@@ -488,7 +460,7 @@ export class EditTool
 
   constructor(
     private readonly config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       EditTool.Name,
@@ -533,7 +505,7 @@ Expectation for required parameters:
       },
       true, // isOutputMarkdown
       false, // canUpdateOutput
-      messageBus,
+      messageBus
     );
   }
 
@@ -542,17 +514,12 @@ Expectation for required parameters:
    * @param params Parameters to validate
    * @returns Error message string or null if valid
    */
-  protected override validateToolParamValues(
-    params: EditToolParams,
-  ): string | null {
+  protected override validateToolParamValues(params: EditToolParams): string | null {
     if (!params.file_path) {
       return "The 'file_path' parameter must be non-empty.";
     }
 
-    const resolvedPath = path.resolve(
-      this.config.getTargetDir(),
-      params.file_path,
-    );
+    const resolvedPath = path.resolve(this.config.getTargetDir(), params.file_path);
     const workspaceContext = this.config.getWorkspaceContext();
     if (!workspaceContext.isPathWithinWorkspace(resolvedPath)) {
       const directories = workspaceContext.getDirectories();
@@ -566,20 +533,19 @@ Expectation for required parameters:
     params: EditToolParams,
     messageBus?: MessageBus,
     toolName?: string,
-    displayName?: string,
+    displayName?: string
   ): ToolInvocation<EditToolParams, ToolResult> {
     return new EditToolInvocation(
       this.config,
       params,
       messageBus ?? this.messageBus,
       toolName ?? this.name,
-      displayName ?? this.displayName,
+      displayName ?? this.displayName
     );
   }
 
   getModifyContext(_: AbortSignal): ModifyContext<EditToolParams> {
-    const resolvePath = (filePath: string) =>
-      path.resolve(this.config.getTargetDir(), filePath);
+    const resolvePath = (filePath: string) => path.resolve(this.config.getTargetDir(), filePath);
 
     return {
       getFilePath: (params: EditToolParams) => params.file_path,
@@ -602,7 +568,7 @@ Expectation for required parameters:
             currentContent,
             params.old_string,
             params.new_string,
-            params.old_string === '' && currentContent === '',
+            params.old_string === '' && currentContent === ''
           );
         } catch (err) {
           if (!isNodeError(err) || err.code !== 'ENOENT') throw err;
@@ -612,7 +578,7 @@ Expectation for required parameters:
       createUpdatedParams: (
         oldContent: string,
         modifiedProposedContent: string,
-        originalParams: EditToolParams,
+        originalParams: EditToolParams
       ): EditToolParams => ({
         ...originalParams,
         ai_proposed_content: oldContent,

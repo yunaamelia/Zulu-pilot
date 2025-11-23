@@ -5,18 +5,10 @@
  */
 
 import { EventEmitter } from 'node:events';
-import {
-  EVENT_API_ERROR,
-  EVENT_API_RESPONSE,
-  EVENT_TOOL_CALL,
-} from './types.js';
+import { EVENT_API_ERROR, EVENT_API_RESPONSE, EVENT_TOOL_CALL } from './types.js';
 
 import { ToolCallDecision } from './tool-call-decision.js';
-import type {
-  ApiErrorEvent,
-  ApiResponseEvent,
-  ToolCallEvent,
-} from './types.js';
+import type { ApiErrorEvent, ApiResponseEvent, ToolCallEvent } from './types.js';
 
 export type UiEvent =
   | (ApiResponseEvent & { 'event.name': typeof EVENT_API_RESPONSE })

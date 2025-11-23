@@ -114,13 +114,7 @@ export interface InputConfig {
     string,
     {
       description: string;
-      type:
-        | 'string'
-        | 'number'
-        | 'boolean'
-        | 'integer'
-        | 'string[]'
-        | 'number[]';
+      type: 'string' | 'number' | 'boolean' | 'integer' | 'string[]' | 'number[]';
       required: boolean;
     }
   >;

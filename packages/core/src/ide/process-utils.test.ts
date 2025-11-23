@@ -4,15 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  afterEach,
-  beforeEach,
-  type Mock,
-} from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach, type Mock } from 'vitest';
 import { getIdeProcessInfo } from './process-utils.js';
 import os from 'node:os';
 
@@ -100,7 +92,7 @@ describe('getIdeProcessInfo', () => {
       expect(result).toEqual({ pid: 900, command: 'powershell.exe' });
       expect(mockedExec).toHaveBeenCalledWith(
         expect.stringContaining('Get-CimInstance Win32_Process'),
-        expect.anything(),
+        expect.anything()
       );
     });
 

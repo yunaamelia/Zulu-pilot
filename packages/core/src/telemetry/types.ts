@@ -18,10 +18,7 @@ import { DiscoveredMCPTool } from '../tools/mcp-tool.js';
 import type { FileDiff } from '../tools/tools.js';
 import { AuthType } from '../core/contentGenerator.js';
 import type { LogAttributes, LogRecord } from '@opentelemetry/api-logs';
-import {
-  getDecisionFromOutcome,
-  ToolCallDecision,
-} from './tool-call-decision.js';
+import { getDecisionFromOutcome, ToolCallDecision } from './tool-call-decision.js';
 import { getConventionAttributes, type FileOperation } from './metrics.js';
 export { ToolCallDecision };
 import type { ToolRegistry } from '../tools/tool-registry.js';
@@ -74,8 +71,7 @@ export class StartSessionEvent implements BaseTelemetryEvent {
 
   constructor(config: Config, toolRegistry?: ToolRegistry) {
     const generatorConfig = config.getContentGeneratorConfig();
-    const mcpServers =
-      config.getMcpClientManager()?.getMcpServers() ?? config.getMcpServers();
+    const mcpServers = config.getMcpClientManager()?.getMcpServers() ?? config.getMcpServers();
 
     let useGemini = false;
     let useVertex = false;
@@ -88,8 +84,7 @@ export class StartSessionEvent implements BaseTelemetryEvent {
     this['event.timestamp'] = new Date().toISOString();
     this.model = config.getModel();
     this.embedding_model = config.getEmbeddingModel();
-    this.sandbox_enabled =
-      typeof config.getSandbox() === 'string' || !!config.getSandbox();
+    this.sandbox_enabled = typeof config.getSandbox() === 'string' || !!config.getSandbox();
     this.core_tools_enabled = (config.getCoreTools() ?? []).join(',');
     this.approval_mode = config.getApprovalMode();
     this.api_key_enabled = useGemini || useVertex;
@@ -97,10 +92,8 @@ export class StartSessionEvent implements BaseTelemetryEvent {
     this.debug_enabled = config.getDebugMode();
     this.mcp_servers = mcpServers ? Object.keys(mcpServers).join(',') : '';
     this.telemetry_enabled = config.getTelemetryEnabled();
-    this.telemetry_log_user_prompts_enabled =
-      config.getTelemetryLogPromptsEnabled();
-    this.file_filtering_respect_git_ignore =
-      config.getFileFilteringRespectGitIgnore();
+    this.telemetry_log_user_prompts_enabled = config.getTelemetryLogPromptsEnabled();
+    this.file_filtering_respect_git_ignore = config.getFileFilteringRespectGitIgnore();
     this.mcp_servers_count = mcpServers ? Object.keys(mcpServers).length : 0;
     this.output_format = config.getOutputFormat();
     const extensions = config.getExtensions();
@@ -113,9 +106,7 @@ export class StartSessionEvent implements BaseTelemetryEvent {
         .getAllTools()
         .filter((tool) => tool instanceof DiscoveredMCPTool);
       this.mcp_tools_count = mcpTools.length;
-      this.mcp_tools = mcpTools
-        .map((tool) => (tool as DiscoveredMCPTool).name)
-        .join(',');
+      this.mcp_tools = mcpTools.map((tool) => (tool as DiscoveredMCPTool).name).join(',');
     }
   }
 
@@ -185,12 +176,7 @@ export class UserPromptEvent implements BaseTelemetryEvent {
   auth_type?: string;
   prompt?: string;
 
-  constructor(
-    prompt_length: number,
-    prompt_Id: string,
-    auth_type?: string,
-    prompt?: string,
-  ) {
+  constructor(prompt_length: number, prompt_Id: string, auth_type?: string, prompt?: string) {
     this['event.name'] = 'user_prompt';
     this['event.timestamp'] = new Date().toISOString();
     this.prompt_length = prompt_length;
@@ -252,7 +238,7 @@ export class ToolCallEvent implements BaseTelemetryEvent {
     success: boolean,
     prompt_id: string,
     tool_type: 'native' | 'mcp',
-    error?: string,
+    error?: string
   );
   constructor(
     call?: CompletedToolCall,
@@ -262,7 +248,7 @@ export class ToolCallEvent implements BaseTelemetryEvent {
     success?: boolean,
     prompt_id?: string,
     tool_type?: 'native' | 'mcp',
-    error?: string,
+    error?: string
   ) {
     this['event.name'] = 'tool_call';
     this['event.timestamp'] = new Date().toISOString();
@@ -272,17 +258,12 @@ export class ToolCallEvent implements BaseTelemetryEvent {
       this.function_args = call.request.args;
       this.duration_ms = call.durationMs ?? 0;
       this.success = call.status === 'success';
-      this.decision = call.outcome
-        ? getDecisionFromOutcome(call.outcome)
-        : undefined;
+      this.decision = call.outcome ? getDecisionFromOutcome(call.outcome) : undefined;
       this.error = call.response.error?.message;
       this.error_type = call.response.errorType;
       this.prompt_id = call.request.prompt_id;
       this.content_length = call.response.contentLength;
-      if (
-        typeof call.tool !== 'undefined' &&
-        call.tool instanceof DiscoveredMCPTool
-      ) {
+      if (typeof call.tool !== 'undefined' && call.tool instanceof DiscoveredMCPTool) {
         this.tool_type = 'mcp';
         this.mcp_server_name = call.tool.serverName;
         this.extension_name = call.tool.extensionName;
@@ -408,7 +389,7 @@ export class ApiErrorEvent implements BaseTelemetryEvent {
     prompt_details: GenAIPromptDetails,
     auth_type?: string,
     error_type?: string,
-    status_code?: number | string,
+    status_code?: number | string
   ) {
     this['event.name'] = 'api_error';
     this['event.timestamp'] = new Date().toISOString();
@@ -465,9 +446,7 @@ export class ApiErrorEvent implements BaseTelemetryEvent {
     }
 
     if (config.getTelemetryLogPromptsEnabled() && this.prompt.contents) {
-      attributes['gen_ai.input.messages'] = JSON.stringify(
-        toInputMessages(this.prompt.contents),
-      );
+      attributes['gen_ai.input.messages'] = JSON.stringify(toInputMessages(this.prompt.contents));
     }
 
     const logRecord: LogRecord = {
@@ -506,12 +485,9 @@ export interface GenAIUsageDetails {
 }
 
 export const EVENT_API_RESPONSE = 'gemini_cli.api_response';
-export const EVENT_GEN_AI_OPERATION_DETAILS =
-  'gen_ai.client.inference.operation.details';
+export const EVENT_GEN_AI_OPERATION_DETAILS = 'gen_ai.client.inference.operation.details';
 
-function toGenerateContentConfigAttributes(
-  config?: GenerateContentConfig,
-): LogAttributes {
+function toGenerateContentConfigAttributes(config?: GenerateContentConfig): LogAttributes {
   if (!config) {
     return {};
   }
@@ -526,9 +502,7 @@ function toGenerateContentConfigAttributes(
     'gen_ai.request.max_tokens': config.maxOutputTokens,
     'gen_ai.output.type': toOutputType(config.responseMimeType),
     'gen_ai.request.stop_sequences': config.stopSequences,
-    'gen_ai.system_instructions': JSON.stringify(
-      toSystemInstruction(config.systemInstruction),
-    ),
+    'gen_ai.system_instructions': JSON.stringify(toSystemInstruction(config.systemInstruction)),
   };
 }
 
@@ -552,7 +526,7 @@ export class ApiResponseEvent implements BaseTelemetryEvent {
     response_details: GenAIResponseDetails,
     auth_type?: string,
     usage_data?: GenerateContentResponseUsageMetadata,
-    response_text?: string,
+    response_text?: string
   ) {
     this['event.name'] = 'api_response';
     this['event.timestamp'] = new Date().toISOString();
@@ -612,12 +586,8 @@ export class ApiResponseEvent implements BaseTelemetryEvent {
       'event.name': EVENT_GEN_AI_OPERATION_DETAILS,
       'event.timestamp': this['event.timestamp'],
       'gen_ai.response.id': this.response.response_id,
-      'gen_ai.response.finish_reasons': toFinishReasons(
-        this.response.candidates,
-      ),
-      'gen_ai.output.messages': JSON.stringify(
-        toOutputMessages(this.response.candidates),
-      ),
+      'gen_ai.response.finish_reasons': toFinishReasons(this.response.candidates),
+      'gen_ai.output.messages': JSON.stringify(toOutputMessages(this.response.candidates)),
       ...toGenerateContentConfigAttributes(this.prompt.generate_content_config),
       ...getConventionAttributes(this),
     };
@@ -628,9 +598,7 @@ export class ApiResponseEvent implements BaseTelemetryEvent {
     }
 
     if (config.getTelemetryLogPromptsEnabled() && this.prompt.contents) {
-      attributes['gen_ai.input.messages'] = JSON.stringify(
-        toInputMessages(this.prompt.contents),
-      );
+      attributes['gen_ai.input.messages'] = JSON.stringify(toInputMessages(this.prompt.contents));
     }
 
     if (this.usage) {
@@ -710,11 +678,7 @@ export class LoopDetectedEvent implements BaseTelemetryEvent {
   prompt_id: string;
   confirmed_by_model?: string;
 
-  constructor(
-    loop_type: LoopType,
-    prompt_id: string,
-    confirmed_by_model?: string,
-  ) {
+  constructor(loop_type: LoopType, prompt_id: string, confirmed_by_model?: string) {
     this['event.name'] = 'loop_detected';
     this['event.timestamp'] = new Date().toISOString();
     this.loop_type = loop_type;
@@ -887,8 +851,7 @@ export function makeChatCompressionEvent({
   };
 }
 
-export const EVENT_MALFORMED_JSON_RESPONSE =
-  'gemini_cli.malformed_json_response';
+export const EVENT_MALFORMED_JSON_RESPONSE = 'gemini_cli.malformed_json_response';
 export class MalformedJsonResponseEvent implements BaseTelemetryEvent {
   'event.name': 'malformed_json_response';
   'event.timestamp': string;
@@ -991,7 +954,7 @@ export class FileOperationEvent implements BaseTelemetryEvent {
     lines?: number,
     mimetype?: string,
     extension?: string,
-    programming_language?: string,
+    programming_language?: string
   ) {
     this['event.name'] = 'file_operation';
     this['event.timestamp'] = new Date().toISOString();
@@ -1072,12 +1035,7 @@ export class ContentRetryEvent implements BaseTelemetryEvent {
   retry_delay_ms: number;
   model: string;
 
-  constructor(
-    attempt_number: number,
-    error_type: string,
-    retry_delay_ms: number,
-    model: string,
-  ) {
+  constructor(attempt_number: number, error_type: string, retry_delay_ms: number, model: string) {
     this['event.name'] = 'content_retry';
     this['event.timestamp'] = new Date().toISOString();
     this.attempt_number = attempt_number;
@@ -1103,8 +1061,7 @@ export class ContentRetryEvent implements BaseTelemetryEvent {
   }
 }
 
-export const EVENT_CONTENT_RETRY_FAILURE =
-  'gemini_cli.chat.content_retry_failure';
+export const EVENT_CONTENT_RETRY_FAILURE = 'gemini_cli.chat.content_retry_failure';
 export class ContentRetryFailureEvent implements BaseTelemetryEvent {
   'event.name': 'content_retry_failure';
   'event.timestamp': string;
@@ -1117,7 +1074,7 @@ export class ContentRetryFailureEvent implements BaseTelemetryEvent {
     total_attempts: number,
     final_error_type: string,
     model: string,
-    total_duration_ms?: number,
+    total_duration_ms?: number
   ) {
     this['event.name'] = 'content_retry_failure';
     this['event.timestamp'] = new Date().toISOString();
@@ -1161,7 +1118,7 @@ export class ModelRoutingEvent implements BaseTelemetryEvent {
     routing_latency_ms: number,
     reasoning: string | undefined,
     failed: boolean,
-    error_message: string | undefined,
+    error_message: string | undefined
   ) {
     this['event.name'] = 'model_routing';
     this['event.timestamp'] = new Date().toISOString();
@@ -1207,7 +1164,7 @@ export class ExtensionInstallEvent implements BaseTelemetryEvent {
     extension_id: string,
     extension_version: string,
     extension_source: string,
-    status: 'success' | 'error',
+    status: 'success' | 'error'
   ) {
     this['event.name'] = 'extension_install';
     this['event.timestamp'] = new Date().toISOString();
@@ -1255,7 +1212,7 @@ export class ToolOutputTruncatedEvent implements BaseTelemetryEvent {
       truncatedContentLength: number;
       threshold: number;
       lines: number;
-    },
+    }
   ) {
     this['event.name'] = this.eventName;
     this.prompt_id = prompt_id;
@@ -1294,11 +1251,7 @@ export class ExtensionUninstallEvent implements BaseTelemetryEvent {
   extension_id: string;
   status: 'success' | 'error';
 
-  constructor(
-    extension_name: string,
-    extension_id: string,
-    status: 'success' | 'error',
-  ) {
+  constructor(extension_name: string, extension_id: string, status: 'success' | 'error') {
     this['event.name'] = 'extension_uninstall';
     this['event.timestamp'] = new Date().toISOString();
     this.extension_name = extension_name;
@@ -1338,7 +1291,7 @@ export class ExtensionUpdateEvent implements BaseTelemetryEvent {
     extension_version: string,
     extension_previous_version: string,
     extension_source: string,
-    status: 'success' | 'error',
+    status: 'success' | 'error'
   ) {
     this['event.name'] = 'extension_update';
     this['event.timestamp'] = new Date().toISOString();
@@ -1376,11 +1329,7 @@ export class ExtensionEnableEvent implements BaseTelemetryEvent {
   extension_id: string;
   setting_scope: string;
 
-  constructor(
-    extension_name: string,
-    extension_id: string,
-    settingScope: string,
-  ) {
+  constructor(extension_name: string, extension_id: string, settingScope: string) {
     this['event.name'] = 'extension_enable';
     this['event.timestamp'] = new Date().toISOString();
     this.extension_name = extension_name;
@@ -1442,7 +1391,7 @@ export class LlmLoopCheckEvent implements BaseTelemetryEvent {
     prompt_id: string,
     flash_confidence: number,
     main_model: string,
-    main_model_confidence: number,
+    main_model_confidence: number
   ) {
     this['event.name'] = 'llm_loop_check';
     this['event.timestamp'] = new Date().toISOString();
@@ -1511,11 +1460,7 @@ export class ExtensionDisableEvent implements BaseTelemetryEvent {
   extension_id: string;
   setting_scope: string;
 
-  constructor(
-    extension_name: string,
-    extension_id: string,
-    settingScope: string,
-  ) {
+  constructor(extension_name: string, extension_id: string, settingScope: string) {
     this['event.name'] = 'extension_disable';
     this['event.timestamp'] = new Date().toISOString();
     this.extension_name = extension_name;
@@ -1591,10 +1536,7 @@ export class SmartEditCorrectionEvent implements BaseTelemetryEvent {
 }
 
 abstract class BaseAgentEvent implements BaseTelemetryEvent {
-  abstract 'event.name':
-    | 'agent_start'
-    | 'agent_finish'
-    | 'agent_recovery_attempt';
+  abstract 'event.name': 'agent_start' | 'agent_finish' | 'agent_recovery_attempt';
   'event.timestamp': string;
   agent_id: string;
   agent_name: string;
@@ -1649,7 +1591,7 @@ export class AgentFinishEvent extends BaseAgentEvent {
     agent_name: string,
     duration_ms: number,
     turn_count: number,
-    terminate_reason: AgentTerminateMode,
+    terminate_reason: AgentTerminateMode
   ) {
     super(agent_id, agent_name);
     this.duration_ms = duration_ms;
@@ -1686,7 +1628,7 @@ export class RecoveryAttemptEvent extends BaseAgentEvent {
     reason: AgentTerminateMode,
     duration_ms: number,
     success: boolean,
-    turn_count: number,
+    turn_count: number
   ) {
     super(agent_id, agent_name);
     this.reason = reason;
@@ -1711,8 +1653,7 @@ export class RecoveryAttemptEvent extends BaseAgentEvent {
   }
 }
 
-export const EVENT_WEB_FETCH_FALLBACK_ATTEMPT =
-  'gemini_cli.web_fetch_fallback_attempt';
+export const EVENT_WEB_FETCH_FALLBACK_ATTEMPT = 'gemini_cli.web_fetch_fallback_attempt';
 export class WebFetchFallbackAttemptEvent implements BaseTelemetryEvent {
   'event.name': 'web_fetch_fallback_attempt';
   'event.timestamp': string;

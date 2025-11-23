@@ -13,9 +13,7 @@ export enum ToolCallDecision {
   AUTO_ACCEPT = 'auto_accept',
 }
 
-export function getDecisionFromOutcome(
-  outcome: ToolConfirmationOutcome,
-): ToolCallDecision {
+export function getDecisionFromOutcome(outcome: ToolConfirmationOutcome): ToolCallDecision {
   switch (outcome) {
     case ToolConfirmationOutcome.ProceedOnce:
       return ToolCallDecision.ACCEPT;

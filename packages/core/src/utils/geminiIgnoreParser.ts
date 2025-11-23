@@ -50,11 +50,7 @@ export class GeminiIgnoreParser implements GeminiIgnoreFilter {
       return false;
     }
 
-    if (
-      filePath.startsWith('\\') ||
-      filePath === '/' ||
-      filePath.includes('\0')
-    ) {
+    if (filePath.startsWith('\\') || filePath === '/' || filePath.includes('\0')) {
       return false;
     }
 

@@ -11,10 +11,7 @@ import type { Log } from '@google-cloud/logging';
 import { hrTimeToMilliseconds } from '@opentelemetry/core';
 import type { ExportResult } from '@opentelemetry/core';
 import { ExportResultCode } from '@opentelemetry/core';
-import type {
-  ReadableLogRecord,
-  LogRecordExporter,
-} from '@opentelemetry/sdk-logs';
+import type { ReadableLogRecord, LogRecordExporter } from '@opentelemetry/sdk-logs';
 
 /**
  * Google Cloud Trace exporter that extends the official trace exporter
@@ -53,10 +50,7 @@ export class GcpLogExporter implements LogRecordExporter {
     this.log = this.logging.log('gemini_cli');
   }
 
-  export(
-    logs: ReadableLogRecord[],
-    resultCallback: (result: ExportResult) => void,
-  ): void {
+  export(logs: ReadableLogRecord[], resultCallback: (result: ExportResult) => void): void {
     try {
       const entries = logs.map((log) => {
         const entry = this.log.entry(
@@ -74,7 +68,7 @@ export class GcpLogExporter implements LogRecordExporter {
             ...log.attributes,
             ...log.resource?.attributes,
             message: log.body,
-          },
+          }
         );
         return entry;
       });

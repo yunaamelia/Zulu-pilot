@@ -137,4 +137,3 @@ export interface IModelAdapter {
     params: GenerateContentParams
   ): AsyncGenerator<GenerateContentResponse, void, unknown>;
 }
-

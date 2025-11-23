@@ -43,7 +43,7 @@ export class AbortError extends Error {
 export async function filter(
   allPaths: string[],
   pattern: string,
-  signal: AbortSignal | undefined,
+  signal: AbortSignal | undefined
 ): Promise<string[]> {
   const patternFilter = picomatch(pattern, {
     dot: true,
@@ -113,23 +113,15 @@ class RecursiveFileSearch implements FileSearch {
     this.buildResultCache();
   }
 
-  async search(
-    pattern: string,
-    options: SearchOptions = {},
-  ): Promise<string[]> {
-    if (
-      !this.resultCache ||
-      (!this.fzf && !this.options.disableFuzzySearch) ||
-      !this.ignore
-    ) {
+  async search(pattern: string, options: SearchOptions = {}): Promise<string[]> {
+    if (!this.resultCache || (!this.fzf && !this.options.disableFuzzySearch) || !this.ignore) {
       throw new Error('Engine not initialized. Call initialize() first.');
     }
 
     pattern = unescapePath(pattern) || '*';
 
     let filteredCandidates;
-    const { files: candidates, isExactMatch } =
-      await this.resultCache!.get(pattern);
+    const { files: candidates, isExactMatch } = await this.resultCache!.get(pattern);
 
     if (isExactMatch) {
       // Use the cached result.
@@ -142,7 +134,7 @@ class RecursiveFileSearch implements FileSearch {
         filteredCandidates = await this.fzf
           .find(pattern)
           .then((results: Array<FzfResultItem<string>>) =>
-            results.map((entry: FzfResultItem<string>) => entry.item),
+            results.map((entry: FzfResultItem<string>) => entry.item)
           )
           .catch(() => {
             shouldCache = false;
@@ -200,10 +192,7 @@ class DirectoryFileSearch implements FileSearch {
     this.ignore = loadIgnoreRules(this.options);
   }
 
-  async search(
-    pattern: string,
-    options: SearchOptions = {},
-  ): Promise<string[]> {
+  async search(pattern: string, options: SearchOptions = {}): Promise<string[]> {
     if (!this.ignore) {
       throw new Error('Engine not initialized. Call initialize() first.');
     }

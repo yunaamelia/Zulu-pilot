@@ -32,7 +32,7 @@ export interface GlobPath {
 export function sortFileEntries(
   entries: GlobPath[],
   nowTimestamp: number,
-  recencyThresholdMs: number,
+  recencyThresholdMs: number
 ): GlobPath[] {
   const sortedEntries = [...entries];
   sortedEntries.sort((a, b) => {
@@ -84,16 +84,13 @@ export interface GlobToolParams {
   respect_gemini_ignore?: boolean;
 }
 
-class GlobToolInvocation extends BaseToolInvocation<
-  GlobToolParams,
-  ToolResult
-> {
+class GlobToolInvocation extends BaseToolInvocation<GlobToolParams, ToolResult> {
   constructor(
     private config: Config,
     params: GlobToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
   }
@@ -101,10 +98,7 @@ class GlobToolInvocation extends BaseToolInvocation<
   getDescription(): string {
     let description = `'${this.params.pattern}'`;
     if (this.params.dir_path) {
-      const searchDir = path.resolve(
-        this.config.getTargetDir(),
-        this.params.dir_path || '.',
-      );
+      const searchDir = path.resolve(this.config.getTargetDir(), this.params.dir_path || '.');
       const relativePath = makeRelative(searchDir, this.config.getTargetDir());
       description += ` within ${shortenPath(relativePath)}`;
     }
@@ -119,10 +113,7 @@ class GlobToolInvocation extends BaseToolInvocation<
       // If a specific path is provided, resolve it and check if it's within workspace
       let searchDirectories: readonly string[];
       if (this.params.dir_path) {
-        const searchDirAbsolute = path.resolve(
-          this.config.getTargetDir(),
-          this.params.dir_path,
-        );
+        const searchDirAbsolute = path.resolve(this.config.getTargetDir(), this.params.dir_path);
         if (!workspaceContext.isPathWithinWorkspace(searchDirAbsolute)) {
           const rawError = `Error: Path "${this.params.dir_path}" is not within any workspace directory`;
           return {
@@ -168,27 +159,26 @@ class GlobToolInvocation extends BaseToolInvocation<
       }
 
       const relativePaths = allEntries.map((p) =>
-        path.relative(this.config.getTargetDir(), p.fullpath()),
+        path.relative(this.config.getTargetDir(), p.fullpath())
       );
 
-      const { filteredPaths, ignoredCount } =
-        fileDiscovery.filterFilesWithReport(relativePaths, {
-          respectGitIgnore:
-            this.params?.respect_git_ignore ??
-            this.config.getFileFilteringOptions().respectGitIgnore ??
-            DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
-          respectGeminiIgnore:
-            this.params?.respect_gemini_ignore ??
-            this.config.getFileFilteringOptions().respectGeminiIgnore ??
-            DEFAULT_FILE_FILTERING_OPTIONS.respectGeminiIgnore,
-        });
+      const { filteredPaths, ignoredCount } = fileDiscovery.filterFilesWithReport(relativePaths, {
+        respectGitIgnore:
+          this.params?.respect_git_ignore ??
+          this.config.getFileFilteringOptions().respectGitIgnore ??
+          DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
+        respectGeminiIgnore:
+          this.params?.respect_gemini_ignore ??
+          this.config.getFileFilteringOptions().respectGeminiIgnore ??
+          DEFAULT_FILE_FILTERING_OPTIONS.respectGeminiIgnore,
+      });
 
       const filteredAbsolutePaths = new Set(
-        filteredPaths.map((p) => path.resolve(this.config.getTargetDir(), p)),
+        filteredPaths.map((p) => path.resolve(this.config.getTargetDir(), p))
       );
 
       const filteredEntries = allEntries.filter((entry) =>
-        filteredAbsolutePaths.has(entry.fullpath()),
+        filteredAbsolutePaths.has(entry.fullpath())
       );
 
       if (!filteredEntries || filteredEntries.length === 0) {
@@ -212,15 +202,9 @@ class GlobToolInvocation extends BaseToolInvocation<
       const nowTimestamp = new Date().getTime();
 
       // Sort the filtered entries using the new helper function
-      const sortedEntries = sortFileEntries(
-        filteredEntries,
-        nowTimestamp,
-        oneDayInMs,
-      );
+      const sortedEntries = sortFileEntries(filteredEntries, nowTimestamp, oneDayInMs);
 
-      const sortedAbsolutePaths = sortedEntries.map((entry) =>
-        entry.fullpath(),
-      );
+      const sortedAbsolutePaths = sortedEntries.map((entry) => entry.fullpath());
       const fileListDescription = sortedAbsolutePaths.join('\n');
       const fileCount = sortedAbsolutePaths.length;
 
@@ -262,7 +246,7 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
   static readonly Name = GLOB_TOOL_NAME;
   constructor(
     private config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       GlobTool.Name,
@@ -272,8 +256,7 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
       {
         properties: {
           pattern: {
-            description:
-              "The glob pattern to match against (e.g., '**/*.py', 'docs/*.md').",
+            description: "The glob pattern to match against (e.g., '**/*.py', 'docs/*.md').",
             type: 'string',
           },
           dir_path: {
@@ -302,20 +285,15 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
       },
       true,
       false,
-      messageBus,
+      messageBus
     );
   }
 
   /**
    * Validates the parameters for the tool.
    */
-  protected override validateToolParamValues(
-    params: GlobToolParams,
-  ): string | null {
-    const searchDirAbsolute = path.resolve(
-      this.config.getTargetDir(),
-      params.dir_path || '.',
-    );
+  protected override validateToolParamValues(params: GlobToolParams): string | null {
+    const searchDirAbsolute = path.resolve(this.config.getTargetDir(), params.dir_path || '.');
 
     const workspaceContext = this.config.getWorkspaceContext();
     if (!workspaceContext.isPathWithinWorkspace(searchDirAbsolute)) {
@@ -335,11 +313,7 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
       return `Error accessing search path: ${e}`;
     }
 
-    if (
-      !params.pattern ||
-      typeof params.pattern !== 'string' ||
-      params.pattern.trim() === ''
-    ) {
+    if (!params.pattern || typeof params.pattern !== 'string' || params.pattern.trim() === '') {
       return "The 'pattern' parameter cannot be empty.";
     }
 
@@ -350,14 +324,8 @@ export class GlobTool extends BaseDeclarativeTool<GlobToolParams, ToolResult> {
     params: GlobToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<GlobToolParams, ToolResult> {
-    return new GlobToolInvocation(
-      this.config,
-      params,
-      messageBus,
-      _toolName,
-      _toolDisplayName,
-    );
+    return new GlobToolInvocation(this.config, params, messageBus, _toolName, _toolDisplayName);
   }
 }

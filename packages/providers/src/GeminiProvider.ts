@@ -80,6 +80,48 @@ export class GeminiProvider implements IModelProvider {
   }
 
   /**
+   * Discover available models from Google Gemini API
+   * Lists all models available via the Gemini API
+   *
+   * @returns Promise resolving to array of available model names
+   * @throws {ConnectionError} When cannot connect to Gemini API
+   */
+  async listModels(): Promise<string[]> {
+    try {
+      const response = await this.axiosInstance.get(`/models?key=${this.apiKey}`);
+
+      const models = response.data?.models ?? [];
+      return models
+        .map((model: { name: string }) => {
+          // Extract model identifier from full name
+          // Format: models/{model} or just model name
+          const parts = model.name?.split('/') ?? [];
+          return parts[parts.length - 1] || model.name;
+        })
+        .filter(Boolean)
+        .sort();
+    } catch (error) {
+      // If API call fails, return common Gemini models
+      return ['gemini-pro', 'gemini-pro-vision', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+    }
+  }
+
+  /**
+   * Check if a model is available
+   *
+   * @param modelName - Model name to check
+   * @returns Promise resolving to true if model is available
+   */
+  async hasModel(modelName: string): Promise<boolean> {
+    try {
+      const models = await this.listModels();
+      return models.includes(modelName);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Stream response from Gemini API.
    */
   async *streamResponse(

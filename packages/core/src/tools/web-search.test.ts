@@ -50,16 +50,12 @@ describe('WebSearchTool', () => {
 
     it('should throw an error for an empty query', () => {
       const params: WebSearchToolParams = { query: '' };
-      expect(() => tool.build(params)).toThrow(
-        "The 'query' parameter cannot be empty.",
-      );
+      expect(() => tool.build(params)).toThrow("The 'query' parameter cannot be empty.");
     });
 
     it('should throw an error for a query with only whitespace', () => {
       const params: WebSearchToolParams = { query: '   ' };
-      expect(() => tool.build(params)).toThrow(
-        "The 'query' parameter cannot be empty.",
-      );
+      expect(() => tool.build(params)).toThrow("The 'query' parameter cannot be empty.");
     });
   });
 
@@ -67,9 +63,7 @@ describe('WebSearchTool', () => {
     it('should return a description of the search', () => {
       const params: WebSearchToolParams = { query: 'test query' };
       const invocation = tool.build(params);
-      expect(invocation.getDescription()).toBe(
-        'Searching the web for: "test query"',
-      );
+      expect(invocation.getDescription()).toBe('Searching the web for: "test query"');
     });
   });
 
@@ -91,11 +85,9 @@ describe('WebSearchTool', () => {
       const result = await invocation.execute(abortSignal);
 
       expect(result.llmContent).toBe(
-        'Web search results for "successful query":\n\nHere are your results.',
+        'Web search results for "successful query":\n\nHere are your results.'
       );
-      expect(result.returnDisplay).toBe(
-        'Search results for "successful query" returned.',
-      );
+      expect(result.returnDisplay).toBe('Search results for "successful query" returned.');
       expect(result.sources).toBeUndefined();
     });
 
@@ -116,7 +108,7 @@ describe('WebSearchTool', () => {
       const result = await invocation.execute(abortSignal);
 
       expect(result.llmContent).toBe(
-        'No search results or information found for query: "no results query"',
+        'No search results or information found for query: "no results query"'
       );
       expect(result.returnDisplay).toBe('No information found.');
     });
@@ -176,9 +168,7 @@ Sources:
 [2] Google (https://google.com)`;
 
       expect(result.llmContent).toBe(expectedLlmContent);
-      expect(result.returnDisplay).toBe(
-        'Search results for "grounding query" returned.',
-      );
+      expect(result.returnDisplay).toBe('Search results for "grounding query" returned.');
       expect(result.sources).toHaveLength(2);
     });
 
@@ -248,9 +238,7 @@ Sources:
 [3] Gemini CLI: your open-source AI agent (https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/)`;
 
       expect(result.llmContent).toBe(expectedLlmContent);
-      expect(result.returnDisplay).toBe(
-        'Search results for "multibyte query" returned.',
-      );
+      expect(result.returnDisplay).toBe('Search results for "multibyte query" returned.');
       expect(result.sources).toHaveLength(3);
     });
   });

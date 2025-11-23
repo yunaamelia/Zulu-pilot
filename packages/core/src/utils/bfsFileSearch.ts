@@ -13,8 +13,7 @@ import { debugLogger } from './debugLogger.js';
 // TODO: Integrate with a more robust server-side logger.
 const logger = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  debug: (...args: any[]) =>
-    debugLogger.debug('[DEBUG] [BfsFileSearch]', ...args),
+  debug: (...args: any[]) => debugLogger.debug('[DEBUG] [BfsFileSearch]', ...args),
 };
 
 interface BfsFileSearchOptions {
@@ -35,15 +34,9 @@ interface BfsFileSearchOptions {
  */
 export async function bfsFileSearch(
   rootDir: string,
-  options: BfsFileSearchOptions,
+  options: BfsFileSearchOptions
 ): Promise<string[]> {
-  const {
-    fileName,
-    ignoreDirs = [],
-    maxDirs = Infinity,
-    debug = false,
-    fileService,
-  } = options;
+  const { fileName, ignoreDirs = [], maxDirs = Infinity, debug = false, fileService } = options;
   const foundFiles: string[] = [];
   const queue: string[] = [rootDir];
   const visited = new Set<string>();
@@ -73,9 +66,7 @@ export async function bfsFileSearch(
     if (currentBatch.length === 0) continue;
 
     if (debug) {
-      logger.debug(
-        `Scanning [${scannedDirCount}/${maxDirs}]: batch of ${currentBatch.length}`,
-      );
+      logger.debug(`Scanning [${scannedDirCount}/${maxDirs}]: batch of ${currentBatch.length}`);
     }
 
     // Read directories in parallel instead of one by one
@@ -86,9 +77,7 @@ export async function bfsFileSearch(
       } catch (error) {
         // Warn user that a directory could not be read, as this affects search results.
         const message = (error as Error)?.message ?? 'Unknown error';
-        debugLogger.warn(
-          `[WARN] Skipping unreadable directory: ${currentDir} (${message})`,
-        );
+        debugLogger.warn(`[WARN] Skipping unreadable directory: ${currentDir} (${message})`);
         if (debug) {
           logger.debug(`Full error for ${currentDir}:`, error);
         }
@@ -114,8 +103,7 @@ export async function bfsFileSearch(
         if (
           fileService?.shouldIgnoreFile(fullPath, {
             respectGitIgnore: options.fileFilteringOptions?.respectGitIgnore,
-            respectGeminiIgnore:
-              options.fileFilteringOptions?.respectGeminiIgnore,
+            respectGeminiIgnore: options.fileFilteringOptions?.respectGeminiIgnore,
           })
         ) {
           continue;

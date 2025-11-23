@@ -56,10 +56,9 @@ interface DiffCommand {
 
 function commandExists(cmd: string): boolean {
   try {
-    execSync(
-      process.platform === 'win32' ? `where.exe ${cmd}` : `command -v ${cmd}`,
-      { stdio: 'ignore' },
-    );
+    execSync(process.platform === 'win32' ? `where.exe ${cmd}` : `command -v ${cmd}`, {
+      stdio: 'ignore',
+    });
     return true;
   } catch {
     return false;
@@ -70,10 +69,7 @@ function commandExists(cmd: string): boolean {
  * Editor command configurations for different platforms.
  * Each editor can have multiple possible command names, listed in order of preference.
  */
-const editorCommands: Record<
-  EditorType,
-  { win32: string[]; default: string[] }
-> = {
+const editorCommands: Record<EditorType, { win32: string[]; default: string[] }> = {
   vscode: { win32: ['code.cmd'], default: ['code'] },
   vscodium: { win32: ['codium.cmd'], default: ['codium'] },
   windsurf: { win32: ['windsurf'], default: ['windsurf'] },
@@ -87,18 +83,13 @@ const editorCommands: Record<
 
 export function checkHasEditorType(editor: EditorType): boolean {
   const commandConfig = editorCommands[editor];
-  const commands =
-    process.platform === 'win32' ? commandConfig.win32 : commandConfig.default;
+  const commands = process.platform === 'win32' ? commandConfig.win32 : commandConfig.default;
   return commands.some((cmd) => commandExists(cmd));
 }
 
 export function allowEditorTypeInSandbox(editor: EditorType): boolean {
   const notUsingSandbox = !process.env['SANDBOX'];
-  if (
-    ['vscode', 'vscodium', 'windsurf', 'cursor', 'zed', 'antigravity'].includes(
-      editor,
-    )
-  ) {
+  if (['vscode', 'vscodium', 'windsurf', 'cursor', 'zed', 'antigravity'].includes(editor)) {
     return notUsingSandbox;
   }
   // For terminal-based editors like vim and emacs, allow in sandbox.
@@ -122,17 +113,15 @@ export function isEditorAvailable(editor: string | undefined): boolean {
 export function getDiffCommand(
   oldPath: string,
   newPath: string,
-  editor: EditorType,
+  editor: EditorType
 ): DiffCommand | null {
   if (!isValidEditorType(editor)) {
     return null;
   }
   const commandConfig = editorCommands[editor];
-  const commands =
-    process.platform === 'win32' ? commandConfig.win32 : commandConfig.default;
+  const commands = process.platform === 'win32' ? commandConfig.win32 : commandConfig.default;
   const command =
-    commands.slice(0, -1).find((cmd) => commandExists(cmd)) ||
-    commands[commands.length - 1];
+    commands.slice(0, -1).find((cmd) => commandExists(cmd)) || commands[commands.length - 1];
 
   switch (editor) {
     case 'vscode':
@@ -189,7 +178,7 @@ export function getDiffCommand(
 export async function openDiff(
   oldPath: string,
   newPath: string,
-  editor: EditorType,
+  editor: EditorType
 ): Promise<void> {
   const diffCommand = getDiffCommand(oldPath, newPath, editor);
   if (!diffCommand) {

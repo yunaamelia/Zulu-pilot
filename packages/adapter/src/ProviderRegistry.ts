@@ -118,4 +118,3 @@ export class ProviderRegistry {
     this.providers.clear();
   }
 }
-

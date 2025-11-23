@@ -8,10 +8,7 @@
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
-import type {
-  UnifiedConfiguration,
-  ProviderConfiguration,
-} from './UnifiedConfiguration.js';
+import type { UnifiedConfiguration, ProviderConfiguration } from './UnifiedConfiguration.js';
 
 const CONFIG_DIR = join(homedir(), '.zulu-pilot');
 const CONFIG_FILE = join(CONFIG_DIR, '.zulu-pilotrc');
@@ -118,10 +115,7 @@ export class UnifiedConfigManager {
    * @param providerName - Provider name
    * @param config - Provider configuration
    */
-  setProviderConfig(
-    providerName: string,
-    config: ProviderConfiguration
-  ): void {
+  setProviderConfig(providerName: string, config: ProviderConfiguration): void {
     if (!this.config) {
       this.config = this.getDefaultConfig();
     }
@@ -153,9 +147,7 @@ export class UnifiedConfigManager {
     }
 
     if (!config.providers[config.defaultProvider]) {
-      throw new Error(
-        `defaultProvider "${config.defaultProvider}" not found in providers`
-      );
+      throw new Error(`defaultProvider "${config.defaultProvider}" not found in providers`);
     }
 
     // Validate each provider configuration
@@ -169,4 +161,3 @@ export class UnifiedConfigManager {
     }
   }
 }
-

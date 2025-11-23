@@ -36,10 +36,7 @@ export class StreamJsonFormatter {
    * @param durationMs - The session duration in milliseconds
    * @returns Simplified stats for streaming output
    */
-  convertToStreamStats(
-    metrics: SessionMetrics,
-    durationMs: number,
-  ): StreamStats {
+  convertToStreamStats(metrics: SessionMetrics, durationMs: number): StreamStats {
     let totalTokens = 0;
     let inputTokens = 0;
     let outputTokens = 0;

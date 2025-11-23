@@ -12,13 +12,7 @@
  */
 
 import { FinishReason } from '@google/genai';
-import type {
-  Candidate,
-  Content,
-  ContentUnion,
-  Part,
-  PartUnion,
-} from '@google/genai';
+import type { Candidate, Content, ContentUnion, Part, PartUnion } from '@google/genai';
 
 export function toInputMessages(contents: Content[]): InputMessages {
   const messages: ChatMessage[] = [];
@@ -30,10 +24,7 @@ export function toInputMessages(contents: Content[]): InputMessages {
 
 function isPart(value: unknown): value is Part {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    !('parts' in value)
+    typeof value === 'object' && value !== null && !Array.isArray(value) && !('parts' in value)
   );
 }
 
@@ -70,7 +61,7 @@ function toContent(content: ContentUnion): Content | undefined {
 }
 
 export function toSystemInstruction(
-  systemInstruction?: ContentUnion,
+  systemInstruction?: ContentUnion
 ): SystemInstruction | undefined {
   const parts: AnyPart[] = [];
   if (systemInstruction) {
@@ -147,12 +138,12 @@ export function toOTelPart(part: Part): AnyPart {
     return new ToolCallRequestPart(
       part.functionCall.name,
       part.functionCall.id,
-      JSON.stringify(part.functionCall.args),
+      JSON.stringify(part.functionCall.args)
     );
   } else if (part.functionResponse) {
     return new ToolCallResponsePart(
       JSON.stringify(part.functionResponse.response),
-      part.functionResponse.id,
+      part.functionResponse.id
     );
   } else if (part.executableCode) {
     const { executableCode, ...unexpectedData } = part;

@@ -46,11 +46,7 @@ describe('Storage – additional helpers', () => {
   });
 
   it('getMcpOAuthTokensPath returns ~/.gemini/mcp-oauth-tokens.json', () => {
-    const expected = path.join(
-      os.homedir(),
-      GEMINI_DIR,
-      'mcp-oauth-tokens.json',
-    );
+    const expected = path.join(os.homedir(), GEMINI_DIR, 'mcp-oauth-tokens.json');
     expect(Storage.getMcpOAuthTokensPath()).toBe(expected);
   });
 

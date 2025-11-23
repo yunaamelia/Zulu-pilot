@@ -45,13 +45,7 @@ class Cell {
   fgColorMode: ColorMode = ColorMode.DEFAULT;
   bgColorMode: ColorMode = ColorMode.DEFAULT;
 
-  constructor(
-    cell: IBufferCell | null,
-    x: number,
-    y: number,
-    cursorX: number,
-    cursorY: number,
-  ) {
+  constructor(cell: IBufferCell | null, x: number, y: number, cursorX: number, cursorY: number) {
     this.cell = cell;
     this.x = x;
     this.y = y;
@@ -163,8 +157,7 @@ export function serializeTerminalToObject(terminal: Terminal): AnsiOutput {
             italic: lastCell.isAttribute(Attribute.italic),
             underline: lastCell.isAttribute(Attribute.underline),
             dim: lastCell.isAttribute(Attribute.dim),
-            inverse:
-              lastCell.isAttribute(Attribute.inverse) || lastCell.isCursor(),
+            inverse: lastCell.isAttribute(Attribute.inverse) || lastCell.isCursor(),
             fg: convertColorToHex(lastCell.fg, lastCell.fgColorMode, defaultFg),
             bg: convertColorToHex(lastCell.bg, lastCell.bgColorMode, defaultBg),
           };
@@ -459,7 +452,7 @@ const ANSI_COLORS = [
 export function convertColorToHex(
   color: number,
   colorMode: ColorMode,
-  defaultColor: string,
+  defaultColor: string
 ): string {
   if (colorMode === ColorMode.RGB) {
     const r = (color >> 16) & 255;

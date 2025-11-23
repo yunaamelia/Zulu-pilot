@@ -65,9 +65,7 @@ export class HookRegistry {
     this.processHooksFromConfig();
     this.initialized = true;
 
-    debugLogger.log(
-      `Hook registry initialized with ${this.entries.length} hook entries`,
-    );
+    debugLogger.log(`Hook registry initialized with ${this.entries.length} hook entries`);
   }
 
   /**
@@ -80,10 +78,7 @@ export class HookRegistry {
 
     return this.entries
       .filter((entry) => entry.eventName === eventName && entry.enabled)
-      .sort(
-        (a, b) =>
-          this.getSourcePriority(a.source) - this.getSourcePriority(b.source),
-      );
+      .sort((a, b) => this.getSourcePriority(a.source) - this.getSourcePriority(b.source));
   }
 
   /**
@@ -112,7 +107,7 @@ export class HookRegistry {
 
     if (updated.length > 0) {
       debugLogger.log(
-        `${enabled ? 'Enabled' : 'Disabled'} ${updated.length} hook(s) matching "${hookName}"`,
+        `${enabled ? 'Enabled' : 'Disabled'} ${updated.length} hook(s) matching "${hookName}"`
       );
     } else {
       debugLogger.warn(`No hooks found matching "${hookName}"`);
@@ -140,10 +135,7 @@ export class HookRegistry {
     const extensions = this.config.getExtensions() || [];
     for (const extension of extensions) {
       if (extension.isActive && extension.hooks) {
-        this.processHooksConfiguration(
-          extension.hooks,
-          ConfigSource.Extensions,
-        );
+        this.processHooksConfiguration(extension.hooks, ConfigSource.Extensions);
       }
     }
   }
@@ -153,7 +145,7 @@ export class HookRegistry {
    */
   private processHooksConfiguration(
     hooksConfig: { [K in HookEventName]?: HookDefinition[] },
-    source: ConfigSource,
+    source: ConfigSource
   ): void {
     for (const [eventName, definitions] of Object.entries(hooksConfig)) {
       if (!this.isValidEventName(eventName)) {
@@ -165,7 +157,7 @@ export class HookRegistry {
 
       if (!Array.isArray(definitions)) {
         debugLogger.warn(
-          `Hook definitions for event "${eventName}" from source "${source}" is not an array. Skipping.`,
+          `Hook definitions for event "${eventName}" from source "${source}" is not an array. Skipping.`
         );
         continue;
       }
@@ -182,16 +174,12 @@ export class HookRegistry {
   private processHookDefinition(
     definition: HookDefinition,
     eventName: HookEventName,
-    source: ConfigSource,
+    source: ConfigSource
   ): void {
-    if (
-      !definition ||
-      typeof definition !== 'object' ||
-      !Array.isArray(definition.hooks)
-    ) {
+    if (!definition || typeof definition !== 'object' || !Array.isArray(definition.hooks)) {
       debugLogger.warn(
         `Discarding invalid hook definition for ${eventName} from ${source}:`,
-        definition,
+        definition
       );
       return;
     }
@@ -214,7 +202,7 @@ export class HookRegistry {
         // Invalid hooks are logged and discarded here, they won't reach HookRunner
         debugLogger.warn(
           `Discarding invalid hook configuration for ${eventName} from ${source}:`,
-          hookConfig,
+          hookConfig
         );
       }
     }
@@ -226,19 +214,15 @@ export class HookRegistry {
   private validateHookConfig(
     config: HookConfig,
     eventName: HookEventName,
-    source: ConfigSource,
+    source: ConfigSource
   ): boolean {
     if (!config.type || !['command', 'plugin'].includes(config.type)) {
-      debugLogger.warn(
-        `Invalid hook ${eventName} from ${source} type: ${config.type}`,
-      );
+      debugLogger.warn(`Invalid hook ${eventName} from ${source} type: ${config.type}`);
       return false;
     }
 
     if (config.type === 'command' && !config.command) {
-      debugLogger.warn(
-        `Command hook ${eventName} from ${source} missing command field`,
-      );
+      debugLogger.warn(`Command hook ${eventName} from ${source} missing command field`);
       return false;
     }
 

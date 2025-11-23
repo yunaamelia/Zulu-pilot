@@ -17,10 +17,9 @@ export class CheckerRegistry {
     // No external built-ins for now
   ]);
 
-  private static readonly BUILT_IN_IN_PROCESS_CHECKERS = new Map<
-    string,
-    InProcessChecker
-  >([[InProcessCheckerType.ALLOWED_PATH, new AllowedPathChecker()]]);
+  private static readonly BUILT_IN_IN_PROCESS_CHECKERS = new Map<string, InProcessChecker>([
+    [InProcessCheckerType.ALLOWED_PATH, new AllowedPathChecker()],
+  ]);
 
   // Regex to validate checker names (alphanumeric and hyphens only)
   private static readonly VALID_NAME_PATTERN = /^[a-z0-9-]+$/;
@@ -33,7 +32,7 @@ export class CheckerRegistry {
   resolveExternal(name: string): string {
     if (!CheckerRegistry.isValidCheckerName(name)) {
       throw new Error(
-        `Invalid checker name "${name}". Checker names must contain only lowercase letters, numbers, and hyphens.`,
+        `Invalid checker name "${name}". Checker names must contain only lowercase letters, numbers, and hyphens.`
       );
     }
 
@@ -65,8 +64,8 @@ export class CheckerRegistry {
 
     throw new Error(
       `Unknown in-process checker "${name}". Available: ${Array.from(
-        CheckerRegistry.BUILT_IN_IN_PROCESS_CHECKERS.keys(),
-      ).join(', ')}`,
+        CheckerRegistry.BUILT_IN_IN_PROCESS_CHECKERS.keys()
+      ).join(', ')}`
     );
   }
 

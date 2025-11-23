@@ -29,9 +29,7 @@ describe('Flash Model Fallback Configuration', () => {
     });
 
     // Initialize contentGeneratorConfig for testing
-    (
-      config as unknown as { contentGeneratorConfig: unknown }
-    ).contentGeneratorConfig = {
+    (config as unknown as { contentGeneratorConfig: unknown }).contentGeneratorConfig = {
       model: DEFAULT_GEMINI_MODEL,
       authType: 'oauth-personal',
     };

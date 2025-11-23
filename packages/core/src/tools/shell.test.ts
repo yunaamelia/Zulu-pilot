@@ -4,16 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  vi,
-  describe,
-  it,
-  expect,
-  beforeAll,
-  beforeEach,
-  afterEach,
-  type Mock,
-} from 'vitest';
+import { vi, describe, it, expect, beforeAll, beforeEach, afterEach, type Mock } from 'vitest';
 
 const mockPlatform = vi.hoisted(() => vi.fn());
 
@@ -36,10 +27,7 @@ vi.mock('node:os', async (importOriginal) => {
 vi.mock('crypto');
 vi.mock('../utils/summarizer.js');
 
-import {
-  initializeShellParsers,
-  isCommandAllowed,
-} from '../utils/shell-utils.js';
+import { initializeShellParsers, isCommandAllowed } from '../utils/shell-utils.js';
 import { ShellTool } from './shell.js';
 import { type Config } from '../config/config.js';
 import {
@@ -86,9 +74,7 @@ describe('ShellTool', () => {
       getDebugMode: vi.fn().mockReturnValue(false),
       getTargetDir: vi.fn().mockReturnValue(tempRootDir),
       getSummarizeToolOutputConfig: vi.fn().mockReturnValue(undefined),
-      getWorkspaceContext: vi
-        .fn()
-        .mockReturnValue(new WorkspaceContext(tempRootDir)),
+      getWorkspaceContext: vi.fn().mockReturnValue(new WorkspaceContext(tempRootDir)),
       getGeminiClient: vi.fn(),
       getEnableInteractiveShell: vi.fn().mockReturnValue(false),
       isInteractive: vi.fn().mockReturnValue(true),
@@ -97,11 +83,8 @@ describe('ShellTool', () => {
     shellTool = new ShellTool(mockConfig);
 
     mockPlatform.mockReturnValue('linux');
-    (vi.mocked(crypto.randomBytes) as Mock).mockReturnValue(
-      Buffer.from('abcdef', 'hex'),
-    );
-    process.env['ComSpec'] =
-      'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
+    (vi.mocked(crypto.randomBytes) as Mock).mockReturnValue(Buffer.from('abcdef', 'hex'));
+    process.env['ComSpec'] = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
 
     // Capture the output callback to simulate streaming events from the service
     mockShellExecutionService.mockImplementation((_cmd, _cwd, callback) => {
@@ -130,16 +113,11 @@ describe('ShellTool', () => {
     it('should allow a command if no restrictions are provided', () => {
       (mockConfig.getCoreTools as Mock).mockReturnValue(undefined);
       (mockConfig.getExcludeTools as Mock).mockReturnValue(undefined);
-      expect(isCommandAllowed('goodCommand --safe', mockConfig).allowed).toBe(
-        true,
-      );
+      expect(isCommandAllowed('goodCommand --safe', mockConfig).allowed).toBe(true);
     });
 
     it('should allow a command with command substitution using $()', () => {
-      const evaluation = isCommandAllowed(
-        'echo $(goodCommand --safe)',
-        mockConfig,
-      );
+      const evaluation = isCommandAllowed('echo $(goodCommand --safe)', mockConfig);
       expect(evaluation.allowed).toBe(true);
       expect(evaluation.reason).toBeUndefined();
     });
@@ -152,9 +130,7 @@ describe('ShellTool', () => {
     });
 
     it('should throw an error for an empty command', () => {
-      expect(() => shellTool.build({ command: ' ' })).toThrow(
-        'Command cannot be empty.',
-      );
+      expect(() => shellTool.build({ command: ' ' })).toThrow('Command cannot be empty.');
     });
 
     it('should return an invocation for a valid relative directory path', () => {
@@ -167,10 +143,8 @@ describe('ShellTool', () => {
 
     it('should throw an error for a directory outside the workspace', () => {
       const outsidePath = path.resolve(tempRootDir, '../outside');
-      expect(() =>
-        shellTool.build({ command: 'ls', dir_path: outsidePath }),
-      ).toThrow(
-        `Directory '${outsidePath}' is not within any of the registered workspace directories.`,
+      expect(() => shellTool.build({ command: 'ls', dir_path: outsidePath })).toThrow(
+        `Directory '${outsidePath}' is not within any of the registered workspace directories.`
       );
     });
 
@@ -186,9 +160,7 @@ describe('ShellTool', () => {
   describe('execute', () => {
     const mockAbortSignal = new AbortController().signal;
 
-    const resolveShellExecution = (
-      result: Partial<ShellExecutionResult> = {},
-    ) => {
+    const resolveShellExecution = (result: Partial<ShellExecutionResult> = {}) => {
       const fullResult: ShellExecutionResult = {
         rawOutput: Buffer.from(result.output || ''),
         output: 'Success',
@@ -221,7 +193,7 @@ describe('ShellTool', () => {
         expect.any(Function),
         mockAbortSignal,
         false,
-        {},
+        {}
       );
       expect(result.llmContent).toContain('Background PIDs: 54322');
       // The file should be deleted by the tool
@@ -246,7 +218,7 @@ describe('ShellTool', () => {
         expect.any(Function),
         mockAbortSignal,
         false,
-        {},
+        {}
       );
     });
 
@@ -267,7 +239,7 @@ describe('ShellTool', () => {
         expect.any(Function),
         mockAbortSignal,
         false,
-        {},
+        {}
       );
     });
 
@@ -294,10 +266,10 @@ describe('ShellTool', () => {
           expect.any(Function),
           mockAbortSignal,
           false,
-          {},
+          {}
         );
       },
-      20000,
+      20000
     );
 
     it('should format error messages correctly', async () => {
@@ -337,18 +309,14 @@ describe('ShellTool', () => {
     });
 
     it('should throw an error for invalid parameters', () => {
-      expect(() => shellTool.build({ command: '' })).toThrow(
-        'Command cannot be empty.',
-      );
+      expect(() => shellTool.build({ command: '' })).toThrow('Command cannot be empty.');
     });
 
     it('should summarize output when configured', async () => {
       (mockConfig.getSummarizeToolOutputConfig as Mock).mockReturnValue({
         [SHELL_TOOL_NAME]: { tokenBudget: 1000 },
       });
-      vi.mocked(summarizer.summarizeToolOutput).mockResolvedValue(
-        'summarized output',
-      );
+      vi.mocked(summarizer.summarizeToolOutput).mockResolvedValue('summarized output');
 
       const invocation = shellTool.build({ command: 'ls' });
       const promise = invocation.execute(mockAbortSignal);
@@ -370,7 +338,7 @@ describe('ShellTool', () => {
         { model: 'summarizer-shell' },
         expect.any(String),
         mockConfig.getGeminiClient(),
-        mockAbortSignal,
+        mockAbortSignal
       );
       expect(result.llmContent).toBe('summarized output');
       expect(result.returnDisplay).toBe('long output');
@@ -409,7 +377,7 @@ describe('ShellTool', () => {
         mockShellOutputCallback({ type: 'binary_detected' });
         expect(updateOutputMock).toHaveBeenCalledOnce();
         expect(updateOutputMock).toHaveBeenCalledWith(
-          '[Binary output detected. Halting stream...]',
+          '[Binary output detected. Halting stream...]'
         );
 
         mockShellOutputCallback({
@@ -430,7 +398,7 @@ describe('ShellTool', () => {
         // Now it should be called a second time with the latest progress.
         expect(updateOutputMock).toHaveBeenCalledTimes(2);
         expect(updateOutputMock).toHaveBeenLastCalledWith(
-          '[Receiving binary output... 2.0 KB received]',
+          '[Receiving binary output... 2.0 KB received]'
         );
 
         resolveExecutionPromise({
@@ -452,22 +420,18 @@ describe('ShellTool', () => {
     it('should request confirmation for a new command and allowlist it on "Always"', async () => {
       const params = { command: 'npm install' };
       const invocation = shellTool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
 
       expect(confirmation).not.toBe(false);
       expect(confirmation && confirmation.type).toBe('exec');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (confirmation as any).onConfirm(
-        ToolConfirmationOutcome.ProceedAlways,
-      );
+      await (confirmation as any).onConfirm(ToolConfirmationOutcome.ProceedAlways);
 
       // Should now be allowlisted
       const secondInvocation = shellTool.build({ command: 'npm test' });
       const secondConfirmation = await secondInvocation.shouldConfirmExecute(
-        new AbortController().signal,
+        new AbortController().signal
       );
       expect(secondConfirmation).toBe(false);
     });
@@ -484,52 +448,38 @@ describe('ShellTool', () => {
       it('should not throw an error or block for an allowed command', async () => {
         (mockConfig.getAllowedTools as Mock).mockReturnValue(['ShellTool(wc)']);
         const invocation = shellTool.build({ command: 'wc -l foo.txt' });
-        const confirmation = await invocation.shouldConfirmExecute(
-          new AbortController().signal,
-        );
+        const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
         expect(confirmation).toBe(false);
       });
 
       it('should not throw an error or block for an allowed command with arguments', async () => {
-        (mockConfig.getAllowedTools as Mock).mockReturnValue([
-          'ShellTool(wc -l)',
-        ]);
+        (mockConfig.getAllowedTools as Mock).mockReturnValue(['ShellTool(wc -l)']);
         const invocation = shellTool.build({ command: 'wc -l foo.txt' });
-        const confirmation = await invocation.shouldConfirmExecute(
-          new AbortController().signal,
-        );
+        const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
         expect(confirmation).toBe(false);
       });
 
       it('should throw an error for command that is not allowed', async () => {
-        (mockConfig.getAllowedTools as Mock).mockReturnValue([
-          'ShellTool(wc -l)',
-        ]);
+        (mockConfig.getAllowedTools as Mock).mockReturnValue(['ShellTool(wc -l)']);
         const invocation = shellTool.build({ command: 'madeupcommand' });
-        await expect(
-          invocation.shouldConfirmExecute(new AbortController().signal),
-        ).rejects.toThrow('madeupcommand');
+        await expect(invocation.shouldConfirmExecute(new AbortController().signal)).rejects.toThrow(
+          'madeupcommand'
+        );
       });
 
       it('should throw an error for a command that is a prefix of an allowed command', async () => {
-        (mockConfig.getAllowedTools as Mock).mockReturnValue([
-          'ShellTool(wc -l)',
-        ]);
+        (mockConfig.getAllowedTools as Mock).mockReturnValue(['ShellTool(wc -l)']);
         const invocation = shellTool.build({ command: 'wc' });
-        await expect(
-          invocation.shouldConfirmExecute(new AbortController().signal),
-        ).rejects.toThrow('wc');
+        await expect(invocation.shouldConfirmExecute(new AbortController().signal)).rejects.toThrow(
+          'wc'
+        );
       });
 
       it('should require all segments of a chained command to be allowlisted', async () => {
-        (mockConfig.getAllowedTools as Mock).mockReturnValue([
-          'ShellTool(echo)',
-        ]);
+        (mockConfig.getAllowedTools as Mock).mockReturnValue(['ShellTool(echo)']);
         const invocation = shellTool.build({ command: 'echo "foo" && ls -l' });
-        await expect(
-          invocation.shouldConfirmExecute(new AbortController().signal),
-        ).rejects.toThrow(
-          'Command "echo "foo" && ls -l" is not in the list of allowed tools for non-interactive mode.',
+        await expect(invocation.shouldConfirmExecute(new AbortController().signal)).rejects.toThrow(
+          'Command "echo "foo" && ls -l" is not in the list of allowed tools for non-interactive mode.'
         );
       });
     });

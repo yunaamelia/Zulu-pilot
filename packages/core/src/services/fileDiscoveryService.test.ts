@@ -22,9 +22,7 @@ describe('FileDiscoveryService', () => {
   }
 
   beforeEach(async () => {
-    testRootDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'file-discovery-test-'),
-    );
+    testRootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'file-discovery-test-'));
     projectRoot = path.join(testRootDir, 'project');
     await fs.mkdir(projectRoot, { recursive: true });
   });
@@ -82,7 +80,7 @@ describe('FileDiscoveryService', () => {
       const service = new FileDiscoveryService(projectRoot);
 
       expect(service.filterFiles(files)).toEqual(
-        ['src/index.ts', 'README.md'].map((f) => path.join(projectRoot, f)),
+        ['src/index.ts', 'README.md'].map((f) => path.join(projectRoot, f))
       );
     });
 
@@ -102,18 +100,16 @@ describe('FileDiscoveryService', () => {
       });
 
       expect(filtered).toEqual(
-        ['src/index.ts', 'node_modules/package/index.js', '.git/config'].map(
-          (f) => path.join(projectRoot, f),
-        ),
+        ['src/index.ts', 'node_modules/package/index.js', '.git/config'].map((f) =>
+          path.join(projectRoot, f)
+        )
       );
     });
 
     it('should not filter files when respectGeminiIgnore is false', () => {
-      const files = [
-        'src/index.ts',
-        'node_modules/package/index.js',
-        'logs/latest.log',
-      ].map((f) => path.join(projectRoot, f));
+      const files = ['src/index.ts', 'node_modules/package/index.js', 'logs/latest.log'].map((f) =>
+        path.join(projectRoot, f)
+      );
 
       const service = new FileDiscoveryService(projectRoot);
 
@@ -123,9 +119,7 @@ describe('FileDiscoveryService', () => {
       });
 
       expect(filtered).toEqual(
-        ['src/index.ts', 'logs/latest.log'].map((f) =>
-          path.join(projectRoot, f),
-        ),
+        ['src/index.ts', 'logs/latest.log'].map((f) => path.join(projectRoot, f))
       );
     });
 
@@ -144,26 +138,21 @@ describe('FileDiscoveryService', () => {
     });
 
     it('should return filtered paths and correct ignored count', () => {
-      const files = [
-        'src/index.ts',
-        'node_modules/package/index.js',
-        'debug.log',
-        'README.md',
-      ].map((f) => path.join(projectRoot, f));
+      const files = ['src/index.ts', 'node_modules/package/index.js', 'debug.log', 'README.md'].map(
+        (f) => path.join(projectRoot, f)
+      );
 
       const service = new FileDiscoveryService(projectRoot);
       const report = service.filterFilesWithReport(files);
 
       expect(report.filteredPaths).toEqual(
-        ['src/index.ts', 'README.md'].map((f) => path.join(projectRoot, f)),
+        ['src/index.ts', 'README.md'].map((f) => path.join(projectRoot, f))
       );
       expect(report.ignoredCount).toBe(2);
     });
 
     it('should handle no ignored files', () => {
-      const files = ['src/index.ts', 'README.md'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['src/index.ts', 'README.md'].map((f) => path.join(projectRoot, f));
 
       const service = new FileDiscoveryService(projectRoot);
       const report = service.filterFilesWithReport(files);
@@ -184,34 +173,26 @@ describe('FileDiscoveryService', () => {
       const service = new FileDiscoveryService(projectRoot);
 
       expect(
-        service.shouldIgnoreFile(
-          path.join(projectRoot, 'node_modules/package/index.js'),
-        ),
+        service.shouldIgnoreFile(path.join(projectRoot, 'node_modules/package/index.js'))
       ).toBe(true);
     });
 
     it('should return false for non-git-ignored files', () => {
       const service = new FileDiscoveryService(projectRoot);
 
-      expect(
-        service.shouldIgnoreFile(path.join(projectRoot, 'src/index.ts')),
-      ).toBe(false);
+      expect(service.shouldIgnoreFile(path.join(projectRoot, 'src/index.ts'))).toBe(false);
     });
 
     it('should return true for gemini-ignored files', () => {
       const service = new FileDiscoveryService(projectRoot);
 
-      expect(
-        service.shouldIgnoreFile(path.join(projectRoot, 'debug.log')),
-      ).toBe(true);
+      expect(service.shouldIgnoreFile(path.join(projectRoot, 'debug.log'))).toBe(true);
     });
 
     it('should return false for non-gemini-ignored files', () => {
       const service = new FileDiscoveryService(projectRoot);
 
-      expect(
-        service.shouldIgnoreFile(path.join(projectRoot, 'src/index.ts')),
-      ).toBe(false);
+      expect(service.shouldIgnoreFile(path.join(projectRoot, 'src/index.ts'))).toBe(false);
     });
   });
 
@@ -219,16 +200,10 @@ describe('FileDiscoveryService', () => {
     it('should handle relative project root paths', async () => {
       await fs.mkdir(path.join(projectRoot, '.git'));
       await createTestFile('.gitignore', 'ignored.txt');
-      const service = new FileDiscoveryService(
-        path.relative(process.cwd(), projectRoot),
-      );
+      const service = new FileDiscoveryService(path.relative(process.cwd(), projectRoot));
 
-      expect(
-        service.shouldIgnoreFile(path.join(projectRoot, 'ignored.txt')),
-      ).toBe(true);
-      expect(
-        service.shouldIgnoreFile(path.join(projectRoot, 'not-ignored.txt')),
-      ).toBe(false);
+      expect(service.shouldIgnoreFile(path.join(projectRoot, 'ignored.txt'))).toBe(true);
+      expect(service.shouldIgnoreFile(path.join(projectRoot, 'not-ignored.txt'))).toBe(false);
     });
 
     it('should handle filterFiles with undefined options', async () => {
@@ -236,9 +211,7 @@ describe('FileDiscoveryService', () => {
       await createTestFile('.gitignore', 'ignored.txt');
       const service = new FileDiscoveryService(projectRoot);
 
-      const files = ['src/index.ts', 'ignored.txt'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['src/index.ts', 'ignored.txt'].map((f) => path.join(projectRoot, f));
 
       expect(service.filterFiles(files, undefined)).toEqual([
         path.join(projectRoot, 'src/index.ts'),
@@ -255,9 +228,7 @@ describe('FileDiscoveryService', () => {
       await createTestFile('.geminiignore', '!important.txt');
 
       const service = new FileDiscoveryService(projectRoot);
-      const files = ['file.txt', 'important.txt'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['file.txt', 'important.txt'].map((f) => path.join(projectRoot, f));
 
       const filtered = service.filterFiles(files);
       expect(filtered).toEqual([path.join(projectRoot, 'important.txt')]);
@@ -268,9 +239,7 @@ describe('FileDiscoveryService', () => {
       await createTestFile('.geminiignore', '!logs/');
 
       const service = new FileDiscoveryService(projectRoot);
-      const files = ['logs/app.log', 'other/app.log'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['logs/app.log', 'other/app.log'].map((f) => path.join(projectRoot, f));
 
       const filtered = service.filterFiles(files);
       expect(filtered).toEqual(files);
@@ -281,9 +250,7 @@ describe('FileDiscoveryService', () => {
       await createTestFile('.geminiignore', 'temp/');
 
       const service = new FileDiscoveryService(projectRoot);
-      const files = ['app.log', 'temp/file.txt'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['app.log', 'temp/file.txt'].map((f) => path.join(projectRoot, f));
 
       const filtered = service.filterFiles(files);
       expect(filtered).toEqual([]);
@@ -294,9 +261,7 @@ describe('FileDiscoveryService', () => {
       await createTestFile('.geminiignore', '!important.txt');
 
       const service = new FileDiscoveryService(projectRoot);
-      const files = ['file.txt', 'important.txt'].map((f) =>
-        path.join(projectRoot, f),
-      );
+      const files = ['file.txt', 'important.txt'].map((f) => path.join(projectRoot, f));
 
       const filtered = service.filterFiles(files, {
         respectGitIgnore: true,
@@ -312,7 +277,7 @@ describe('FileDiscoveryService', () => {
 
       const service = new FileDiscoveryService(projectRoot);
       const files = ['file.txt', 'important.txt', 'temp/file.js'].map((f) =>
-        path.join(projectRoot, f),
+        path.join(projectRoot, f)
       );
 
       const filtered = service.filterFiles(files, {
@@ -323,9 +288,7 @@ describe('FileDiscoveryService', () => {
       // .gitignore is ignored, so *.txt is not applied.
       // .geminiignore un-ignores important.txt (which wasn't ignored anyway)
       // and ignores temp/
-      expect(filtered).toEqual(
-        ['file.txt', 'important.txt'].map((f) => path.join(projectRoot, f)),
-      );
+      expect(filtered).toEqual(['file.txt', 'important.txt'].map((f) => path.join(projectRoot, f)));
     });
   });
 });

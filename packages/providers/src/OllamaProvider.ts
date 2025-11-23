@@ -47,6 +47,39 @@ export class OllamaProvider implements IModelProvider {
   }
 
   /**
+   * T132: Discover available models from Ollama instance
+   * Lists all models installed on the local Ollama instance
+   *
+   * @returns Promise resolving to array of available model names
+   * @throws {ConnectionError} When cannot connect to Ollama
+   */
+  async listModels(): Promise<string[]> {
+    try {
+      const response = await this.axiosInstance.get('/api/tags');
+
+      const models = response.data?.models ?? [];
+      return models.map((model: { name: string }) => model.name).filter(Boolean);
+    } catch (error) {
+      throw this.handleError(error as AxiosError);
+    }
+  }
+
+  /**
+   * T132: Check if a model is available
+   *
+   * @param modelName - Model name to check
+   * @returns Promise resolving to true if model is available
+   */
+  async hasModel(modelName: string): Promise<boolean> {
+    try {
+      const models = await this.listModels();
+      return models.includes(modelName);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Stream response from Ollama.
    */
   async *streamResponse(

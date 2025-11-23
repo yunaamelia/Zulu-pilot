@@ -20,9 +20,7 @@ describe('GeminiIgnoreParser', () => {
   }
 
   beforeEach(async () => {
-    projectRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), 'geminiignore-test-'),
-    );
+    projectRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'geminiignore-test-'));
   });
 
   afterEach(async () => {
@@ -32,20 +30,11 @@ describe('GeminiIgnoreParser', () => {
 
   describe('when .geminiignore exists', () => {
     beforeEach(async () => {
-      await createTestFile(
-        '.geminiignore',
-        'ignored.txt\n# A comment\n/ignored_dir/\n',
-      );
+      await createTestFile('.geminiignore', 'ignored.txt\n# A comment\n/ignored_dir/\n');
       await createTestFile('ignored.txt', 'ignored');
       await createTestFile('not_ignored.txt', 'not ignored');
-      await createTestFile(
-        path.join('ignored_dir', 'file.txt'),
-        'in ignored dir',
-      );
-      await createTestFile(
-        path.join('subdir', 'not_ignored.txt'),
-        'not ignored',
-      );
+      await createTestFile(path.join('ignored_dir', 'file.txt'), 'in ignored dir');
+      await createTestFile(path.join('subdir', 'not_ignored.txt'), 'not ignored');
     });
 
     it('should ignore files specified in .geminiignore', () => {
@@ -54,9 +43,7 @@ describe('GeminiIgnoreParser', () => {
       expect(parser.isIgnored('ignored.txt')).toBe(true);
       expect(parser.isIgnored('not_ignored.txt')).toBe(false);
       expect(parser.isIgnored(path.join('ignored_dir', 'file.txt'))).toBe(true);
-      expect(parser.isIgnored(path.join('subdir', 'not_ignored.txt'))).toBe(
-        false,
-      );
+      expect(parser.isIgnored(path.join('subdir', 'not_ignored.txt'))).toBe(false);
     });
   });
 

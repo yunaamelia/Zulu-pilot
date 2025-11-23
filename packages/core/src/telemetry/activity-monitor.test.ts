@@ -98,10 +98,7 @@ describe('ActivityMonitor', () => {
     });
 
     it('should record activity events', () => {
-      activityMonitor.recordActivity(
-        ActivityType.USER_INPUT_START,
-        'test-context',
-      );
+      activityMonitor.recordActivity(ActivityType.USER_INPUT_START, 'test-context');
 
       const stats = activityMonitor.getActivityStats();
       expect(stats.totalEvents).toBe(2); // includes the start event
@@ -110,11 +107,7 @@ describe('ActivityMonitor', () => {
 
     it('should include metadata in activity events', () => {
       const metadata = { key: 'value', count: 42 };
-      activityMonitor.recordActivity(
-        ActivityType.MESSAGE_ADDED,
-        'test-context',
-        metadata,
-      );
+      activityMonitor.recordActivity(ActivityType.MESSAGE_ADDED, 'test-context', metadata);
 
       const recentActivity = activityMonitor.getRecentActivity(1);
       expect(recentActivity[0].metadata).toEqual(metadata);
@@ -134,10 +127,7 @@ describe('ActivityMonitor', () => {
 
       // Record more events than buffer size
       for (let i = 0; i < 5; i++) {
-        activityMonitor.recordActivity(
-          ActivityType.USER_INPUT_START,
-          `event-${i}`,
-        );
+        activityMonitor.recordActivity(ActivityType.USER_INPUT_START, `event-${i}`);
       }
 
       const stats = activityMonitor.getActivityStats();
@@ -192,9 +182,7 @@ describe('ActivityMonitor', () => {
       };
 
       // Spy on console.debug to check error handling
-      const debugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      const debugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
 
       activityMonitor.addListener(faultyListener);
       activityMonitor.addListener(goodListener);

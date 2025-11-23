@@ -4,22 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  afterAll,
-} from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import type { LogEntry } from './logger.js';
-import {
-  Logger,
-  MessageSenderType,
-  encodeTagName,
-  decodeTagName,
-} from './logger.js';
+import { Logger, MessageSenderType, encodeTagName, decodeTagName } from './logger.js';
 import { AuthType } from './contentGenerator.js';
 import { Storage } from '../config/storage.js';
 import { promises as fs, existsSync } from 'node:fs';
@@ -40,10 +27,7 @@ const hash = crypto.createHash('sha256').update(projectDir).digest('hex');
 const TEST_GEMINI_DIR = path.join(os.homedir(), GEMINI_DIR, TMP_DIR_NAME, hash);
 
 const TEST_LOG_FILE_PATH = path.join(TEST_GEMINI_DIR, LOG_FILE_NAME);
-const TEST_CHECKPOINT_FILE_PATH = path.join(
-  TEST_GEMINI_DIR,
-  CHECKPOINT_FILE_NAME,
-);
+const TEST_CHECKPOINT_FILE_PATH = path.join(TEST_GEMINI_DIR, CHECKPOINT_FILE_NAME);
 
 async function cleanupLogAndCheckpointFiles() {
   try {
@@ -144,14 +128,8 @@ describe('Logger', () => {
           message: 'Msg2',
         },
       ];
-      await fs.writeFile(
-        TEST_LOG_FILE_PATH,
-        JSON.stringify(existingLogs, null, 2),
-      );
-      const newLogger = new Logger(
-        currentSessionId,
-        new Storage(process.cwd()),
-      );
+      await fs.writeFile(TEST_LOG_FILE_PATH, JSON.stringify(existingLogs, null, 2));
+      const newLogger = new Logger(currentSessionId, new Storage(process.cwd()));
       await newLogger.initialize();
       expect(newLogger['messageId']).toBe(2);
       expect(newLogger['logs']).toEqual(existingLogs);
@@ -168,10 +146,7 @@ describe('Logger', () => {
           message: 'OldMsg',
         },
       ];
-      await fs.writeFile(
-        TEST_LOG_FILE_PATH,
-        JSON.stringify(existingLogs, null, 2),
-      );
+      await fs.writeFile(TEST_LOG_FILE_PATH, JSON.stringify(existingLogs, null, 2));
       const newLogger = new Logger('a-new-session', new Storage(process.cwd()));
       await newLogger.initialize();
       expect(newLogger['messageId']).toBe(0);
@@ -193,53 +168,41 @@ describe('Logger', () => {
 
     it('should handle invalid JSON in log file by backing it up and starting fresh', async () => {
       await fs.writeFile(TEST_LOG_FILE_PATH, 'invalid json');
-      const consoleDebugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      const consoleDebugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
 
       const newLogger = new Logger(testSessionId, new Storage(process.cwd()));
       await newLogger.initialize();
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid JSON in log file'),
-        expect.any(SyntaxError),
+        expect.any(SyntaxError)
       );
       const logContent = await readLogFile();
       expect(logContent).toEqual([]);
       const dirContents = await fs.readdir(TEST_GEMINI_DIR);
       expect(
-        dirContents.some(
-          (f) =>
-            f.startsWith(LOG_FILE_NAME + '.invalid_json') && f.endsWith('.bak'),
-        ),
+        dirContents.some((f) => f.startsWith(LOG_FILE_NAME + '.invalid_json') && f.endsWith('.bak'))
       ).toBe(true);
       newLogger.close();
     });
 
     it('should handle non-array JSON in log file by backing it up and starting fresh', async () => {
-      await fs.writeFile(
-        TEST_LOG_FILE_PATH,
-        JSON.stringify({ not: 'an array' }),
-      );
-      const consoleDebugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      await fs.writeFile(TEST_LOG_FILE_PATH, JSON.stringify({ not: 'an array' }));
+      const consoleDebugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
 
       const newLogger = new Logger(testSessionId, new Storage(process.cwd()));
       await newLogger.initialize();
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        `Log file at ${TEST_LOG_FILE_PATH} is not a valid JSON array. Starting with empty logs.`,
+        `Log file at ${TEST_LOG_FILE_PATH} is not a valid JSON array. Starting with empty logs.`
       );
       const logContent = await readLogFile();
       expect(logContent).toEqual([]);
       const dirContents = await fs.readdir(TEST_GEMINI_DIR);
       expect(
         dirContents.some(
-          (f) =>
-            f.startsWith(LOG_FILE_NAME + '.malformed_array') &&
-            f.endsWith('.bak'),
-        ),
+          (f) => f.startsWith(LOG_FILE_NAME + '.malformed_array') && f.endsWith('.bak')
+        )
       ).toBe(true);
       newLogger.close();
     });
@@ -275,17 +238,12 @@ describe('Logger', () => {
     });
 
     it('should handle logger not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close(); // Ensure it's treated as uninitialized
-      const consoleDebugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      const consoleDebugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
       await uninitializedLogger.logMessage(MessageSenderType.USER, 'test');
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        'Logger not initialized or session ID missing. Cannot log message.',
+        'Logger not initialized or session ID missing. Cannot log message.'
       );
       expect((await readLogFile()).length).toBe(0);
       uninitializedLogger.close();
@@ -293,16 +251,10 @@ describe('Logger', () => {
 
     it('should simulate concurrent writes from different logger instances to the same file', async () => {
       const concurrentSessionId = 'concurrent-session';
-      const logger1 = new Logger(
-        concurrentSessionId,
-        new Storage(process.cwd()),
-      );
+      const logger1 = new Logger(concurrentSessionId, new Storage(process.cwd()));
       await logger1.initialize();
 
-      const logger2 = new Logger(
-        concurrentSessionId,
-        new Storage(process.cwd()),
-      );
+      const logger2 = new Logger(concurrentSessionId, new Storage(process.cwd()));
       await logger2.initialize();
       expect(logger2['sessionId']).toEqual(logger1['sessionId']);
 
@@ -316,9 +268,7 @@ describe('Logger', () => {
 
       const logsFromFile = await readLogFile();
       expect(logsFromFile.length).toBe(4);
-      const messageIdsInFile = logsFromFile
-        .map((log) => log.messageId)
-        .sort((a, b) => a - b);
+      const messageIdsInFile = logsFromFile.map((log) => log.messageId).sort((a, b) => a - b);
       expect(messageIdsInFile).toEqual([0, 1, 2, 3]);
 
       const messagesInFile = logsFromFile
@@ -336,18 +286,13 @@ describe('Logger', () => {
 
     it('should not throw, not increment messageId, and log error if writing to file fails', async () => {
       vi.spyOn(fs, 'writeFile').mockRejectedValueOnce(new Error('Disk full'));
-      const consoleDebugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      const consoleDebugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
       const initialMessageId = logger['messageId'];
       const initialLogCount = logger['logs'].length;
 
       await logger.logMessage(MessageSenderType.USER, 'test fail write');
 
-      expect(consoleDebugSpy).toHaveBeenCalledWith(
-        'Error writing to log file:',
-        expect.any(Error),
-      );
+      expect(consoleDebugSpy).toHaveBeenCalledWith('Error writing to log file:', expect.any(Error));
       expect(logger['messageId']).toBe(initialMessageId); // Not incremented
       expect(logger['logs'].length).toBe(initialLogCount); // Log not added to in-memory cache
     });
@@ -366,19 +311,13 @@ describe('Logger', () => {
       await loggerSort2.initialize();
       await loggerSort2.logMessage(MessageSenderType.USER, 'S2M0_ts102000');
       vi.advanceTimersByTime(1000);
-      await loggerSort2.logMessage(
-        'model' as MessageSenderType,
-        'S2_Model_ts103000',
-      );
+      await loggerSort2.logMessage('model' as MessageSenderType, 'S2_Model_ts103000');
       vi.advanceTimersByTime(1000);
       await loggerSort2.logMessage(MessageSenderType.USER, 'S2M1_ts104000');
       loggerSort.close();
       loggerSort2.close();
 
-      const finalLogger = new Logger(
-        'final-session',
-        new Storage(process.cwd()),
-      );
+      const finalLogger = new Logger('final-session', new Storage(process.cwd()));
       await finalLogger.initialize();
 
       const messages = await finalLogger.getPreviousUserMessages();
@@ -398,10 +337,7 @@ describe('Logger', () => {
     });
 
     it('should return empty array if logger not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close();
       const messages = await uninitializedLogger.getPreviousUserMessages();
       expect(messages).toEqual([]);
@@ -436,12 +372,9 @@ describe('Logger', () => {
     ])('should save a checkpoint', async ({ tag, encodedTag }) => {
       await logger.saveCheckpoint(
         { history: conversation, authType: AuthType.LOGIN_WITH_GOOGLE },
-        tag,
+        tag
       );
-      const taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
+      const taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
       const fileContent = await fs.readFile(taggedFilePath, 'utf-8');
       expect(JSON.parse(fileContent)).toEqual({
         history: conversation,
@@ -450,20 +383,15 @@ describe('Logger', () => {
     });
 
     it('should not throw if logger is not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close();
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
 
       await expect(
-        uninitializedLogger.saveCheckpoint({ history: conversation }, 'tag'),
+        uninitializedLogger.saveCheckpoint({ history: conversation }, 'tag')
       ).resolves.not.toThrow();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Logger not initialized or checkpoint file path not set. Cannot save a checkpoint.',
+        'Logger not initialized or checkpoint file path not set. Cannot save a checkpoint.'
       );
     });
   });
@@ -475,10 +403,7 @@ describe('Logger', () => {
     ];
 
     beforeEach(async () => {
-      await fs.writeFile(
-        TEST_CHECKPOINT_FILE_PATH,
-        JSON.stringify(conversation, null, 2),
-      );
+      await fs.writeFile(TEST_CHECKPOINT_FILE_PATH, JSON.stringify(conversation, null, 2));
     });
 
     it.each([
@@ -501,20 +426,11 @@ describe('Logger', () => {
       },
     ])('should load from a checkpoint', async ({ tag, encodedTag }) => {
       const taggedConversation = {
-        history: [
-          ...conversation,
-          { role: 'user', parts: [{ text: 'hello' }] },
-        ],
+        history: [...conversation, { role: 'user', parts: [{ text: 'hello' }] }],
         authType: AuthType.USE_GEMINI,
       };
-      const taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
-      await fs.writeFile(
-        taggedFilePath,
-        JSON.stringify(taggedConversation, null, 2),
-      );
+      const taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
+      await fs.writeFile(taggedFilePath, JSON.stringify(taggedConversation, null, 2));
 
       const loaded = await logger.loadCheckpoint(tag);
       expect(loaded).toEqual(taggedConversation);
@@ -525,10 +441,7 @@ describe('Logger', () => {
     it('should load a legacy checkpoint without authType', async () => {
       const tag = 'legacy-tag';
       const encodedTag = 'legacy-tag';
-      const taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
+      const taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
       await fs.writeFile(taggedFilePath, JSON.stringify(conversation, null, 2));
 
       const loaded = await logger.loadCheckpoint(tag);
@@ -549,52 +462,37 @@ describe('Logger', () => {
     it('should return an empty history if the file contains invalid JSON', async () => {
       const tag = 'invalid-json-tag';
       const encodedTag = 'invalid-json-tag';
-      const taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
+      const taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
       await fs.writeFile(taggedFilePath, 'invalid json');
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
       const loadedCheckpoint = await logger.loadCheckpoint(tag);
       expect(loadedCheckpoint).toEqual({ history: [] });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Failed to read or parse checkpoint file'),
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
     it('should return an empty history if logger is not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close();
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
       const loadedCheckpoint = await uninitializedLogger.loadCheckpoint('tag');
       expect(loadedCheckpoint).toEqual({ history: [] });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Logger not initialized or checkpoint file path not set. Cannot load checkpoint.',
+        'Logger not initialized or checkpoint file path not set. Cannot load checkpoint.'
       );
     });
   });
 
   describe('deleteCheckpoint', () => {
-    const conversation: Content[] = [
-      { role: 'user', parts: [{ text: 'Content to be deleted' }] },
-    ];
+    const conversation: Content[] = [{ role: 'user', parts: [{ text: 'Content to be deleted' }] }];
     const tag = 'delete-me';
     const encodedTag = 'delete-me';
     let taggedFilePath: string;
 
     beforeEach(async () => {
-      taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
+      taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
       // Create a file to be deleted
       await fs.writeFile(taggedFilePath, JSON.stringify(conversation));
     });
@@ -609,10 +507,7 @@ describe('Logger', () => {
 
     it('should delete both new and old checkpoint files if they exist', async () => {
       const oldTag = 'delete-me(old)';
-      const oldStylePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${oldTag}.json`,
-      );
+      const oldStylePath = path.join(TEST_GEMINI_DIR, `checkpoint-${oldTag}.json`);
       const newStylePath = logger['_checkpointPath'](oldTag);
 
       // Create both files
@@ -641,35 +536,26 @@ describe('Logger', () => {
       vi.spyOn(fs, 'unlink').mockRejectedValueOnce(
         Object.assign(new Error('EACCES: permission denied'), {
           code: 'EACCES',
-        }),
+        })
       );
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
 
-      await expect(logger.deleteCheckpoint(tag)).rejects.toThrow(
-        'EACCES: permission denied',
-      );
+      await expect(logger.deleteCheckpoint(tag)).rejects.toThrow('EACCES: permission denied');
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         `Failed to delete checkpoint file ${taggedFilePath}:`,
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
     it('should return false if logger is not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close();
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
 
       const result = await uninitializedLogger.deleteCheckpoint(tag);
       expect(result).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Logger not initialized or checkpoint file path not set. Cannot delete checkpoint.',
+        'Logger not initialized or checkpoint file path not set. Cannot delete checkpoint.'
       );
     });
   });
@@ -680,10 +566,7 @@ describe('Logger', () => {
     let taggedFilePath: string;
 
     beforeEach(() => {
-      taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${encodedTag}.json`,
-      );
+      taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${encodedTag}.json`);
     });
 
     it('should return true if the checkpoint file exists', async () => {
@@ -698,14 +581,11 @@ describe('Logger', () => {
     });
 
     it('should throw an error if logger is not initialized', async () => {
-      const uninitializedLogger = new Logger(
-        testSessionId,
-        new Storage(process.cwd()),
-      );
+      const uninitializedLogger = new Logger(testSessionId, new Storage(process.cwd()));
       uninitializedLogger.close();
 
       await expect(uninitializedLogger.checkpointExists(tag)).rejects.toThrow(
-        'Logger not initialized. Cannot check for checkpoint existence.',
+        'Logger not initialized. Cannot check for checkpoint existence.'
       );
     });
 
@@ -713,18 +593,14 @@ describe('Logger', () => {
       vi.spyOn(fs, 'access').mockRejectedValueOnce(
         Object.assign(new Error('EACCES: permission denied'), {
           code: 'EACCES',
-        }),
+        })
       );
-      const consoleErrorSpy = vi
-        .spyOn(debugLogger, 'error')
-        .mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(debugLogger, 'error').mockImplementation(() => {});
 
-      await expect(logger.checkpointExists(tag)).rejects.toThrow(
-        'EACCES: permission denied',
-      );
+      await expect(logger.checkpointExists(tag)).rejects.toThrow('EACCES: permission denied');
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         `Failed to check checkpoint existence for path for tag "${tag}":`,
-        expect.any(Error),
+        expect.any(Error)
       );
     });
   });
@@ -735,19 +611,10 @@ describe('Logger', () => {
       { role: 'model', parts: [{ text: 'Hi there' }] },
     ];
     it('should load from a checkpoint with a raw special character tag', async () => {
-      const taggedConversation = [
-        ...conversation,
-        { role: 'user', parts: [{ text: 'hello' }] },
-      ];
+      const taggedConversation = [...conversation, { role: 'user', parts: [{ text: 'hello' }] }];
       const tag = 'special(char)';
-      const taggedFilePath = path.join(
-        TEST_GEMINI_DIR,
-        `checkpoint-${tag}.json`,
-      );
-      await fs.writeFile(
-        taggedFilePath,
-        JSON.stringify(taggedConversation, null, 2),
-      );
+      const taggedFilePath = path.join(TEST_GEMINI_DIR, `checkpoint-${tag}.json`);
+      await fs.writeFile(taggedFilePath, JSON.stringify(taggedConversation, null, 2));
 
       const loaded = await logger.loadCheckpoint(tag);
       expect(loaded.history).toEqual(taggedConversation);
@@ -758,12 +625,10 @@ describe('Logger', () => {
     it('should reset logger state', async () => {
       await logger.logMessage(MessageSenderType.USER, 'A message');
       logger.close();
-      const consoleDebugSpy = vi
-        .spyOn(debugLogger, 'debug')
-        .mockImplementation(() => {});
+      const consoleDebugSpy = vi.spyOn(debugLogger, 'debug').mockImplementation(() => {});
       await logger.logMessage(MessageSenderType.USER, 'Another message');
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        'Logger not initialized or session ID missing. Cannot log message.',
+        'Logger not initialized or session ID missing. Cannot log message.'
       );
       const messages = await logger.getPreviousUserMessages();
       expect(messages).toEqual([]);

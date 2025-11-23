@@ -58,10 +58,7 @@ export function resolvePathFromEnv(envVar?: string): {
       }
     } catch (error) {
       // If os.homedir() fails, we catch the error instead of crashing.
-      debugLogger.warn(
-        `Could not resolve home directory for path: ${trimmedEnvVar}`,
-        error,
-      );
+      debugLogger.warn(`Could not resolve home directory for path: ${trimmedEnvVar}`, error);
       // Return null to indicate the path resolution failed.
       return { isSwitch: false, value: null, isDisabled: false };
     }
@@ -75,18 +72,13 @@ export function resolvePathFromEnv(envVar?: string): {
   };
 }
 
-export function getCoreSystemPrompt(
-  config: Config,
-  userMemory?: string,
-): string {
+export function getCoreSystemPrompt(config: Config, userMemory?: string): string {
   // A flag to indicate whether the system prompt override is active.
   let systemMdEnabled = false;
   // The default path for the system prompt file. This can be overridden.
   let systemMdPath = path.resolve(path.join(GEMINI_DIR, 'system.md'));
   // Resolve the environment variable to get either a path or a switch value.
-  const systemMdResolution = resolvePathFromEnv(
-    process.env['GEMINI_SYSTEM_MD'],
-  );
+  const systemMdResolution = resolvePathFromEnv(process.env['GEMINI_SYSTEM_MD']);
 
   // Proceed only if the environment variable is set and is not disabled.
   if (systemMdResolution.value && !systemMdResolution.isDisabled) {
@@ -288,10 +280,7 @@ ${(function () {
 Your core function is efficient and safe assistance. Balance extreme conciseness with the crucial need for clarity, especially regarding safety and potential system modifications. Always prioritize user control and project conventions. Never make assumptions about the contents of files; instead use '${READ_FILE_TOOL_NAME}' to ensure you aren't making broad assumptions. Finally, you are an agent - please keep going until the user's query is completely resolved.`,
     };
 
-    const orderedPrompts: Array<keyof typeof promptConfig> = [
-      'preamble',
-      'coreMandates',
-    ];
+    const orderedPrompts: Array<keyof typeof promptConfig> = ['preamble', 'coreMandates'];
 
     if (enableCodebaseInvestigator && enableWriteTodosTool) {
       orderedPrompts.push('primaryWorkflows_prefix_ci_todo');
@@ -307,7 +296,7 @@ Your core function is efficient and safe assistance. Balance extreme conciseness
       'operationalGuidelines',
       'sandbox',
       'git',
-      'finalReminder',
+      'finalReminder'
     );
 
     // By default, all prompts are enabled. A prompt is disabled if its corresponding
@@ -322,9 +311,7 @@ Your core function is efficient and safe assistance. Balance extreme conciseness
   }
 
   // if GEMINI_WRITE_SYSTEM_MD is set (and not 0|false), write base system prompt to file
-  const writeSystemMdResolution = resolvePathFromEnv(
-    process.env['GEMINI_WRITE_SYSTEM_MD'],
-  );
+  const writeSystemMdResolution = resolvePathFromEnv(process.env['GEMINI_WRITE_SYSTEM_MD']);
 
   // Check if the feature is enabled. This proceeds only if the environment
   // variable is set and is not explicitly '0' or 'false'.
@@ -338,9 +325,7 @@ Your core function is efficient and safe assistance. Balance extreme conciseness
   }
 
   const memorySuffix =
-    userMemory && userMemory.trim().length > 0
-      ? `\n\n---\n\n${userMemory.trim()}`
-      : '';
+    userMemory && userMemory.trim().length > 0 ? `\n\n---\n\n${userMemory.trim()}` : '';
 
   return `${basePrompt}${memorySuffix}`;
 }

@@ -120,62 +120,53 @@ describe('EditTool', () => {
 
     // Reset mocks and set default implementation for ensureCorrectEdit
     mockEnsureCorrectEdit.mockReset();
-    mockEnsureCorrectEdit.mockImplementation(
-      async (_, currentContent, params) => {
-        let occurrences = 0;
-        if (params.old_string && currentContent) {
-          // Simple string counting for the mock
-          let index = currentContent.indexOf(params.old_string);
-          while (index !== -1) {
-            occurrences++;
-            index = currentContent.indexOf(params.old_string, index + 1);
-          }
-        } else if (params.old_string === '') {
-          occurrences = 0; // Creating a new file
+    mockEnsureCorrectEdit.mockImplementation(async (_, currentContent, params) => {
+      let occurrences = 0;
+      if (params.old_string && currentContent) {
+        // Simple string counting for the mock
+        let index = currentContent.indexOf(params.old_string);
+        while (index !== -1) {
+          occurrences++;
+          index = currentContent.indexOf(params.old_string, index + 1);
         }
-        return Promise.resolve({ params, occurrences });
-      },
-    );
+      } else if (params.old_string === '') {
+        occurrences = 0; // Creating a new file
+      }
+      return Promise.resolve({ params, occurrences });
+    });
 
     // Default mock for generateJson to return the snippet unchanged
     mockGenerateJson.mockReset();
-    mockGenerateJson.mockImplementation(
-      async (contents: Content[], schema: SchemaUnion) => {
-        // The problematic_snippet is the last part of the user's content
-        const userContent = contents.find((c: Content) => c.role === 'user');
-        let promptText = '';
-        if (userContent && userContent.parts) {
-          promptText = userContent.parts
-            .filter((p: Part) => typeof (p as any).text === 'string')
-            .map((p: Part) => (p as any).text)
-            .join('\n');
-        }
-        const snippetMatch = promptText.match(
-          /Problematic target snippet:\n```\n([\s\S]*?)\n```/,
-        );
-        const problematicSnippet =
-          snippetMatch && snippetMatch[1] ? snippetMatch[1] : '';
+    mockGenerateJson.mockImplementation(async (contents: Content[], schema: SchemaUnion) => {
+      // The problematic_snippet is the last part of the user's content
+      const userContent = contents.find((c: Content) => c.role === 'user');
+      let promptText = '';
+      if (userContent && userContent.parts) {
+        promptText = userContent.parts
+          .filter((p: Part) => typeof (p as any).text === 'string')
+          .map((p: Part) => (p as any).text)
+          .join('\n');
+      }
+      const snippetMatch = promptText.match(/Problematic target snippet:\n```\n([\s\S]*?)\n```/);
+      const problematicSnippet = snippetMatch && snippetMatch[1] ? snippetMatch[1] : '';
 
-        if (((schema as any).properties as any)?.corrected_target_snippet) {
-          return Promise.resolve({
-            corrected_target_snippet: problematicSnippet,
-          });
-        }
-        if (((schema as any).properties as any)?.corrected_new_string) {
-          // For new_string correction, we might need more sophisticated logic,
-          // but for now, returning original is a safe default if not specified by a test.
-          const originalNewStringMatch = promptText.match(
-            /original_new_string \(what was intended to replace original_old_string\):\n```\n([\s\S]*?)\n```/,
-          );
-          const originalNewString =
-            originalNewStringMatch && originalNewStringMatch[1]
-              ? originalNewStringMatch[1]
-              : '';
-          return Promise.resolve({ corrected_new_string: originalNewString });
-        }
-        return Promise.resolve({}); // Default empty object if schema doesn't match
-      },
-    );
+      if (((schema as any).properties as any)?.corrected_target_snippet) {
+        return Promise.resolve({
+          corrected_target_snippet: problematicSnippet,
+        });
+      }
+      if (((schema as any).properties as any)?.corrected_new_string) {
+        // For new_string correction, we might need more sophisticated logic,
+        // but for now, returning original is a safe default if not specified by a test.
+        const originalNewStringMatch = promptText.match(
+          /original_new_string \(what was intended to replace original_old_string\):\n```\n([\s\S]*?)\n```/
+        );
+        const originalNewString =
+          originalNewStringMatch && originalNewStringMatch[1] ? originalNewStringMatch[1] : '';
+        return Promise.resolve({ corrected_new_string: originalNewString });
+      }
+      return Promise.resolve({}); // Default empty object if schema doesn't match
+    });
 
     tool = new EditTool(mockConfig);
   });
@@ -200,14 +191,12 @@ describe('EditTool', () => {
 
     it('should replace oldString with newString in currentContent', () => {
       expect(applyReplacement('hello old world old', 'old', 'new', false)).toBe(
-        'hello new world new',
+        'hello new world new'
       );
     });
 
     it('should return currentContent if oldString is empty and not a new file', () => {
-      expect(applyReplacement('hello world', '', 'new', false)).toBe(
-        'hello world',
-      );
+      expect(applyReplacement('hello world', '', 'new', false)).toBe('hello world');
     });
 
     it.each([
@@ -304,9 +293,7 @@ describe('EditTool', () => {
         new_string: 'new',
       };
       const error = tool.validateToolParams(params);
-      expect(error).toContain(
-        'File path must be within one of the workspace directories',
-      );
+      expect(error).toContain('File path must be within one of the workspace directories');
     });
   });
 
@@ -331,15 +318,13 @@ describe('EditTool', () => {
         occurrences: 1,
       });
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(confirmation).toEqual(
         expect.objectContaining({
           title: `Confirm Edit: ${testFile}`,
           fileName: testFile,
           fileDiff: expect.any(String),
-        }),
+        })
       );
     });
 
@@ -353,15 +338,13 @@ describe('EditTool', () => {
       // ensureCorrectEdit will be called by shouldConfirmExecute
       mockEnsureCorrectEdit.mockResolvedValueOnce({ params, occurrences: 1 });
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(confirmation).toEqual(
         expect.objectContaining({
           title: `Confirm Edit: ${testFile}`,
           fileName: testFile,
           fileDiff: expect.any(String),
-        }),
+        })
       );
     });
 
@@ -374,9 +357,7 @@ describe('EditTool', () => {
       };
       mockEnsureCorrectEdit.mockResolvedValueOnce({ params, occurrences: 0 });
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(confirmation).toBe(false);
     });
 
@@ -389,9 +370,7 @@ describe('EditTool', () => {
       };
       mockEnsureCorrectEdit.mockResolvedValueOnce({ params, occurrences: 2 });
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(confirmation).toBe(false);
     });
 
@@ -408,15 +387,13 @@ describe('EditTool', () => {
       // If it is called, it should return 0 occurrences for a new file.
       mockEnsureCorrectEdit.mockResolvedValueOnce({ params, occurrences: 0 });
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(confirmation).toEqual(
         expect.objectContaining({
           title: `Confirm Edit: ${newFileName}`,
           fileName: newFileName,
           fileDiff: expect.any(String),
-        }),
+        })
       );
     });
 
@@ -439,26 +416,24 @@ describe('EditTool', () => {
       // The main beforeEach already calls mockEnsureCorrectEdit.mockReset()
       // Set a specific mock for this test case
       let mockCalled = false;
-      mockEnsureCorrectEdit.mockImplementationOnce(
-        async (_, content, p, client, baseClient) => {
-          mockCalled = true;
-          expect(content).toBe(originalContent);
-          expect(p).toBe(params);
-          expect(client).toBe(geminiClient);
-          expect(baseClient).toBe(baseLlmClient);
-          return {
-            params: {
-              file_path: filePath,
-              old_string: correctedOldString,
-              new_string: correctedNewString,
-            },
-            occurrences: 1,
-          };
-        },
-      );
+      mockEnsureCorrectEdit.mockImplementationOnce(async (_, content, p, client, baseClient) => {
+        mockCalled = true;
+        expect(content).toBe(originalContent);
+        expect(p).toBe(params);
+        expect(client).toBe(geminiClient);
+        expect(baseClient).toBe(baseLlmClient);
+        return {
+          params: {
+            file_path: filePath,
+            old_string: correctedOldString,
+            new_string: correctedNewString,
+          },
+          occurrences: 1,
+        };
+      });
       const invocation = tool.build(params);
       const confirmation = (await invocation.shouldConfirmExecute(
-        new AbortController().signal,
+        new AbortController().signal
       )) as FileDiff;
 
       expect(mockCalled).toBe(true); // Check if the mock implementation was run
@@ -467,7 +442,7 @@ describe('EditTool', () => {
         expect.objectContaining({
           title: `Confirm Edit: ${testFile}`,
           fileName: testFile,
-        }),
+        })
       );
       // Check that the diff is based on the corrected strings leading to the new state
       expect(confirmation.fileDiff).toContain(`-${originalContent}`);
@@ -477,7 +452,7 @@ describe('EditTool', () => {
       // indeed produces the expectedFinalContent, which is what the diff should reflect.
       const patchedContent = originalContent.replace(
         correctedOldString, // This was the string identified by ensureCorrectEdit for replacement
-        correctedNewString, // This was the string identified by ensureCorrectEdit as the replacement
+        correctedNewString // This was the string identified by ensureCorrectEdit as the replacement
       );
       expect(patchedContent).toBe(expectedFinalContent);
     });
@@ -503,9 +478,9 @@ describe('EditTool', () => {
           throw abortError;
         });
 
-      await expect(
-        invocation.shouldConfirmExecute(abortController.signal),
-      ).rejects.toBe(abortError);
+      await expect(invocation.shouldConfirmExecute(abortController.signal)).rejects.toBe(
+        abortError
+      );
 
       calculateSpy.mockRestore();
     });
@@ -556,9 +531,7 @@ describe('EditTool', () => {
         old_string: 'old',
         new_string: 'new',
       };
-      expect(() => tool.build(params)).toThrow(
-        /The 'file_path' parameter must be non-empty./,
-      );
+      expect(() => tool.build(params)).toThrow(/The 'file_path' parameter must be non-empty./);
     });
 
     it('should reject when calculateEdit fails after an abort signal', async () => {
@@ -581,9 +554,7 @@ describe('EditTool', () => {
           throw abortError;
         });
 
-      await expect(invocation.execute(abortController.signal)).rejects.toBe(
-        abortError,
-      );
+      await expect(invocation.execute(abortController.signal)).rejects.toBe(abortError);
 
       calculateSpy.mockRestore();
     });
@@ -623,9 +594,7 @@ describe('EditTool', () => {
         new_string: fileContent,
       };
 
-      (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(
-        ApprovalMode.AUTO_EDIT,
-      );
+      (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(ApprovalMode.AUTO_EDIT);
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
 
@@ -658,12 +627,8 @@ describe('EditTool', () => {
       // The default mockEnsureCorrectEdit will return 0 occurrences for 'nonexistent'
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
-      expect(result.llmContent).toMatch(
-        /0 occurrences found for old_string in/,
-      );
-      expect(result.returnDisplay).toMatch(
-        /Failed to edit, could not find the string to replace./,
-      );
+      expect(result.llmContent).toMatch(/0 occurrences found for old_string in/);
+      expect(result.returnDisplay).toMatch(/Failed to edit, could not find the string to replace./);
     });
 
     it('should return error if multiple occurrences of old_string are found', async () => {
@@ -676,12 +641,8 @@ describe('EditTool', () => {
       // The default mockEnsureCorrectEdit will return 2 occurrences for 'old'
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
-      expect(result.llmContent).toMatch(
-        /Expected 1 occurrence but found 2 for old_string in file/,
-      );
-      expect(result.returnDisplay).toMatch(
-        /Failed to edit, expected 1 occurrence but found 2/,
-      );
+      expect(result.llmContent).toMatch(/Expected 1 occurrence but found 2 for old_string in file/);
+      expect(result.returnDisplay).toMatch(/Failed to edit, expected 1 occurrence but found 2/);
     });
 
     it('should successfully replace multiple occurrences when expected_replacements specified', async () => {
@@ -697,9 +658,7 @@ describe('EditTool', () => {
       const result = await invocation.execute(new AbortController().signal);
 
       expect(result.llmContent).toMatch(/Successfully modified file/);
-      expect(fs.readFileSync(filePath, 'utf8')).toBe(
-        'new text\nnew text\nnew text',
-      );
+      expect(fs.readFileSync(filePath, 'utf8')).toBe('new text\nnew text\nnew text');
       const display = result.returnDisplay as FileDiff;
 
       expect(display.fileDiff).toMatch(/-old text\n-old text\n-old text/);
@@ -728,11 +687,9 @@ describe('EditTool', () => {
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
       expect(result.llmContent).toMatch(
-        /Expected 3 occurrences but found 2 for old_string in file/,
+        /Expected 3 occurrences but found 2 for old_string in file/
       );
-      expect(result.returnDisplay).toMatch(
-        /Failed to edit, expected 3 occurrences but found 2/,
-      );
+      expect(result.returnDisplay).toMatch(/Failed to edit, expected 3 occurrences but found 2/);
     });
 
     it('should return error if trying to create a file that already exists (empty old_string)', async () => {
@@ -745,9 +702,7 @@ describe('EditTool', () => {
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
       expect(result.llmContent).toMatch(/File already exists, cannot create/);
-      expect(result.returnDisplay).toMatch(
-        /Attempted to create a file that already exists/,
-      );
+      expect(result.returnDisplay).toMatch(/Attempted to create a file that already exists/);
     });
 
     it('should include modification message when proposed content is modified', async () => {
@@ -761,15 +716,11 @@ describe('EditTool', () => {
         ai_proposed_content: 'Line 1\nAI line\nLine 3\nLine 4\nLine 5\n',
       };
 
-      (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(
-        ApprovalMode.AUTO_EDIT,
-      );
+      (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(ApprovalMode.AUTO_EDIT);
       const invocation = tool.build(params);
       const result = await invocation.execute(new AbortController().signal);
 
-      expect(result.llmContent).toMatch(
-        /User modified the `new_string` content/,
-      );
+      expect(result.llmContent).toMatch(/User modified the `new_string` content/);
       expect((result.returnDisplay as FileDiff).diffStat).toStrictEqual({
         model_added_lines: 1,
         model_removed_lines: 1,
@@ -791,31 +742,24 @@ describe('EditTool', () => {
         name: 'modified_by_user is not provided',
         modifiedByUser: undefined,
       },
-    ])(
-      'should not include modification message when $name',
-      async ({ modifiedByUser }) => {
-        const initialContent = 'This is some old text.';
-        fs.writeFileSync(filePath, initialContent, 'utf8');
-        const params: EditToolParams = {
-          file_path: filePath,
-          old_string: 'old',
-          new_string: 'new',
-          ...(modifiedByUser !== undefined && {
-            modified_by_user: modifiedByUser,
-          }),
-        };
+    ])('should not include modification message when $name', async ({ modifiedByUser }) => {
+      const initialContent = 'This is some old text.';
+      fs.writeFileSync(filePath, initialContent, 'utf8');
+      const params: EditToolParams = {
+        file_path: filePath,
+        old_string: 'old',
+        new_string: 'new',
+        ...(modifiedByUser !== undefined && {
+          modified_by_user: modifiedByUser,
+        }),
+      };
 
-        (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(
-          ApprovalMode.AUTO_EDIT,
-        );
-        const invocation = tool.build(params);
-        const result = await invocation.execute(new AbortController().signal);
+      (mockConfig.getApprovalMode as Mock).mockReturnValueOnce(ApprovalMode.AUTO_EDIT);
+      const invocation = tool.build(params);
+      const result = await invocation.execute(new AbortController().signal);
 
-        expect(result.llmContent).not.toMatch(
-          /User modified the `new_string` content/,
-        );
-      },
-    );
+      expect(result.llmContent).not.toMatch(/User modified the `new_string` content/);
+    });
 
     it('should return error if old_string and new_string are identical', async () => {
       const initialContent = 'This is some identical text.';
@@ -852,7 +796,7 @@ describe('EditTool', () => {
 
       expect(result.error?.type).toBe(ToolErrorType.EDIT_NO_CHANGE);
       expect(result.returnDisplay).toMatch(
-        /No changes to apply. The new content is identical to the current content./,
+        /No changes to apply. The new content is identical to the current content./
       );
       // Ensure the file was not actually changed
       expect(fs.readFileSync(filePath, 'utf8')).toBe(initialContent);
@@ -933,24 +877,21 @@ describe('EditTool', () => {
         expectedError: ToolErrorType.FILE_WRITE_FAILURE,
         isAsyncTest: true,
       },
-    ])(
-      'should return $name',
-      async ({ setup, params, expectedError, isAsyncTest }) => {
-        const testParams = {
-          ...params,
-          file_path: params.file_path || filePath,
-        };
-        setup(filePath);
+    ])('should return $name', async ({ setup, params, expectedError, isAsyncTest }) => {
+      const testParams = {
+        ...params,
+        file_path: params.file_path || filePath,
+      };
+      setup(filePath);
 
-        if (!isAsyncTest) {
-          expect(() => tool.build(testParams)).not.toThrow();
-        } else {
-          const invocation = tool.build(testParams);
-          const result = await invocation.execute(new AbortController().signal);
-          expect(result.error?.type).toBe(expectedError);
-        }
-      },
-    );
+      if (!isAsyncTest) {
+        expect(() => tool.build(testParams)).not.toThrow();
+      } else {
+        const invocation = tool.build(testParams);
+        const result = await invocation.execute(new AbortController().signal);
+        expect(result.error?.type).toBe(expectedError);
+      }
+    });
   });
 
   describe('getDescription', () => {
@@ -967,8 +908,7 @@ describe('EditTool', () => {
         fileName: 'test.txt',
         oldStr: 'this is the old string value',
         newStr: 'this is the new string value',
-        expected:
-          'test.txt: this is the old string value => this is the new string value',
+        expected: 'test.txt: this is the old string value => this is the new string value',
       },
       {
         name: 'very short strings',
@@ -980,8 +920,7 @@ describe('EditTool', () => {
       {
         name: 'long strings (truncated)',
         fileName: 'long.txt',
-        oldStr:
-          'this is a very long old string that will definitely be truncated',
+        oldStr: 'this is a very long old string that will definitely be truncated',
         newStr: 'this is a very long new string that will also be truncated',
         expected:
           'long.txt: this is a very long old string... => this is a very long new string...',
@@ -1014,9 +953,7 @@ describe('EditTool', () => {
         new_string: 'hacked',
       };
       const error = tool.validateToolParams(invalidPath);
-      expect(error).toContain(
-        'File path must be within one of the workspace directories',
-      );
+      expect(error).toContain('File path must be within one of the workspace directories');
       expect(error).toContain(rootDir);
     });
   });
@@ -1032,8 +969,7 @@ describe('EditTool', () => {
       const tool = new EditTool({} as unknown as Config);
       const schema = tool.schema;
       expect(
-        (schema.parametersJsonSchema as EditFileParameterSchema).properties
-          .file_path.description,
+        (schema.parametersJsonSchema as EditFileParameterSchema).properties.file_path.description
       ).toBe('The path to the file to modify.');
     });
 
@@ -1043,8 +979,7 @@ describe('EditTool', () => {
       const tool = new EditTool({} as unknown as Config);
       const schema = tool.schema;
       expect(
-        (schema.parametersJsonSchema as EditFileParameterSchema).properties
-          .file_path.description,
+        (schema.parametersJsonSchema as EditFileParameterSchema).properties.file_path.description
       ).toBe('The path to the file to modify.');
     });
   });
@@ -1084,9 +1019,7 @@ describe('EditTool', () => {
       });
 
       const invocation = tool.build(params);
-      const confirmation = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmation = await invocation.shouldConfirmExecute(new AbortController().signal);
 
       expect(ideClient.openDiff).toHaveBeenCalledWith(filePath, newContent);
 
@@ -1115,20 +1048,14 @@ describe('EditTool', () => {
         const fileName = `test-file-${i}.txt`;
         const filePath = path.join(rootDir, fileName);
         const numLines = Math.floor(Math.random() * 6) + 5; // 5 to 10 lines
-        const lines = Array.from(
-          { length: numLines },
-          (_, j) => `File ${i}, Line ${j + 1}`,
-        );
+        const lines = Array.from({ length: numLines }, (_, j) => `File ${i}, Line ${j + 1}`);
         const content = lines.join('\n') + '\n';
 
         // Determine which lines to remove (2 or 3 lines)
         const numLinesToRemove = Math.floor(Math.random() * 2) + 2; // 2 or 3
         expectedLinesRemoved.push(numLinesToRemove);
         const startLineToRemove = 1; // Start removing from the second line
-        const linesToRemove = lines.slice(
-          startLineToRemove,
-          startLineToRemove + numLinesToRemove,
-        );
+        const linesToRemove = lines.slice(startLineToRemove, startLineToRemove + numLinesToRemove);
         const toRemove = linesToRemove.join('\n') + '\n';
 
         fs.writeFileSync(filePath, content, 'utf8');
@@ -1155,9 +1082,7 @@ describe('EditTool', () => {
           'diffStat' in result.returnDisplay &&
           result.returnDisplay.diffStat
         ) {
-          actualLinesRemoved.push(
-            result.returnDisplay.diffStat?.model_removed_lines,
-          );
+          actualLinesRemoved.push(result.returnDisplay.diffStat?.model_removed_lines);
         } else if (result.error) {
           console.error(`Edit failed for ${file.path}:`, result.error);
         }
@@ -1172,14 +1097,8 @@ describe('EditTool', () => {
       }
 
       // 4. Assert that the total number of removed lines matches the diffStat total
-      const totalExpectedRemoved = expectedLinesRemoved.reduce(
-        (sum, current) => sum + current,
-        0,
-      );
-      const totalActualRemoved = actualLinesRemoved.reduce(
-        (sum, current) => sum + current,
-        0,
-      );
+      const totalExpectedRemoved = expectedLinesRemoved.reduce((sum, current) => sum + current, 0);
+      const totalActualRemoved = actualLinesRemoved.reduce((sum, current) => sum + current, 0);
       expect(totalActualRemoved).toBe(totalExpectedRemoved);
     });
   });

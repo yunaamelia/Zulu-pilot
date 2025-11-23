@@ -59,15 +59,12 @@ function verifyVSCode(
   ideProcessInfo: {
     pid: number;
     command: string;
-  },
+  }
 ): IdeInfo {
   if (ide.name !== IDE_DEFINITIONS.vscode.name) {
     return ide;
   }
-  if (
-    !ideProcessInfo.command ||
-    ideProcessInfo.command.toLowerCase().includes('code')
-  ) {
+  if (!ideProcessInfo.command || ideProcessInfo.command.toLowerCase().includes('code')) {
     return IDE_DEFINITIONS.vscode;
   }
   return IDE_DEFINITIONS.vscodefork;
@@ -78,7 +75,7 @@ export function detectIde(
     pid: number;
     command: string;
   },
-  ideInfoFromFile?: { name?: string; displayName?: string },
+  ideInfoFromFile?: { name?: string; displayName?: string }
 ): IdeInfo | undefined {
   if (ideInfoFromFile?.name && ideInfoFromFile.displayName) {
     return {

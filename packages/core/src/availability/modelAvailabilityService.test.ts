@@ -58,11 +58,7 @@ describe('ModelAvailabilityService', () => {
     service.markTerminal(model, 'capacity');
     service.markRetryOncePerTurn(stickyModel);
 
-    const first = service.selectFirstAvailable([
-      model,
-      stickyModel,
-      healthyModel,
-    ]);
+    const first = service.selectFirstAvailable([model, stickyModel, healthyModel]);
     expect(first).toEqual({
       selected: stickyModel,
       attempts: 1,
@@ -75,11 +71,7 @@ describe('ModelAvailabilityService', () => {
     });
 
     service.consumeStickyAttempt(stickyModel);
-    const second = service.selectFirstAvailable([
-      model,
-      stickyModel,
-      healthyModel,
-    ]);
+    const second = service.selectFirstAvailable([model, stickyModel, healthyModel]);
     expect(second).toEqual({
       selected: healthyModel,
       skipped: [
@@ -95,11 +87,7 @@ describe('ModelAvailabilityService', () => {
     });
 
     service.resetTurn();
-    const third = service.selectFirstAvailable([
-      model,
-      stickyModel,
-      healthyModel,
-    ]);
+    const third = service.selectFirstAvailable([model, stickyModel, healthyModel]);
     expect(third).toEqual({
       selected: stickyModel,
       attempts: 1,

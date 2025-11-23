@@ -37,22 +37,18 @@ export class GoogleCredentialProvider implements OAuthClientProvider {
   constructor(private readonly config?: MCPServerConfig) {
     const url = this.config?.url || this.config?.httpUrl;
     if (!url) {
-      throw new Error(
-        'URL must be provided in the config for Google Credentials provider',
-      );
+      throw new Error('URL must be provided in the config for Google Credentials provider');
     }
 
     const hostname = new URL(url).hostname;
     if (!ALLOWED_HOSTS.some((pattern) => pattern.test(hostname))) {
-      throw new Error(
-        `Host "${hostname}" is not an allowed host for Google Credential provider.`,
-      );
+      throw new Error(`Host "${hostname}" is not an allowed host for Google Credential provider.`);
     }
 
     const scopes = this.config?.oauth?.scopes;
     if (!scopes || scopes.length === 0) {
       throw new Error(
-        'Scopes must be provided in the oauth config for Google Credentials provider',
+        'Scopes must be provided in the oauth config for Google Credentials provider'
       );
     }
     this.auth = new GoogleAuth({
@@ -86,10 +82,7 @@ export class GoogleCredentialProvider implements OAuthClientProvider {
     const accessTokenResponse = await client.getAccessToken();
 
     if (!accessTokenResponse.token) {
-      coreEvents.emitFeedback(
-        'error',
-        'Failed to get access token from Google ADC',
-      );
+      coreEvents.emitFeedback('error', 'Failed to get access token from Google ADC');
       return undefined;
     }
 

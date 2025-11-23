@@ -4,12 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  ErrorInfo,
-  GoogleApiError,
-  QuotaFailure,
-  RetryInfo,
-} from './googleErrors.js';
+import type { ErrorInfo, GoogleApiError, QuotaFailure, RetryInfo } from './googleErrors.js';
 import { parseGoogleApiError } from './googleErrors.js';
 import { getErrorStatus, ModelNotFoundError } from './httpErrors.js';
 
@@ -22,7 +17,7 @@ export class TerminalQuotaError extends Error {
   constructor(
     message: string,
     override readonly cause: GoogleApiError,
-    retryDelayMs?: number,
+    retryDelayMs?: number
   ) {
     super(message);
     this.name = 'TerminalQuotaError';
@@ -39,7 +34,7 @@ export class RetryableQuotaError extends Error {
   constructor(
     message: string,
     override readonly cause: GoogleApiError,
-    retryDelaySeconds: number,
+    retryDelaySeconds: number
   ) {
     super(message);
     this.name = 'RetryableQuotaError';
@@ -84,8 +79,7 @@ export function classifyGoogleError(error: unknown): unknown {
 
   if (status === 404) {
     const message =
-      googleApiError?.message ||
-      (error instanceof Error ? error.message : 'Model not found');
+      googleApiError?.message || (error instanceof Error ? error.message : 'Model not found');
     return new ModelNotFoundError(message, status);
   }
 
@@ -103,7 +97,7 @@ export function classifyGoogleError(error: unknown): unknown {
             message: errorMessage,
             details: [],
           },
-          retryDelaySeconds,
+          retryDelaySeconds
         );
       }
     }
@@ -112,18 +106,15 @@ export function classifyGoogleError(error: unknown): unknown {
   }
 
   const quotaFailure = googleApiError.details.find(
-    (d): d is QuotaFailure =>
-      d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure',
+    (d): d is QuotaFailure => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure'
   );
 
   const errorInfo = googleApiError.details.find(
-    (d): d is ErrorInfo =>
-      d['@type'] === 'type.googleapis.com/google.rpc.ErrorInfo',
+    (d): d is ErrorInfo => d['@type'] === 'type.googleapis.com/google.rpc.ErrorInfo'
   );
 
   const retryInfo = googleApiError.details.find(
-    (d): d is RetryInfo =>
-      d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo',
+    (d): d is RetryInfo => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
   );
 
   // 1. Check for long-term limits in QuotaFailure or ErrorInfo
@@ -133,7 +124,7 @@ export function classifyGoogleError(error: unknown): unknown {
       if (quotaId.includes('PerDay') || quotaId.includes('Daily')) {
         return new TerminalQuotaError(
           `You have exhausted your daily quota on this model.`,
-          googleApiError,
+          googleApiError
         );
       }
     }
@@ -160,15 +151,11 @@ export function classifyGoogleError(error: unknown): unknown {
           return new RetryableQuotaError(
             `${googleApiError.message}`,
             googleApiError,
-            delaySeconds ?? 10,
+            delaySeconds ?? 10
           );
         }
         if (errorInfo.reason === 'QUOTA_EXHAUSTED') {
-          return new TerminalQuotaError(
-            `${googleApiError.message}`,
-            googleApiError,
-            delaySeconds,
-          );
+          return new TerminalQuotaError(`${googleApiError.message}`, googleApiError, delaySeconds);
         }
       }
     }
@@ -178,7 +165,7 @@ export function classifyGoogleError(error: unknown): unknown {
     if (quotaLimit.includes('PerDay') || quotaLimit.includes('Daily')) {
       return new TerminalQuotaError(
         `You have exhausted your daily quota on this model.`,
-        googleApiError,
+        googleApiError
       );
     }
   }
@@ -190,14 +177,14 @@ export function classifyGoogleError(error: unknown): unknown {
         return new TerminalQuotaError(
           `${googleApiError.message}\nSuggested retry after ${retryInfo.retryDelay}.`,
           googleApiError,
-          delaySeconds,
+          delaySeconds
         );
       }
       // This is a retryable error with a specific delay.
       return new RetryableQuotaError(
         `${googleApiError.message}\nSuggested retry after ${retryInfo.retryDelay}.`,
         googleApiError,
-        delaySeconds,
+        delaySeconds
       );
     }
   }
@@ -210,7 +197,7 @@ export function classifyGoogleError(error: unknown): unknown {
         return new RetryableQuotaError(
           `${googleApiError.message}\nSuggested retry after 60s.`,
           googleApiError,
-          60,
+          60
         );
       }
     }
@@ -222,7 +209,7 @@ export function classifyGoogleError(error: unknown): unknown {
       return new RetryableQuotaError(
         `${errorInfo.reason}\nSuggested retry after 60s.`,
         googleApiError,
-        60,
+        60
       );
     }
   }

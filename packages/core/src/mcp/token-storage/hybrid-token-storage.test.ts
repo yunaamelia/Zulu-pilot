@@ -73,12 +73,12 @@ describe('HybridTokenStorage', () => {
       clearAll: vi.fn(),
     };
 
-    (
-      KeychainTokenStorage as unknown as ReturnType<typeof vi.fn>
-    ).mockImplementation(() => mockKeychainStorage);
-    (
-      FileTokenStorage as unknown as ReturnType<typeof vi.fn>
-    ).mockImplementation(() => mockFileStorage);
+    (KeychainTokenStorage as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockKeychainStorage
+    );
+    (FileTokenStorage as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockFileStorage
+    );
 
     storage = new HybridTokenStorage('test-service');
   });
@@ -95,9 +95,7 @@ describe('HybridTokenStorage', () => {
       await storage.getCredentials('test-server');
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
-      expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
+      expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith('test-server');
       expect(await storage.getStorageType()).toBe(TokenStorageType.KEYCHAIN);
     });
 
@@ -108,12 +106,8 @@ describe('HybridTokenStorage', () => {
       await storage.getCredentials('test-server');
 
       expect(mockKeychainStorage.isAvailable).not.toHaveBeenCalled();
-      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
-      expect(await storage.getStorageType()).toBe(
-        TokenStorageType.ENCRYPTED_FILE,
-      );
+      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith('test-server');
+      expect(await storage.getStorageType()).toBe(TokenStorageType.ENCRYPTED_FILE);
     });
 
     it('should fall back to file storage when keychain is unavailable', async () => {
@@ -123,29 +117,19 @@ describe('HybridTokenStorage', () => {
       await storage.getCredentials('test-server');
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
-      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
-      expect(await storage.getStorageType()).toBe(
-        TokenStorageType.ENCRYPTED_FILE,
-      );
+      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith('test-server');
+      expect(await storage.getStorageType()).toBe(TokenStorageType.ENCRYPTED_FILE);
     });
 
     it('should fall back to file storage when keychain throws error', async () => {
-      mockKeychainStorage.isAvailable!.mockRejectedValue(
-        new Error('Keychain error'),
-      );
+      mockKeychainStorage.isAvailable!.mockRejectedValue(new Error('Keychain error'));
       mockFileStorage.getCredentials.mockResolvedValue(null);
 
       await storage.getCredentials('test-server');
 
       expect(mockKeychainStorage.isAvailable).toHaveBeenCalled();
-      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
-      expect(await storage.getStorageType()).toBe(
-        TokenStorageType.ENCRYPTED_FILE,
-      );
+      expect(mockFileStorage.getCredentials).toHaveBeenCalledWith('test-server');
+      expect(await storage.getStorageType()).toBe(TokenStorageType.ENCRYPTED_FILE);
     });
 
     it('should cache storage selection', async () => {
@@ -176,9 +160,7 @@ describe('HybridTokenStorage', () => {
       const result = await storage.getCredentials('test-server');
 
       expect(result).toEqual(credentials);
-      expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
+      expect(mockKeychainStorage.getCredentials).toHaveBeenCalledWith('test-server');
     });
   });
 
@@ -198,9 +180,7 @@ describe('HybridTokenStorage', () => {
 
       await storage.setCredentials(credentials);
 
-      expect(mockKeychainStorage.setCredentials).toHaveBeenCalledWith(
-        credentials,
-      );
+      expect(mockKeychainStorage.setCredentials).toHaveBeenCalledWith(credentials);
     });
   });
 
@@ -211,9 +191,7 @@ describe('HybridTokenStorage', () => {
 
       await storage.deleteCredentials('test-server');
 
-      expect(mockKeychainStorage.deleteCredentials).toHaveBeenCalledWith(
-        'test-server',
-      );
+      expect(mockKeychainStorage.deleteCredentials).toHaveBeenCalledWith('test-server');
     });
   });
 

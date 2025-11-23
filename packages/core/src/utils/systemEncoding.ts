@@ -63,13 +63,11 @@ export function getSystemEncoding(): string | null {
         }
       }
       // Only warn if we can't parse the output format, not if windowsCodePageToEncoding fails
-      throw new Error(
-        `Unable to parse Windows code page from 'chcp' output "${output.trim()}". `,
-      );
+      throw new Error(`Unable to parse Windows code page from 'chcp' output "${output.trim()}". `);
     } catch (error) {
       debugLogger.warn(
         `Failed to get Windows code page using 'chcp' command: ${error instanceof Error ? error.message : String(error)}. ` +
-          `Will attempt to detect encoding from command output instead.`,
+          `Will attempt to detect encoding from command output instead.`
       );
     }
     return null;
@@ -85,9 +83,7 @@ export function getSystemEncoding(): string | null {
   // Fallback to querying the system directly when environment variables are missing
   if (!locale) {
     try {
-      locale = execSync('locale charmap', { encoding: 'utf8' })
-        .toString()
-        .trim();
+      locale = execSync('locale charmap', { encoding: 'utf8' }).toString().trim();
     } catch (_e) {
       debugLogger.warn('Failed to get locale charmap.');
       return null;

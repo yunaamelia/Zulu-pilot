@@ -145,9 +145,7 @@ describe('channel', () => {
         name: 'test',
         version: '1.0.0',
       });
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.STABLE,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.STABLE);
     });
 
     it('should return NIGHTLY for a nightly version', async () => {
@@ -155,9 +153,7 @@ describe('channel', () => {
         name: 'test',
         version: '1.0.0-nightly.1',
       });
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.NIGHTLY,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.NIGHTLY);
     });
 
     it('should return PREVIEW for a preview version', async () => {
@@ -165,25 +161,19 @@ describe('channel', () => {
         name: 'test',
         version: '1.0.0-preview.1',
       });
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.PREVIEW,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.PREVIEW);
     });
 
     it('should return NIGHTLY if package.json is not found', async () => {
       vi.spyOn(packageJson, 'getPackageJson').mockResolvedValue(undefined);
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.NIGHTLY,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.NIGHTLY);
     });
 
     it('should return NIGHTLY if version is not defined', async () => {
       vi.spyOn(packageJson, 'getPackageJson').mockResolvedValue({
         name: 'test',
       });
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.NIGHTLY,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.NIGHTLY);
     });
   });
 
@@ -196,9 +186,7 @@ describe('channel', () => {
       await expect(isStable('/test/dir')).resolves.toBe(true);
       await expect(isNightly('/test/dir')).resolves.toBe(false);
       await expect(isPreview('/test/dir')).resolves.toBe(false);
-      await expect(getReleaseChannel('/test/dir')).resolves.toBe(
-        ReleaseChannel.STABLE,
-      );
+      await expect(getReleaseChannel('/test/dir')).resolves.toBe(ReleaseChannel.STABLE);
 
       expect(spy).toHaveBeenCalledTimes(1);
     });

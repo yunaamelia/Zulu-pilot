@@ -47,7 +47,7 @@ describe('setupUser for existing user', () => {
         ({
           loadCodeAssist: mockLoad,
           onboardUser: mockOnboardUser,
-        }) as unknown as CodeAssistServer,
+        }) as unknown as CodeAssistServer
     );
   });
 
@@ -61,13 +61,7 @@ describe('setupUser for existing user', () => {
       currentTier: mockPaidTier,
     });
     await setupUser({} as OAuth2Client);
-    expect(CodeAssistServer).toHaveBeenCalledWith(
-      {},
-      'test-project',
-      {},
-      '',
-      undefined,
-    );
+    expect(CodeAssistServer).toHaveBeenCalledWith({}, 'test-project', {}, '', undefined);
   });
 
   it('should ignore GOOGLE_CLOUD_PROJECT when project from server is set', async () => {
@@ -77,13 +71,7 @@ describe('setupUser for existing user', () => {
       currentTier: mockPaidTier,
     });
     const projectId = await setupUser({} as OAuth2Client);
-    expect(CodeAssistServer).toHaveBeenCalledWith(
-      {},
-      'test-project',
-      {},
-      '',
-      undefined,
-    );
+    expect(CodeAssistServer).toHaveBeenCalledWith({}, 'test-project', {}, '', undefined);
     expect(projectId).toEqual({
       projectId: 'server-project',
       userTier: 'standard-tier',
@@ -97,9 +85,7 @@ describe('setupUser for existing user', () => {
       throw new ProjectIdRequiredError();
     });
 
-    await expect(setupUser({} as OAuth2Client)).rejects.toThrow(
-      ProjectIdRequiredError,
-    );
+    await expect(setupUser({} as OAuth2Client)).rejects.toThrow(ProjectIdRequiredError);
   });
 });
 
@@ -123,7 +109,7 @@ describe('setupUser for new user', () => {
         ({
           loadCodeAssist: mockLoad,
           onboardUser: mockOnboardUser,
-        }) as unknown as CodeAssistServer,
+        }) as unknown as CodeAssistServer
     );
   });
 
@@ -137,13 +123,7 @@ describe('setupUser for new user', () => {
       allowedTiers: [mockPaidTier],
     });
     const userData = await setupUser({} as OAuth2Client);
-    expect(CodeAssistServer).toHaveBeenCalledWith(
-      {},
-      'test-project',
-      {},
-      '',
-      undefined,
-    );
+    expect(CodeAssistServer).toHaveBeenCalledWith({}, 'test-project', {}, '', undefined);
     expect(mockLoad).toHaveBeenCalled();
     expect(mockOnboardUser).toHaveBeenCalledWith({
       tierId: 'standard-tier',
@@ -167,13 +147,7 @@ describe('setupUser for new user', () => {
       allowedTiers: [mockFreeTier],
     });
     const userData = await setupUser({} as OAuth2Client);
-    expect(CodeAssistServer).toHaveBeenCalledWith(
-      {},
-      undefined,
-      {},
-      '',
-      undefined,
-    );
+    expect(CodeAssistServer).toHaveBeenCalledWith({}, undefined, {}, '', undefined);
     expect(mockLoad).toHaveBeenCalled();
     expect(mockOnboardUser).toHaveBeenCalledWith({
       tierId: 'free-tier',
@@ -217,8 +191,6 @@ describe('setupUser for new user', () => {
       done: true,
       response: {},
     });
-    await expect(setupUser({} as OAuth2Client)).rejects.toThrow(
-      ProjectIdRequiredError,
-    );
+    await expect(setupUser({} as OAuth2Client)).rejects.toThrow(ProjectIdRequiredError);
   });
 });

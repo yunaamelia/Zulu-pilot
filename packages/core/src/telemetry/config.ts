@@ -11,9 +11,7 @@ import { TelemetryTarget } from './index.js';
 /**
  * Parse a boolean environment flag. Accepts 'true'/'1' as true.
  */
-export function parseBooleanEnvFlag(
-  value: string | undefined,
-): boolean | undefined {
+export function parseBooleanEnvFlag(value: string | undefined): boolean | undefined {
   if (value === undefined) return undefined;
   return value === 'true' || value === '1';
 }
@@ -22,7 +20,7 @@ export function parseBooleanEnvFlag(
  * Normalize a telemetry target value into TelemetryTarget or undefined.
  */
 export function parseTelemetryTargetValue(
-  value: string | TelemetryTarget | undefined,
+  value: string | TelemetryTarget | undefined
 ): TelemetryTarget | undefined {
   if (value === undefined) return undefined;
   if (value === TelemetryTarget.LOCAL || value === 'local') {
@@ -56,9 +54,7 @@ export async function resolveTelemetrySettings(options: {
   const settings = options.settings ?? {};
 
   const enabled =
-    argv.telemetry ??
-    parseBooleanEnvFlag(env['GEMINI_TELEMETRY_ENABLED']) ??
-    settings.enabled;
+    argv.telemetry ?? parseBooleanEnvFlag(env['GEMINI_TELEMETRY_ENABLED']) ?? settings.enabled;
 
   const rawTarget =
     (argv.telemetryTarget as string | TelemetryTarget | undefined) ??
@@ -67,9 +63,7 @@ export async function resolveTelemetrySettings(options: {
   const target = parseTelemetryTargetValue(rawTarget);
   if (rawTarget !== undefined && target === undefined) {
     throw new FatalConfigError(
-      `Invalid telemetry target: ${String(
-        rawTarget,
-      )}. Valid values are: local, gcp`,
+      `Invalid telemetry target: ${String(rawTarget)}. Valid values are: local, gcp`
     );
   }
 
@@ -83,14 +77,10 @@ export async function resolveTelemetrySettings(options: {
     (argv.telemetryOtlpProtocol as string | undefined) ??
     env['GEMINI_TELEMETRY_OTLP_PROTOCOL'] ??
     settings.otlpProtocol;
-  const otlpProtocol = (['grpc', 'http'] as const).find(
-    (p) => p === rawProtocol,
-  );
+  const otlpProtocol = (['grpc', 'http'] as const).find((p) => p === rawProtocol);
   if (rawProtocol !== undefined && otlpProtocol === undefined) {
     throw new FatalConfigError(
-      `Invalid telemetry OTLP protocol: ${String(
-        rawProtocol,
-      )}. Valid values are: grpc, http`,
+      `Invalid telemetry OTLP protocol: ${String(rawProtocol)}. Valid values are: grpc, http`
     );
   }
 
@@ -99,14 +89,10 @@ export async function resolveTelemetrySettings(options: {
     parseBooleanEnvFlag(env['GEMINI_TELEMETRY_LOG_PROMPTS']) ??
     settings.logPrompts;
 
-  const outfile =
-    argv.telemetryOutfile ??
-    env['GEMINI_TELEMETRY_OUTFILE'] ??
-    settings.outfile;
+  const outfile = argv.telemetryOutfile ?? env['GEMINI_TELEMETRY_OUTFILE'] ?? settings.outfile;
 
   const useCollector =
-    parseBooleanEnvFlag(env['GEMINI_TELEMETRY_USE_COLLECTOR']) ??
-    settings.useCollector;
+    parseBooleanEnvFlag(env['GEMINI_TELEMETRY_USE_COLLECTOR']) ?? settings.useCollector;
 
   return {
     enabled,

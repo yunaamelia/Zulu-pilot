@@ -31,14 +31,12 @@ export const DEFAULT_THINKING_MODE = 8192;
  */
 export function resolveModel(
   requestedModel: string,
-  previewFeaturesEnabled: boolean | undefined,
+  previewFeaturesEnabled: boolean | undefined
 ): string {
   switch (requestedModel) {
     case DEFAULT_GEMINI_MODEL_AUTO:
     case GEMINI_MODEL_ALIAS_PRO: {
-      return previewFeaturesEnabled
-        ? PREVIEW_GEMINI_MODEL
-        : DEFAULT_GEMINI_MODEL;
+      return previewFeaturesEnabled ? PREVIEW_GEMINI_MODEL : DEFAULT_GEMINI_MODEL;
     }
     case GEMINI_MODEL_ALIAS_FLASH: {
       return DEFAULT_GEMINI_FLASH_MODEL;
@@ -69,7 +67,7 @@ export function resolveModel(
 export function getEffectiveModel(
   isInFallbackMode: boolean,
   requestedModel: string,
-  previewFeaturesEnabled: boolean | undefined,
+  previewFeaturesEnabled: boolean | undefined
 ): string {
   const resolvedModel = resolveModel(requestedModel, previewFeaturesEnabled);
 

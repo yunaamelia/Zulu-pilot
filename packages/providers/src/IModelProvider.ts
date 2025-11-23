@@ -53,6 +53,23 @@ export interface IModelProvider {
    * @returns Current model identifier or undefined
    */
   getModel?(): string | undefined;
+
+  /**
+   * T132-T134: Discover available models from the provider
+   * Lists all models available via the provider API
+   *
+   * @returns Promise resolving to array of available model names
+   * @throws {ConnectionError} When cannot connect to provider
+   */
+  listModels?(): Promise<string[]>;
+
+  /**
+   * Check if a model is available
+   *
+   * @param modelName - Model name to check
+   * @returns Promise resolving to true if model is available
+   */
+  hasModel?(modelName: string): Promise<boolean>;
 }
 
 /**

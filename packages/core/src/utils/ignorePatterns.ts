@@ -246,12 +246,10 @@ export function extractExtensionsFromPatterns(patterns: string[]): string[] {
           // If extname returns empty (e.g. for '.'), use the original part.
           // Then filter out empty or '.' results and invalid double dot patterns.
           const result = extracted || extPart;
-          return result && result !== '.' && !result.substring(1).includes('.')
-            ? [result]
-            : [];
+          return result && result !== '.' && !result.substring(1).includes('.') ? [result] : [];
         }
         return [];
-      }),
+      })
   );
   return Array.from(extensions).sort();
 }

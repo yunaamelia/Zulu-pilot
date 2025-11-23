@@ -21,7 +21,7 @@ const PRIVATE_IP_RANGES = [
 export class FetchError extends Error {
   constructor(
     message: string,
-    public code?: string,
+    public code?: string
   ) {
     super(message);
     this.name = 'FetchError';
@@ -37,10 +37,7 @@ export function isPrivateIp(url: string): boolean {
   }
 }
 
-export async function fetchWithTimeout(
-  url: string,
-  timeout: number,
-): Promise<Response> {
+export async function fetchWithTimeout(url: string, timeout: number): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 

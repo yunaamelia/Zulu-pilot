@@ -50,11 +50,7 @@ export class FileTokenStorage extends BaseTokenStorage {
     const authTag = Buffer.from(parts[1], 'hex');
     const encrypted = parts[2];
 
-    const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
-      this.encryptionKey,
-      iv,
-    );
+    const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
     decipher.setAuthTag(authTag);
 
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -81,9 +77,7 @@ export class FileTokenStorage extends BaseTokenStorage {
       }
       if (
         err.message?.includes('Invalid encrypted data format') ||
-        err.message?.includes(
-          'Unsupported state or unable to authenticate data',
-        )
+        err.message?.includes('Unsupported state or unable to authenticate data')
       ) {
         throw new Error('Token file corrupted');
       }
@@ -91,9 +85,7 @@ export class FileTokenStorage extends BaseTokenStorage {
     }
   }
 
-  private async saveTokens(
-    tokens: Map<string, OAuthCredentials>,
-  ): Promise<void> {
+  private async saveTokens(tokens: Map<string, OAuthCredentials>): Promise<void> {
     await this.ensureDirectoryExists();
 
     const data = Object.fromEntries(tokens);

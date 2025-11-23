@@ -185,9 +185,7 @@ describe('HookTranslator', () => {
 
       expect(sdkResponse.text).toBe('Hello response');
       expect(sdkResponse.candidates).toHaveLength(1);
-      expect(sdkResponse.candidates?.[0]?.content?.parts?.[0]?.text).toBe(
-        'Hello response',
-      );
+      expect(sdkResponse.candidates?.[0]?.content?.parts?.[0]?.text).toBe('Hello response');
     });
   });
 

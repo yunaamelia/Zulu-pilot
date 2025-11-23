@@ -29,9 +29,7 @@ function validateUrl(url: string): void {
 
   // Only allow HTTP and HTTPS protocols
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    throw new Error(
-      `Unsafe protocol: ${parsedUrl.protocol}. Only HTTP and HTTPS are allowed.`,
-    );
+    throw new Error(`Unsafe protocol: ${parsedUrl.protocol}. Only HTTP and HTTPS are allowed.`);
   }
 
   // Additional validation: ensure no newlines or control characters
@@ -110,18 +108,10 @@ export async function openBrowserSecurely(url: string): Promise<void> {
   } catch (error) {
     // For Linux, try fallback commands if xdg-open fails
     if (
-      (platformName === 'linux' ||
-        platformName === 'freebsd' ||
-        platformName === 'openbsd') &&
+      (platformName === 'linux' || platformName === 'freebsd' || platformName === 'openbsd') &&
       command === 'xdg-open'
     ) {
-      const fallbackCommands = [
-        'gnome-open',
-        'kde-open',
-        'firefox',
-        'chromium',
-        'google-chrome',
-      ];
+      const fallbackCommands = ['gnome-open', 'kde-open', 'firefox', 'chromium', 'google-chrome'];
 
       for (const fallbackCommand of fallbackCommands) {
         try {
@@ -136,7 +126,7 @@ export async function openBrowserSecurely(url: string): Promise<void> {
 
     // Re-throw the error if all attempts failed
     throw new Error(
-      `Failed to open browser: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to open browser: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
 }
@@ -157,10 +147,7 @@ export function shouldLaunchBrowser(): boolean {
   }
 
   // Common environment variables used in CI/CD or other non-interactive shells.
-  if (
-    process.env['CI'] ||
-    process.env['DEBIAN_FRONTEND'] === 'noninteractive'
-  ) {
+  if (process.env['CI'] || process.env['DEBIAN_FRONTEND'] === 'noninteractive') {
     return false;
   }
 

@@ -4,15 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type MockedObject,
-} from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type MockedObject } from 'vitest';
 import { McpClientManager } from './mcp-client-manager.js';
 import { McpClient } from './mcp-client.js';
 import type { ToolRegistry } from './tool-registry.js';
@@ -143,9 +135,7 @@ describe('McpClientManager', () => {
     mockConfig.getBlockedMcpServers.mockReturnValue(['test-server']);
     const manager = new McpClientManager({} as ToolRegistry, mockConfig);
     await manager.startConfiguredMcpServers();
-    expect(manager.getBlockedMcpServers()).toEqual([
-      { name: 'test-server', extensionName: '' },
-    ]);
+    expect(manager.getBlockedMcpServers()).toEqual([{ name: 'test-server', extensionName: '' }]);
   });
 
   describe('restart', () => {
@@ -189,7 +179,7 @@ describe('McpClientManager', () => {
     it('should throw an error if the server does not exist', async () => {
       const manager = new McpClientManager({} as ToolRegistry, mockConfig);
       await expect(manager.restartServer('non-existent')).rejects.toThrow(
-        'No MCP server registered with the name "non-existent"',
+        'No MCP server registered with the name "non-existent"'
       );
     });
   });

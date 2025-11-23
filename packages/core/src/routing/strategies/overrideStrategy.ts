@@ -5,16 +5,9 @@
  */
 
 import type { Config } from '../../config/config.js';
-import {
-  DEFAULT_GEMINI_MODEL_AUTO,
-  resolveModel,
-} from '../../config/models.js';
+import { DEFAULT_GEMINI_MODEL_AUTO, resolveModel } from '../../config/models.js';
 import type { BaseLlmClient } from '../../core/baseLlmClient.js';
-import type {
-  RoutingContext,
-  RoutingDecision,
-  RoutingStrategy,
-} from '../routingStrategy.js';
+import type { RoutingContext, RoutingDecision, RoutingStrategy } from '../routingStrategy.js';
 
 /**
  * Handles cases where the user explicitly specifies a model (override).
@@ -25,7 +18,7 @@ export class OverrideStrategy implements RoutingStrategy {
   async route(
     _context: RoutingContext,
     config: Config,
-    _baseLlmClient: BaseLlmClient,
+    _baseLlmClient: BaseLlmClient
   ): Promise<RoutingDecision | null> {
     const overrideModel = config.getModel();
 

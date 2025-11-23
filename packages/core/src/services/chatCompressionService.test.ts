@@ -5,10 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  ChatCompressionService,
-  findCompressSplitPoint,
-} from './chatCompressionService.js';
+import { ChatCompressionService, findCompressSplitPoint } from './chatCompressionService.js';
 import type { Content, GenerateContentResponse } from '@google/genai';
 import { CompressionStatus } from '../core/turn.js';
 import { tokenLimit } from '../core/tokenLimits.js';
@@ -23,15 +20,11 @@ vi.mock('../utils/environmentContext.js');
 
 describe('findCompressSplitPoint', () => {
   it('should throw an error for non-positive numbers', () => {
-    expect(() => findCompressSplitPoint([], 0)).toThrow(
-      'Fraction must be between 0 and 1',
-    );
+    expect(() => findCompressSplitPoint([], 0)).toThrow('Fraction must be between 0 and 1');
   });
 
   it('should throw an error for a fraction greater than or equal to 1', () => {
-    expect(() => findCompressSplitPoint([], 1)).toThrow(
-      'Fraction must be between 0 and 1',
-    );
+    expect(() => findCompressSplitPoint([], 1)).toThrow('Fraction must be between 0 and 1');
   });
 
   it('should handle an empty history', () => {
@@ -82,9 +75,7 @@ describe('findCompressSplitPoint', () => {
   });
 
   it('should handle a history with only one item', () => {
-    const historyWithEmptyParts: Content[] = [
-      { role: 'user', parts: [{ text: 'Message 1' }] },
-    ];
+    const historyWithEmptyParts: Content[] = [{ role: 'user', parts: [{ text: 'Message 1' }] }];
     expect(findCompressSplitPoint(historyWithEmptyParts, 0.5)).toBe(0);
   });
 
@@ -122,7 +113,7 @@ describe('ChatCompressionService', () => {
 
     vi.mocked(tokenLimit).mockReturnValue(1000);
     vi.mocked(getInitialChatHistory).mockImplementation(
-      async (_config, extraHistory) => extraHistory || [],
+      async (_config, extraHistory) => extraHistory || []
     );
   });
 
@@ -138,32 +129,28 @@ describe('ChatCompressionService', () => {
       false,
       mockModel,
       mockConfig,
-      false,
+      false
     );
     expect(result.info.compressionStatus).toBe(CompressionStatus.NOOP);
     expect(result.newHistory).toBeNull();
   });
 
   it('should return NOOP if previously failed and not forced', async () => {
-    vi.mocked(mockChat.getHistory).mockReturnValue([
-      { role: 'user', parts: [{ text: 'hi' }] },
-    ]);
+    vi.mocked(mockChat.getHistory).mockReturnValue([{ role: 'user', parts: [{ text: 'hi' }] }]);
     const result = await service.compress(
       mockChat,
       mockPromptId,
       false,
       mockModel,
       mockConfig,
-      true,
+      true
     );
     expect(result.info.compressionStatus).toBe(CompressionStatus.NOOP);
     expect(result.newHistory).toBeNull();
   });
 
   it('should return NOOP if under token threshold and not forced', async () => {
-    vi.mocked(mockChat.getHistory).mockReturnValue([
-      { role: 'user', parts: [{ text: 'hi' }] },
-    ]);
+    vi.mocked(mockChat.getHistory).mockReturnValue([{ role: 'user', parts: [{ text: 'hi' }] }]);
     vi.mocked(mockChat.getLastPromptTokenCount).mockReturnValue(600);
     vi.mocked(tokenLimit).mockReturnValue(1000);
     // Threshold is 0.7 * 1000 = 700. 600 < 700, so NOOP.
@@ -174,7 +161,7 @@ describe('ChatCompressionService', () => {
       false,
       mockModel,
       mockConfig,
-      false,
+      false
     );
     expect(result.info.compressionStatus).toBe(CompressionStatus.NOOP);
     expect(result.newHistory).toBeNull();
@@ -209,7 +196,7 @@ describe('ChatCompressionService', () => {
       false,
       mockModel,
       mockConfig,
-      false,
+      false
     );
 
     expect(result.info.compressionStatus).toBe(CompressionStatus.COMPRESSED);
@@ -248,7 +235,7 @@ describe('ChatCompressionService', () => {
       true, // forced
       mockModel,
       mockConfig,
-      false,
+      false
     );
 
     expect(result.info.compressionStatus).toBe(CompressionStatus.COMPRESSED);
@@ -284,11 +271,11 @@ describe('ChatCompressionService', () => {
       true,
       mockModel,
       mockConfig,
-      false,
+      false
     );
 
     expect(result.info.compressionStatus).toBe(
-      CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+      CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT
     );
     expect(result.newHistory).toBeNull();
   });

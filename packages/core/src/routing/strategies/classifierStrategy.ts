@@ -7,11 +7,7 @@
 import { z } from 'zod';
 import type { BaseLlmClient } from '../../core/baseLlmClient.js';
 import { promptIdContext } from '../../utils/promptIdContext.js';
-import type {
-  RoutingContext,
-  RoutingDecision,
-  RoutingStrategy,
-} from '../routingStrategy.js';
+import type { RoutingContext, RoutingDecision, RoutingStrategy } from '../routingStrategy.js';
 import {
   GEMINI_MODEL_ALIAS_FLASH,
   GEMINI_MODEL_ALIAS_PRO,
@@ -19,10 +15,7 @@ import {
 } from '../../config/models.js';
 import { createUserContent, Type } from '@google/genai';
 import type { Config } from '../../config/config.js';
-import {
-  isFunctionCall,
-  isFunctionResponse,
-} from '../../utils/messageInspectors.js';
+import { isFunctionCall, isFunctionResponse } from '../../utils/messageInspectors.js';
 import { debugLogger } from '../../utils/debugLogger.js';
 
 // The number of recent history turns to provide to the router for context.
@@ -133,7 +126,7 @@ export class ClassifierStrategy implements RoutingStrategy {
   async route(
     context: RoutingContext,
     config: Config,
-    baseLlmClient: BaseLlmClient,
+    baseLlmClient: BaseLlmClient
   ): Promise<RoutingDecision | null> {
     const startTime = Date.now();
     try {
@@ -143,7 +136,7 @@ export class ClassifierStrategy implements RoutingStrategy {
           .toString(16)
           .slice(2)}`;
         debugLogger.warn(
-          `Could not find promptId in context. This is unexpected. Using a fallback ID: ${promptId}`,
+          `Could not find promptId in context. This is unexpected. Using a fallback ID: ${promptId}`
         );
       }
 
@@ -152,7 +145,7 @@ export class ClassifierStrategy implements RoutingStrategy {
       // Filter out tool-related turns.
       // TODO - Consider using function req/res if they help accuracy.
       const cleanHistory = historySlice.filter(
-        (content) => !isFunctionCall(content) && !isFunctionResponse(content),
+        (content) => !isFunctionCall(content) && !isFunctionResponse(content)
       );
 
       // Take the last N turns from the *cleaned* history.
@@ -174,10 +167,7 @@ export class ClassifierStrategy implements RoutingStrategy {
 
       if (routerResponse.model_choice === FLASH_MODEL) {
         return {
-          model: resolveModel(
-            GEMINI_MODEL_ALIAS_FLASH,
-            config.getPreviewFeatures(),
-          ),
+          model: resolveModel(GEMINI_MODEL_ALIAS_FLASH, config.getPreviewFeatures()),
           metadata: {
             source: 'Classifier',
             latencyMs,
@@ -186,10 +176,7 @@ export class ClassifierStrategy implements RoutingStrategy {
         };
       } else {
         return {
-          model: resolveModel(
-            GEMINI_MODEL_ALIAS_PRO,
-            config.getPreviewFeatures(),
-          ),
+          model: resolveModel(GEMINI_MODEL_ALIAS_PRO, config.getPreviewFeatures()),
           metadata: {
             source: 'Classifier',
             reasoning,

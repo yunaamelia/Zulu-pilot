@@ -33,10 +33,7 @@ export const COMPRESSION_PRESERVE_THRESHOLD = 0.3;
  *
  * Exported for testing purposes.
  */
-export function findCompressSplitPoint(
-  contents: Content[],
-  fraction: number,
-): number {
+export function findCompressSplitPoint(contents: Content[], fraction: number): number {
   if (fraction <= 0 || fraction >= 1) {
     throw new Error('Fraction must be between 0 and 1');
   }
@@ -49,10 +46,7 @@ export function findCompressSplitPoint(
   let cumulativeCharCount = 0;
   for (let i = 0; i < contents.length; i++) {
     const content = contents[i];
-    if (
-      content.role === 'user' &&
-      !content.parts?.some((part) => !!part.functionResponse)
-    ) {
+    if (content.role === 'user' && !content.parts?.some((part) => !!part.functionResponse)) {
       if (cumulativeCharCount >= targetCharCount) {
         return i;
       }
@@ -64,10 +58,7 @@ export function findCompressSplitPoint(
   // We found no split points after targetCharCount.
   // Check if it's safe to compress everything.
   const lastContent = contents[contents.length - 1];
-  if (
-    lastContent?.role === 'model' &&
-    !lastContent?.parts?.some((part) => part.functionCall)
-  ) {
+  if (lastContent?.role === 'model' && !lastContent?.parts?.some((part) => part.functionCall)) {
     return contents.length;
   }
 
@@ -82,15 +73,12 @@ export class ChatCompressionService {
     force: boolean,
     model: string,
     config: Config,
-    hasFailedCompressionAttempt: boolean,
+    hasFailedCompressionAttempt: boolean
   ): Promise<{ newHistory: Content[] | null; info: ChatCompressionInfo }> {
     const curatedHistory = chat.getHistory(true);
 
     // Regardless of `force`, don't do anything if the history is empty.
-    if (
-      curatedHistory.length === 0 ||
-      (hasFailedCompressionAttempt && !force)
-    ) {
+    if (curatedHistory.length === 0 || (hasFailedCompressionAttempt && !force)) {
       return {
         newHistory: null,
         info: {
@@ -106,8 +94,7 @@ export class ChatCompressionService {
     // Don't compress if not forced and we are under the limit.
     if (!force) {
       const threshold =
-        (await config.getCompressionThreshold()) ??
-        DEFAULT_COMPRESSION_TOKEN_THRESHOLD;
+        (await config.getCompressionThreshold()) ?? DEFAULT_COMPRESSION_TOKEN_THRESHOLD;
       if (originalTokenCount < threshold * tokenLimit(model)) {
         return {
           newHistory: null,
@@ -120,10 +107,7 @@ export class ChatCompressionService {
       }
     }
 
-    const splitPoint = findCompressSplitPoint(
-      curatedHistory,
-      1 - COMPRESSION_PRESERVE_THRESHOLD,
-    );
+    const splitPoint = findCompressSplitPoint(curatedHistory, 1 - COMPRESSION_PRESERVE_THRESHOLD);
 
     const historyToCompress = curatedHistory.slice(0, splitPoint);
     const historyToKeep = curatedHistory.slice(splitPoint);
@@ -157,7 +141,7 @@ export class ChatCompressionService {
           systemInstruction: { text: getCompressionPrompt() },
         },
       },
-      promptId,
+      promptId
     );
     const summary = getResponseText(summaryResponse) ?? '';
 
@@ -178,10 +162,7 @@ export class ChatCompressionService {
 
     // Estimate token count 1 token ≈ 4 characters
     const newTokenCount = Math.floor(
-      fullNewHistory.reduce(
-        (total, content) => total + JSON.stringify(content).length,
-        0,
-      ) / 4,
+      fullNewHistory.reduce((total, content) => total + JSON.stringify(content).length, 0) / 4
     );
 
     logChatCompression(
@@ -189,7 +170,7 @@ export class ChatCompressionService {
       makeChatCompressionEvent({
         tokens_before: originalTokenCount,
         tokens_after: newTokenCount,
-      }),
+      })
     );
 
     if (newTokenCount > originalTokenCount) {
@@ -198,8 +179,7 @@ export class ChatCompressionService {
         info: {
           originalTokenCount,
           newTokenCount,
-          compressionStatus:
-            CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
+          compressionStatus: CompressionStatus.COMPRESSION_FAILED_INFLATED_TOKEN_COUNT,
         },
       };
     } else {

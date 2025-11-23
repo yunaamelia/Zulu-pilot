@@ -4,27 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-  type Mock,
-} from 'vitest';
-import {
-  BaseToolInvocation,
-  BaseDeclarativeTool,
-  Kind,
-  type ToolResult,
-} from './tools.js';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
+import { BaseToolInvocation, BaseDeclarativeTool, Kind, type ToolResult } from './tools.js';
 import { MessageBus } from '../confirmation-bus/message-bus.js';
 import { PolicyEngine } from '../policy/policy-engine.js';
-import {
-  MessageBusType,
-  type ToolConfirmationResponse,
-} from '../confirmation-bus/types.js';
+import { MessageBusType, type ToolConfirmationResponse } from '../confirmation-bus/types.js';
 import { randomUUID } from 'node:crypto';
 
 // Mock crypto module
@@ -53,9 +37,7 @@ class TestToolInvocation extends BaseToolInvocation<TestParams, TestResult> {
     };
   }
 
-  override async shouldConfirmExecute(
-    abortSignal: AbortSignal,
-  ): Promise<false> {
+  override async shouldConfirmExecute(abortSignal: AbortSignal): Promise<false> {
     // This conditional is here to allow testing of the case where there is no message bus.
     if (this.messageBus) {
       const decision = await this.getMessageBusDecision(abortSignal);
@@ -86,7 +68,7 @@ class TestTool extends BaseDeclarativeTool<TestParams, TestResult> {
       },
       true,
       false,
-      messageBus,
+      messageBus
     );
   }
 
@@ -123,9 +105,7 @@ describe('Message Bus Integration', () => {
       const unsubscribeSpy = vi.spyOn(messageBus, 'unsubscribe');
 
       // Start confirmation process
-      const confirmationPromise = invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmationPromise = invocation.shouldConfirmExecute(new AbortController().signal);
 
       // Verify confirmation request was published
       expect(publishSpy).toHaveBeenCalledWith({
@@ -140,7 +120,7 @@ describe('Message Bus Integration', () => {
       // Verify subscription to response
       expect(subscribeSpy).toHaveBeenCalledWith(
         MessageBusType.TOOL_CONFIRMATION_RESPONSE,
-        expect.any(Function),
+        expect.any(Function)
       );
 
       // Simulate confirmation response
@@ -164,9 +144,7 @@ describe('Message Bus Integration', () => {
 
       const subscribeSpy = vi.spyOn(messageBus, 'subscribe');
 
-      const confirmationPromise = invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmationPromise = invocation.shouldConfirmExecute(new AbortController().signal);
 
       // Simulate denial response
       const responseHandler = subscribeSpy.mock.calls[0][1];
@@ -179,9 +157,7 @@ describe('Message Bus Integration', () => {
       responseHandler(response);
 
       // Should reject with error when denied
-      await expect(confirmationPromise).rejects.toThrow(
-        'Tool execution denied by policy',
-      );
+      await expect(confirmationPromise).rejects.toThrow('Tool execution denied by policy');
     });
 
     it('should handle timeout', async () => {
@@ -190,9 +166,7 @@ describe('Message Bus Integration', () => {
       const tool = new TestTool(messageBus);
       const invocation = tool.build({ testParam: 'test-value' });
 
-      const confirmationPromise = invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmationPromise = invocation.shouldConfirmExecute(new AbortController().signal);
 
       // Fast-forward past timeout
       vi.advanceTimersByTime(30000);
@@ -208,25 +182,19 @@ describe('Message Bus Integration', () => {
       const invocation = tool.build({ testParam: 'test-value' });
 
       const abortController = new AbortController();
-      const confirmationPromise = invocation.shouldConfirmExecute(
-        abortController.signal,
-      );
+      const confirmationPromise = invocation.shouldConfirmExecute(abortController.signal);
 
       // Abort the operation
       abortController.abort();
 
-      await expect(confirmationPromise).rejects.toThrow(
-        'Tool execution denied by policy',
-      );
+      await expect(confirmationPromise).rejects.toThrow('Tool execution denied by policy');
     });
 
     it('should fall back to default behavior when no message bus', async () => {
       const tool = new TestTool(); // No message bus
       const invocation = tool.build({ testParam: 'test-value' });
 
-      const result = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const result = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(result).toBe(false);
     });
 
@@ -237,9 +205,7 @@ describe('Message Bus Integration', () => {
       const invocation = tool.build({ testParam: 'test-value' });
 
       const subscribeSpy = vi.spyOn(messageBus, 'subscribe');
-      const confirmationPromise = invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const confirmationPromise = invocation.shouldConfirmExecute(new AbortController().signal);
 
       // Send response with wrong correlation ID
       const responseHandler = subscribeSpy.mock.calls[0][1];
@@ -292,9 +258,7 @@ describe('Message Bus Integration', () => {
         throw new Error('Message bus error');
       });
 
-      const result = await invocation.shouldConfirmExecute(
-        new AbortController().signal,
-      );
+      const result = await invocation.shouldConfirmExecute(new AbortController().signal);
       expect(result).toBe(false); // Should gracefully fall back
     });
   });

@@ -115,17 +115,13 @@ describe('detectIde with ideInfoFromFile', () => {
     const ideInfoFromFile = { displayName: 'Custom IDE' };
     vi.stubEnv('TERM_PROGRAM', 'vscode');
     vi.stubEnv('CURSOR_TRACE_ID', '');
-    expect(detectIde(ideProcessInfo, ideInfoFromFile)).toBe(
-      IDE_DEFINITIONS.vscode,
-    );
+    expect(detectIde(ideProcessInfo, ideInfoFromFile)).toBe(IDE_DEFINITIONS.vscode);
   });
 
   it('should fall back to env detection if displayName is missing', () => {
     const ideInfoFromFile = { name: 'custom-ide' };
     vi.stubEnv('TERM_PROGRAM', 'vscode');
     vi.stubEnv('CURSOR_TRACE_ID', '');
-    expect(detectIde(ideProcessInfo, ideInfoFromFile)).toBe(
-      IDE_DEFINITIONS.vscode,
-    );
+    expect(detectIde(ideProcessInfo, ideInfoFromFile)).toBe(IDE_DEFINITIONS.vscode);
   });
 });

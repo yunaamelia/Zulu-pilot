@@ -29,14 +29,14 @@ export class GitService {
     const gitAvailable = await this.verifyGitAvailability();
     if (!gitAvailable) {
       throw new Error(
-        'Checkpointing is enabled, but Git is not installed. Please install Git or disable checkpointing to continue.',
+        'Checkpointing is enabled, but Git is not installed. Please install Git or disable checkpointing to continue.'
       );
     }
     try {
       await this.setupShadowGitRepository();
     } catch (error) {
       throw new Error(
-        `Failed to initialize checkpointing: ${error instanceof Error ? error.message : 'Unknown error'}. Please check that Git is working properly or disable checkpointing.`,
+        `Failed to initialize checkpointing: ${error instanceof Error ? error.message : 'Unknown error'}. Please check that Git is working properly or disable checkpointing.`
       );
     }
   }
@@ -118,7 +118,7 @@ export class GitService {
       return commitResult.commit;
     } catch (error) {
       throw new Error(
-        `Failed to create checkpoint snapshot: ${error instanceof Error ? error.message : 'Unknown error'}. Checkpointing may not be working properly.`,
+        `Failed to create checkpoint snapshot: ${error instanceof Error ? error.message : 'Unknown error'}. Checkpointing may not be working properly.`
       );
     }
   }

@@ -44,7 +44,7 @@ export function exitAlternateScreen() {
 
 export function shouldEnterAlternateScreen(
   useAlternateBuffer: boolean,
-  isScreenReader: boolean,
+  isScreenReader: boolean
 ): boolean {
   return useAlternateBuffer && !isScreenReader;
 }

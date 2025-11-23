@@ -55,7 +55,7 @@ export function shortenPath(filePath: string, maxLen: number = 35): string {
   const truncateComponent = (
     component: string,
     targetLength: number,
-    mode: TruncateMode,
+    mode: TruncateMode
   ): string => {
     if (component.length <= targetLength) {
       return component;
@@ -82,9 +82,7 @@ export function shortenPath(filePath: string, maxLen: number = 35): string {
 
     const front = Math.ceil((targetLength - 3) / 2);
     const back = targetLength - 3 - front;
-    return `${component.slice(0, front)}...${component.slice(
-      component.length - back,
-    )}`;
+    return `${component.slice(0, front)}...${component.slice(component.length - back)}`;
   };
 
   const parsedPath = path.parse(filePath);
@@ -217,7 +215,7 @@ export function shortenPath(filePath: string, maxLen: number = 35): string {
   }
 
   const truncatedComponents = components.map((component, index) =>
-    truncateComponent(component, budgets[index], componentModes[index]),
+    truncateComponent(component, budgets[index], componentModes[index])
   );
 
   const truncatedFirst = truncatedComponents[0];
@@ -240,10 +238,7 @@ export function shortenPath(filePath: string, maxLen: number = 35): string {
  * @param rootDirectory The absolute path of the directory to make the target path relative to.
  * @returns The relative path from rootDirectory to targetPath.
  */
-export function makeRelative(
-  targetPath: string,
-  rootDirectory: string,
-): string {
+export function makeRelative(targetPath: string, rootDirectory: string): string {
   if (!path.isAbsolute(targetPath)) {
     return targetPath;
   }
@@ -290,7 +285,7 @@ export function escapePath(filePath: string): string {
 export function unescapePath(filePath: string): string {
   return filePath.replace(
     new RegExp(`\\\\([${SHELL_SPECIAL_CHARS.source.slice(1, -1)}])`, 'g'),
-    '$1',
+    '$1'
   );
 }
 

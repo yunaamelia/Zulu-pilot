@@ -28,20 +28,17 @@ const FILE_OPERATION_COUNT = 'gemini_cli.file.operation.count';
 const LINES_CHANGED = 'gemini_cli.lines.changed';
 const INVALID_CHUNK_COUNT = 'gemini_cli.chat.invalid_chunk.count';
 const CONTENT_RETRY_COUNT = 'gemini_cli.chat.content_retry.count';
-const CONTENT_RETRY_FAILURE_COUNT =
-  'gemini_cli.chat.content_retry_failure.count';
+const CONTENT_RETRY_FAILURE_COUNT = 'gemini_cli.chat.content_retry_failure.count';
 const MODEL_ROUTING_LATENCY = 'gemini_cli.model_routing.latency';
 const MODEL_ROUTING_FAILURE_COUNT = 'gemini_cli.model_routing.failure.count';
-const MODEL_SLASH_COMMAND_CALL_COUNT =
-  'gemini_cli.slash_command.model.call_count';
+const MODEL_SLASH_COMMAND_CALL_COUNT = 'gemini_cli.slash_command.model.call_count';
 
 // Agent Metrics
 const AGENT_RUN_COUNT = 'gemini_cli.agent.run.count';
 const AGENT_DURATION_MS = 'gemini_cli.agent.duration';
 const AGENT_TURNS = 'gemini_cli.agent.turns';
 const AGENT_RECOVERY_ATTEMPT_COUNT = 'gemini_cli.agent.recovery_attempt.count';
-const AGENT_RECOVERY_ATTEMPT_DURATION =
-  'gemini_cli.agent.recovery_attempt.duration';
+const AGENT_RECOVERY_ATTEMPT_DURATION = 'gemini_cli.agent.recovery_attempt.duration';
 
 // OpenTelemetry GenAI Semantic Convention Metrics
 const GEN_AI_CLIENT_TOKEN_USAGE = 'gen_ai.client.token.usage';
@@ -57,8 +54,7 @@ const TOKEN_EFFICIENCY = 'gemini_cli.token.efficiency';
 const API_REQUEST_BREAKDOWN = 'gemini_cli.api.request.breakdown';
 const PERFORMANCE_SCORE = 'gemini_cli.performance.score';
 const REGRESSION_DETECTION = 'gemini_cli.performance.regression';
-const REGRESSION_PERCENTAGE_CHANGE =
-  'gemini_cli.performance.regression.percentage_change';
+const REGRESSION_PERCENTAGE_CHANGE = 'gemini_cli.performance.regression.percentage_change';
 const BASELINE_COMPARISON = 'gemini_cli.performance.baseline.comparison';
 const FLICKER_FRAME_COUNT = 'gemini_cli.ui.flicker.count';
 const SLOW_RENDER_LATENCY = 'gemini_cli.ui.slow_render.latency';
@@ -190,8 +186,7 @@ const COUNTER_DEFINITIONS = {
     },
   },
   [FLICKER_FRAME_COUNT]: {
-    description:
-      'Counts UI frames that flicker (render taller than the terminal).',
+    description: 'Counts UI frames that flicker (render taller than the terminal).',
     valueType: ValueType.INT,
     assign: (c: Counter) => (flickerFrameCounter = c),
     attributes: {} as Record<string, never>,
@@ -315,8 +310,7 @@ const PERFORMANCE_COUNTER_DEFINITIONS = {
 
 const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
   [STARTUP_TIME]: {
-    description:
-      'CLI startup time in milliseconds, broken down by initialization phase.',
+    description: 'CLI startup time in milliseconds, broken down by initialization phase.',
     unit: 'ms',
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (startupTimeHistogram = h),
@@ -362,8 +356,7 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [TOKEN_EFFICIENCY]: {
-    description:
-      'Token efficiency metrics (tokens per operation, cache hit rate, etc.).',
+    description: 'Token efficiency metrics (tokens per operation, cache hit rate, etc.).',
     unit: 'ratio',
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (tokenEfficiencyHistogram = h),
@@ -394,8 +387,7 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [REGRESSION_PERCENTAGE_CHANGE]: {
-    description:
-      'Percentage change compared to baseline for detected regressions.',
+    description: 'Percentage change compared to baseline for detected regressions.',
     unit: 'percent',
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (regressionPercentageChangeHistogram = h),
@@ -407,8 +399,7 @@ const PERFORMANCE_HISTOGRAM_DEFINITIONS = {
     },
   },
   [BASELINE_COMPARISON]: {
-    description:
-      'Performance comparison to established baseline (percentage change).',
+    description: 'Performance comparison to established baseline (percentage change).',
     unit: 'percent',
     valueType: ValueType.DOUBLE,
     assign: (h: Histogram) => (baselineComparisonHistogram = h),
@@ -540,16 +531,14 @@ export function initializeMetrics(config: Config): void {
   if (!meter) return;
 
   // Initialize core metrics
-  Object.entries(COUNTER_DEFINITIONS).forEach(
-    ([name, { description, valueType, assign }]) => {
-      assign(meter.createCounter(name, { description, valueType }));
-    },
-  );
+  Object.entries(COUNTER_DEFINITIONS).forEach(([name, { description, valueType, assign }]) => {
+    assign(meter.createCounter(name, { description, valueType }));
+  });
 
   Object.entries(HISTOGRAM_DEFINITIONS).forEach(
     ([name, { description, unit, valueType, assign }]) => {
       assign(meter.createHistogram(name, { description, unit, valueType }));
-    },
+    }
   );
 
   // Increment session counter after all metrics are initialized
@@ -563,7 +552,7 @@ export function initializeMetrics(config: Config): void {
 
 export function recordChatCompressionMetrics(
   config: Config,
-  attributes: MetricDefinitions[typeof EVENT_CHAT_COMPRESSION]['attributes'],
+  attributes: MetricDefinitions[typeof EVENT_CHAT_COMPRESSION]['attributes']
 ) {
   if (!chatCompressionCounter || !isMetricsInitialized) return;
   chatCompressionCounter.add(1, {
@@ -575,10 +564,9 @@ export function recordChatCompressionMetrics(
 export function recordToolCallMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof TOOL_CALL_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof TOOL_CALL_COUNT]['attributes']
 ): void {
-  if (!toolCallCounter || !toolCallLatencyHistogram || !isMetricsInitialized)
-    return;
+  if (!toolCallCounter || !toolCallLatencyHistogram || !isMetricsInitialized) return;
 
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
@@ -594,7 +582,7 @@ export function recordToolCallMetrics(
 export function recordCustomTokenUsageMetrics(
   config: Config,
   tokenCount: number,
-  attributes: MetricDefinitions[typeof TOKEN_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof TOKEN_USAGE]['attributes']
 ): void {
   if (!tokenUsageCounter || !isMetricsInitialized) return;
   tokenUsageCounter.add(tokenCount, {
@@ -606,14 +594,9 @@ export function recordCustomTokenUsageMetrics(
 export function recordCustomApiResponseMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes']
 ): void {
-  if (
-    !apiRequestCounter ||
-    !apiRequestLatencyHistogram ||
-    !isMetricsInitialized
-  )
-    return;
+  if (!apiRequestCounter || !apiRequestLatencyHistogram || !isMetricsInitialized) return;
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
     model: attributes.model,
@@ -629,14 +612,9 @@ export function recordCustomApiResponseMetrics(
 export function recordApiErrorMetrics(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_COUNT]['attributes']
 ): void {
-  if (
-    !apiRequestCounter ||
-    !apiRequestLatencyHistogram ||
-    !isMetricsInitialized
-  )
-    return;
+  if (!apiRequestCounter || !apiRequestLatencyHistogram || !isMetricsInitialized) return;
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
     model: attributes.model,
@@ -652,7 +630,7 @@ export function recordApiErrorMetrics(
 
 export function recordFileOperationMetric(
   config: Config,
-  attributes: MetricDefinitions[typeof FILE_OPERATION_COUNT]['attributes'],
+  attributes: MetricDefinitions[typeof FILE_OPERATION_COUNT]['attributes']
 ): void {
   if (!fileOperationCounter || !isMetricsInitialized) return;
   fileOperationCounter.add(1, {
@@ -665,7 +643,7 @@ export function recordLinesChanged(
   config: Config,
   lines: number,
   changeType: 'added' | 'removed',
-  attributes?: { function_name?: string },
+  attributes?: { function_name?: string }
 ): void {
   if (!linesChangedCounter || !isMetricsInitialized) return;
   if (!Number.isFinite(lines) || lines <= 0) return;
@@ -725,16 +703,10 @@ export function recordContentRetry(config: Config): void {
  */
 export function recordContentRetryFailure(config: Config): void {
   if (!contentRetryFailureCounter || !isMetricsInitialized) return;
-  contentRetryFailureCounter.add(
-    1,
-    baseMetricDefinition.getCommonAttributes(config),
-  );
+  contentRetryFailureCounter.add(1, baseMetricDefinition.getCommonAttributes(config));
 }
 
-export function recordModelSlashCommand(
-  config: Config,
-  event: ModelSlashCommandEvent,
-): void {
+export function recordModelSlashCommand(config: Config, event: ModelSlashCommandEvent): void {
   if (!modelSlashCommandCallCounter || !isMetricsInitialized) return;
   modelSlashCommandCallCounter.add(1, {
     ...baseMetricDefinition.getCommonAttributes(config),
@@ -742,16 +714,8 @@ export function recordModelSlashCommand(
   });
 }
 
-export function recordModelRoutingMetrics(
-  config: Config,
-  event: ModelRoutingEvent,
-): void {
-  if (
-    !modelRoutingLatencyHistogram ||
-    !modelRoutingFailureCounter ||
-    !isMetricsInitialized
-  )
-    return;
+export function recordModelRoutingMetrics(config: Config, event: ModelRoutingEvent): void {
+  if (!modelRoutingLatencyHistogram || !modelRoutingFailureCounter || !isMetricsInitialized) return;
 
   modelRoutingLatencyHistogram.record(event.routing_latency_ms, {
     ...baseMetricDefinition.getCommonAttributes(config),
@@ -768,16 +732,8 @@ export function recordModelRoutingMetrics(
   }
 }
 
-export function recordAgentRunMetrics(
-  config: Config,
-  event: AgentFinishEvent,
-): void {
-  if (
-    !agentRunCounter ||
-    !agentDurationHistogram ||
-    !agentTurnsHistogram ||
-    !isMetricsInitialized
-  )
+export function recordAgentRunMetrics(config: Config, event: AgentFinishEvent): void {
+  if (!agentRunCounter || !agentDurationHistogram || !agentTurnsHistogram || !isMetricsInitialized)
     return;
 
   const commonAttributes = baseMetricDefinition.getCommonAttributes(config);
@@ -799,10 +755,7 @@ export function recordAgentRunMetrics(
   });
 }
 
-export function recordRecoveryAttemptMetrics(
-  config: Config,
-  event: RecoveryAttemptEvent,
-): void {
+export function recordRecoveryAttemptMetrics(config: Config, event: RecoveryAttemptEvent): void {
   if (
     !agentRecoveryAttemptCounter ||
     !agentRecoveryAttemptDurationHistogram ||
@@ -830,7 +783,7 @@ export function recordRecoveryAttemptMetrics(
 export function recordGenAiClientTokenUsage(
   config: Config,
   tokenCount: number,
-  attributes: MetricDefinitions[typeof GEN_AI_CLIENT_TOKEN_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof GEN_AI_CLIENT_TOKEN_USAGE]['attributes']
 ): void {
   if (!genAiClientTokenUsageHistogram || !isMetricsInitialized) return;
 
@@ -845,7 +798,7 @@ export function recordGenAiClientTokenUsage(
 export function recordGenAiClientOperationDuration(
   config: Config,
   durationSeconds: number,
-  attributes: MetricDefinitions[typeof GEN_AI_CLIENT_OPERATION_DURATION]['attributes'],
+  attributes: MetricDefinitions[typeof GEN_AI_CLIENT_OPERATION_DURATION]['attributes']
 ): void {
   if (!genAiClientOperationDurationHistogram || !isMetricsInitialized) return;
 
@@ -854,16 +807,10 @@ export function recordGenAiClientOperationDuration(
     ...attributes,
   };
 
-  genAiClientOperationDurationHistogram.record(
-    durationSeconds,
-    metricAttributes,
-  );
+  genAiClientOperationDurationHistogram.record(durationSeconds, metricAttributes);
 }
 
-export function getConventionAttributes(event: {
-  model: string;
-  auth_type?: string;
-}): {
+export function getConventionAttributes(event: { model: string; auth_type?: string }): {
   'gen_ai.operation.name': GenAiOperationName;
   'gen_ai.provider.name': GenAiProviderName;
   'gen_ai.request.model': string;
@@ -915,20 +862,20 @@ export function initializePerformanceMonitoring(config: Config): void {
   Object.entries(PERFORMANCE_COUNTER_DEFINITIONS).forEach(
     ([name, { description, valueType, assign }]) => {
       assign(meter.createCounter(name, { description, valueType }));
-    },
+    }
   );
 
   Object.entries(PERFORMANCE_HISTOGRAM_DEFINITIONS).forEach(
     ([name, { description, unit, valueType, assign }]) => {
       assign(meter.createHistogram(name, { description, unit, valueType }));
-    },
+    }
   );
 }
 
 export function recordStartupPerformance(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof STARTUP_TIME]['attributes'],
+  attributes: MetricDefinitions[typeof STARTUP_TIME]['attributes']
 ): void {
   if (!startupTimeHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -944,7 +891,7 @@ export function recordStartupPerformance(
 export function recordMemoryUsage(
   config: Config,
   bytes: number,
-  attributes: MetricDefinitions[typeof MEMORY_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof MEMORY_USAGE]['attributes']
 ): void {
   if (!memoryUsageGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -959,7 +906,7 @@ export function recordMemoryUsage(
 export function recordCpuUsage(
   config: Config,
   percentage: number,
-  attributes: MetricDefinitions[typeof CPU_USAGE]['attributes'],
+  attributes: MetricDefinitions[typeof CPU_USAGE]['attributes']
 ): void {
   if (!cpuUsageGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -984,10 +931,9 @@ export function recordToolQueueDepth(config: Config, queueDepth: number): void {
 export function recordToolExecutionBreakdown(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof TOOL_EXECUTION_BREAKDOWN]['attributes'],
+  attributes: MetricDefinitions[typeof TOOL_EXECUTION_BREAKDOWN]['attributes']
 ): void {
-  if (!toolExecutionBreakdownHistogram || !isPerformanceMonitoringEnabled)
-    return;
+  if (!toolExecutionBreakdownHistogram || !isPerformanceMonitoringEnabled) return;
 
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
@@ -1000,7 +946,7 @@ export function recordToolExecutionBreakdown(
 export function recordTokenEfficiency(
   config: Config,
   value: number,
-  attributes: MetricDefinitions[typeof TOKEN_EFFICIENCY]['attributes'],
+  attributes: MetricDefinitions[typeof TOKEN_EFFICIENCY]['attributes']
 ): void {
   if (!tokenEfficiencyHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -1015,7 +961,7 @@ export function recordTokenEfficiency(
 export function recordApiRequestBreakdown(
   config: Config,
   durationMs: number,
-  attributes: MetricDefinitions[typeof API_REQUEST_BREAKDOWN]['attributes'],
+  attributes: MetricDefinitions[typeof API_REQUEST_BREAKDOWN]['attributes']
 ): void {
   if (!apiRequestBreakdownHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -1030,7 +976,7 @@ export function recordApiRequestBreakdown(
 export function recordPerformanceScore(
   config: Config,
   score: number,
-  attributes: MetricDefinitions[typeof PERFORMANCE_SCORE]['attributes'],
+  attributes: MetricDefinitions[typeof PERFORMANCE_SCORE]['attributes']
 ): void {
   if (!performanceScoreGauge || !isPerformanceMonitoringEnabled) return;
 
@@ -1044,7 +990,7 @@ export function recordPerformanceScore(
 
 export function recordPerformanceRegression(
   config: Config,
-  attributes: MetricDefinitions[typeof REGRESSION_DETECTION]['attributes'],
+  attributes: MetricDefinitions[typeof REGRESSION_DETECTION]['attributes']
 ): void {
   if (!regressionDetectionCounter || !isPerformanceMonitoringEnabled) return;
 
@@ -1057,19 +1003,14 @@ export function recordPerformanceRegression(
 
   if (attributes.baseline_value !== 0 && regressionPercentageChangeHistogram) {
     const percentageChange =
-      ((attributes.current_value - attributes.baseline_value) /
-        attributes.baseline_value) *
-      100;
-    regressionPercentageChangeHistogram.record(
-      percentageChange,
-      metricAttributes,
-    );
+      ((attributes.current_value - attributes.baseline_value) / attributes.baseline_value) * 100;
+    regressionPercentageChangeHistogram.record(percentageChange, metricAttributes);
   }
 }
 
 export function recordBaselineComparison(
   config: Config,
-  attributes: MetricDefinitions[typeof BASELINE_COMPARISON]['attributes'],
+  attributes: MetricDefinitions[typeof BASELINE_COMPARISON]['attributes']
 ): void {
   if (!baselineComparisonHistogram || !isPerformanceMonitoringEnabled) return;
 
@@ -1078,9 +1019,7 @@ export function recordBaselineComparison(
     return;
   }
   const percentageChange =
-    ((attributes.current_value - attributes.baseline_value) /
-      attributes.baseline_value) *
-    100;
+    ((attributes.current_value - attributes.baseline_value) / attributes.baseline_value) * 100;
 
   const metricAttributes: Attributes = {
     ...baseMetricDefinition.getCommonAttributes(config),
@@ -1112,17 +1051,14 @@ export function recordTokenUsageMetrics(
       'server.address'?: string;
       'server.port'?: number;
     };
-  },
+  }
 ): void {
   recordCustomTokenUsageMetrics(config, tokenCount, {
     model: attributes.model,
     type: attributes.type,
   });
 
-  if (
-    (attributes.type === 'input' || attributes.type === 'output') &&
-    attributes.genAiAttributes
-  ) {
+  if ((attributes.type === 'input' || attributes.type === 'output') && attributes.genAiAttributes) {
     recordGenAiClientTokenUsage(config, tokenCount, {
       ...attributes.genAiAttributes,
       'gen_ai.token.type': attributes.type,
@@ -1148,7 +1084,7 @@ export function recordApiResponseMetrics(
       'server.port'?: number;
       'error.type'?: string;
     };
-  },
+  }
 ): void {
   recordCustomApiResponseMetrics(config, durationMs, {
     model: attributes.model,

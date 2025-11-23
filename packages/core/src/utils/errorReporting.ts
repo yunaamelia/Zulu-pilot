@@ -27,7 +27,7 @@ export async function reportError(
   baseMessage: string,
   context?: Content[] | Record<string, unknown> | unknown[],
   type = 'general',
-  reportingDir = os.tmpdir(), // for testing
+  reportingDir = os.tmpdir() // for testing
 ): Promise<void> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const reportFileName = `gemini-client-error-${type}-${timestamp}.json`;
@@ -36,11 +36,7 @@ export async function reportError(
   let errorToReport: { message: string; stack?: string };
   if (error instanceof Error) {
     errorToReport = { message: error.message, stack: error.stack };
-  } else if (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error
-  ) {
+  } else if (typeof error === 'object' && error !== null && 'message' in error) {
     errorToReport = {
       message: String((error as { message: unknown }).message),
     };
@@ -61,13 +57,11 @@ export async function reportError(
     // This can happen if context contains something like BigInt
     console.error(
       `${baseMessage} Could not stringify report content (likely due to context):`,
-      stringifyError,
+      stringifyError
     );
     console.error('Original error that triggered report generation:', error);
     if (context) {
-      console.error(
-        'Original context could not be stringified or included in report.',
-      );
+      console.error('Original context could not be stringified or included in report.');
     }
     // Fallback: try to report only the error if context was the issue
     try {
@@ -76,12 +70,12 @@ export async function reportError(
       // Still try to write the minimal report
       await fs.writeFile(reportPath, stringifiedReportContent);
       console.error(
-        `${baseMessage} Partial report (excluding context) available at: ${reportPath}`,
+        `${baseMessage} Partial report (excluding context) available at: ${reportPath}`
       );
     } catch (minimalWriteError) {
       console.error(
         `${baseMessage} Failed to write even a minimal error report:`,
-        minimalWriteError,
+        minimalWriteError
       );
     }
     return;
@@ -93,7 +87,7 @@ export async function reportError(
   } catch (writeError) {
     console.error(
       `${baseMessage} Additionally, failed to write detailed error report:`,
-      writeError,
+      writeError
     );
     // Log the original error as a fallback if report writing fails
     console.error('Original error that triggered report generation:', error);
@@ -107,7 +101,7 @@ export async function reportError(
         try {
           console.error(
             'Original context (stringified, truncated):',
-            JSON.stringify(context).substring(0, 1000),
+            JSON.stringify(context).substring(0, 1000)
           );
         } catch {
           console.error('Original context could not be logged or stringified.');

@@ -6,11 +6,12 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { UnifiedConfigManager } from '../../../packages/core/src/config/UnifiedConfigManager.js';
 import type { UnifiedConfiguration } from '../../../packages/core/src/config/UnifiedConfiguration.js';
-import { readFile, writeFile, unlink } from 'fs/promises';
+import { readFile, writeFile, unlink, rm, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const CONFIG_FILE = join(homedir(), '.zulu-pilotrc');
+const CONFIG_DIR = join(homedir(), '.zulu-pilot');
+const CONFIG_FILE = join(CONFIG_DIR, '.zulu-pilotrc');
 
 describe('UnifiedConfigManager', () => {
   let manager: UnifiedConfigManager;
@@ -20,11 +21,16 @@ describe('UnifiedConfigManager', () => {
   });
 
   afterEach(async () => {
-    // Clean up test config file
+    // Clean up test config file and directory
     try {
       await unlink(CONFIG_FILE);
     } catch {
       // Ignore if file doesn't exist
+    }
+    try {
+      await rm(CONFIG_DIR, { recursive: true, force: true });
+    } catch {
+      // Ignore if directory doesn't exist
     }
   });
 
@@ -47,6 +53,8 @@ describe('UnifiedConfigManager', () => {
         },
       };
 
+      // Ensure directory exists
+      await mkdir(CONFIG_DIR, { recursive: true });
       await writeFile(CONFIG_FILE, JSON.stringify(testConfig, null, 2), 'utf-8');
       const config = await manager.loadConfig();
 
@@ -55,6 +63,8 @@ describe('UnifiedConfigManager', () => {
     });
 
     it('should throw error for invalid JSON', async () => {
+      // Ensure directory exists
+      await mkdir(CONFIG_DIR, { recursive: true });
       await writeFile(CONFIG_FILE, 'invalid json', 'utf-8');
 
       await expect(manager.loadConfig()).rejects.toThrow();

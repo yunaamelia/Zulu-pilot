@@ -20,15 +20,12 @@ export class GitIgnoreParser implements GitIgnoreFilter {
 
   constructor(
     projectRoot: string,
-    private readonly extraPatterns?: string[],
+    private readonly extraPatterns?: string[]
   ) {
     this.projectRoot = path.resolve(projectRoot);
     if (this.extraPatterns) {
       // extraPatterns are assumed to be from project root (like .geminiignore)
-      this.processedExtraPatterns = this.processPatterns(
-        this.extraPatterns,
-        '.',
-      );
+      this.processedExtraPatterns = this.processPatterns(this.extraPatterns, '.');
     }
   }
 
@@ -40,9 +37,7 @@ export class GitIgnoreParser implements GitIgnoreFilter {
       return [];
     }
 
-    const isExcludeFile = patternsFilePath.endsWith(
-      path.join('.git', 'info', 'exclude'),
-    );
+    const isExcludeFile = patternsFilePath.endsWith(path.join('.git', 'info', 'exclude'));
 
     const relativeBaseDir = isExcludeFile
       ? '.'
@@ -55,10 +50,7 @@ export class GitIgnoreParser implements GitIgnoreFilter {
     return this.processPatterns(rawPatterns, relativeBaseDir);
   }
 
-  private processPatterns(
-    rawPatterns: string[],
-    relativeBaseDir: string,
-  ): string[] {
+  private processPatterns(rawPatterns: string[], relativeBaseDir: string): string[] {
     return rawPatterns
       .map((p) => p.trimStart())
       .filter((p) => p !== '' && !p.startsWith('#'))
@@ -147,12 +139,7 @@ export class GitIgnoreParser implements GitIgnoreFilter {
 
       // Load global patterns from .git/info/exclude on first call
       if (this.globalPatterns === undefined) {
-        const excludeFile = path.join(
-          this.projectRoot,
-          '.git',
-          'info',
-          'exclude',
-        );
+        const excludeFile = path.join(this.projectRoot, '.git', 'info', 'exclude');
         this.globalPatterns = fs.existsSync(excludeFile)
           ? this.loadPatternsForFile(excludeFile)
           : [];
@@ -173,9 +160,7 @@ export class GitIgnoreParser implements GitIgnoreFilter {
         const relativeDir = path.relative(this.projectRoot, dir);
         if (relativeDir) {
           const normalizedRelativeDir = relativeDir.replace(/\\/g, '/');
-          const igPlusExtras = ignore()
-            .add(ig)
-            .add(this.processedExtraPatterns);
+          const igPlusExtras = ignore().add(ig).add(this.processedExtraPatterns);
           if (igPlusExtras.ignores(normalizedRelativeDir)) {
             // This directory is ignored by an ancestor's .gitignore.
             // According to git behavior, we don't need to process this

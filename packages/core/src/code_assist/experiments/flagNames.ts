@@ -12,5 +12,4 @@ export const ExperimentFlags = {
   ENABLE_PREVIEW: 45740196,
 } as const;
 
-export type ExperimentFlagName =
-  (typeof ExperimentFlags)[keyof typeof ExperimentFlags];
+export type ExperimentFlagName = (typeof ExperimentFlags)[keyof typeof ExperimentFlags];

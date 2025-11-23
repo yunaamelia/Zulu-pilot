@@ -86,10 +86,7 @@ export class ActivityMonitor {
     this.addListener(this.memoryMonitoringListener);
 
     // Record activity monitoring start
-    this.recordActivity(
-      ActivityType.MANUAL_TRIGGER,
-      'activity_monitoring_start',
-    );
+    this.recordActivity(ActivityType.MANUAL_TRIGGER, 'activity_monitoring_start');
   }
 
   /**
@@ -125,11 +122,7 @@ export class ActivityMonitor {
   /**
    * Record a user activity event
    */
-  recordActivity(
-    type: ActivityType,
-    context?: string,
-    metadata?: Record<string, unknown>,
-  ): void {
+  recordActivity(type: ActivityType, context?: string, metadata?: Record<string, unknown>): void {
     if (!this.isActive || !this.config.enabled) {
       return;
     }
@@ -201,10 +194,7 @@ export class ActivityMonitor {
   /**
    * Handle memory monitoring for activity events
    */
-  private handleMemoryMonitoringActivity(
-    event: ActivityEvent,
-    config: Config,
-  ): void {
+  private handleMemoryMonitoringActivity(event: ActivityEvent, config: Config): void {
     // Check if this activity type should trigger memory monitoring
     if (!this.config.triggerActivities.includes(event.type)) {
       return;
@@ -243,9 +233,7 @@ let globalActivityMonitor: ActivityMonitor | null = null;
 /**
  * Initialize global activity monitor
  */
-export function initializeActivityMonitor(
-  config?: ActivityMonitorConfig,
-): ActivityMonitor {
+export function initializeActivityMonitor(config?: ActivityMonitorConfig): ActivityMonitor {
   if (!globalActivityMonitor) {
     globalActivityMonitor = new ActivityMonitor(config);
   }
@@ -265,7 +253,7 @@ export function getActivityMonitor(): ActivityMonitor | null {
 export function recordGlobalActivity(
   type: ActivityType,
   context?: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): void {
   if (globalActivityMonitor) {
     globalActivityMonitor.recordActivity(type, context, metadata);
@@ -277,7 +265,7 @@ export function recordGlobalActivity(
  */
 export function startGlobalActivityMonitoring(
   coreConfig: Config,
-  activityConfig?: ActivityMonitorConfig,
+  activityConfig?: ActivityMonitorConfig
 ): void {
   const monitor = initializeActivityMonitor(activityConfig);
   monitor.start(coreConfig);

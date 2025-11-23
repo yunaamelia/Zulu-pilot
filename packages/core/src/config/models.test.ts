@@ -21,29 +21,17 @@ describe('getEffectiveModel', () => {
     const isInFallbackMode = false;
 
     it('should return the Pro model when Pro is requested', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_MODEL);
     });
 
     it('should return the Flash model when Flash is requested', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_FLASH_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
     });
 
     it('should return the Lite model when Lite is requested', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_FLASH_LITE_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_LITE_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
     });
 
@@ -55,65 +43,37 @@ describe('getEffectiveModel', () => {
 
     describe('with preview features', () => {
       it('should return the preview model when pro alias is requested', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_PRO,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_PRO, true);
         expect(model).toBe(PREVIEW_GEMINI_MODEL);
       });
 
       it('should return the default pro model when pro alias is requested and preview is off', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_PRO,
-          false,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_PRO, false);
         expect(model).toBe(DEFAULT_GEMINI_MODEL);
       });
 
       it('should return the flash model when flash is requested and preview is on', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_FLASH,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_FLASH, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the flash model when lite is requested and preview is on', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_FLASH_LITE,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_FLASH_LITE, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
       });
 
       it('should return the flash model when the flash model name is explicitly requested and preview is on', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_FLASH_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the lite model when the lite model name is requested and preview is on', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_FLASH_LITE_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_LITE_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
       });
 
       it('should return the default gemini model when the model is explicitly set and preview is on', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_MODEL);
       });
     });
@@ -123,29 +83,17 @@ describe('getEffectiveModel', () => {
     const isInFallbackMode = true;
 
     it('should downgrade the Pro model to the Flash model', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
     });
 
     it('should return the Flash model when Flash is requested', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_FLASH_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
     });
 
     it('should HONOR the Lite model when Lite is requested', () => {
-      const model = getEffectiveModel(
-        isInFallbackMode,
-        DEFAULT_GEMINI_FLASH_LITE_MODEL,
-        false,
-      );
+      const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_LITE_MODEL, false);
       expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
     });
 
@@ -163,56 +111,32 @@ describe('getEffectiveModel', () => {
 
     describe('with preview features', () => {
       it('should downgrade the Pro alias to the Flash model', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_PRO,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_PRO, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the Flash alias when requested', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_FLASH,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_FLASH, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the Lite alias when requested', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          GEMINI_MODEL_ALIAS_FLASH_LITE,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, GEMINI_MODEL_ALIAS_FLASH_LITE, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
       });
 
       it('should downgrade the default Gemini model to the Flash model', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the default Flash model when requested', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_FLASH_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
       });
 
       it('should return the default Lite model when requested', () => {
-        const model = getEffectiveModel(
-          isInFallbackMode,
-          DEFAULT_GEMINI_FLASH_LITE_MODEL,
-          true,
-        );
+        const model = getEffectiveModel(isInFallbackMode, DEFAULT_GEMINI_FLASH_LITE_MODEL, true);
         expect(model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
       });
 

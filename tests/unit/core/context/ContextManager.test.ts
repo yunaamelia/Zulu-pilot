@@ -248,9 +248,10 @@ describe('ContextManager', () => {
 
       await manager.addFile('large.txt');
 
-      // Set limit close to current tokens
+      // Set limit to trigger warning (>80%) but still within effective limit
+      // Using 1.2 means tokens are 83.33% of limit, which triggers warning but is within limit
       const totalTokens = manager.getTotalEstimatedTokens();
-      const warning = manager.checkTokenLimit(totalTokens * 1.1); // Just above
+      const warning = manager.checkTokenLimit(totalTokens * 1.2);
 
       expect(warning).toBeTruthy();
       expect(warning).toContain('approaching');

@@ -7,12 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 import { executeToolCall } from './nonInteractiveToolExecutor.js';
-import type {
-  ToolRegistry,
-  ToolCallRequestInfo,
-  ToolResult,
-  Config,
-} from '../index.js';
+import type { ToolRegistry, ToolCallRequestInfo, ToolResult, Config } from '../index.js';
 import {
   DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES,
   DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
@@ -56,8 +51,7 @@ describe('executeToolCall', () => {
       storage: {
         getProjectTempDir: () => '/tmp',
       },
-      getTruncateToolOutputThreshold: () =>
-        DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
+      getTruncateToolOutputThreshold: () => DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
       getTruncateToolOutputLines: () => DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES,
       getUseSmartEdit: () => false,
       getGeminiClient: () => null, // No client needed for these tests
@@ -86,11 +80,7 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockResolvedValue(toolResult);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(mockToolRegistry.getTool).toHaveBeenCalledWith('testTool');
     expect(executeFn).toHaveBeenCalledWith(request.args);
@@ -101,9 +91,7 @@ describe('executeToolCall', () => {
       outputFile: undefined,
       resultDisplay: 'Success!',
       contentLength:
-        typeof toolResult.llmContent === 'string'
-          ? toolResult.llmContent.length
-          : undefined,
+        typeof toolResult.llmContent === 'string' ? toolResult.llmContent.length : undefined,
       responseParts: [
         {
           functionResponse: {
@@ -125,16 +113,9 @@ describe('executeToolCall', () => {
       prompt_id: 'prompt-id-2',
     };
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(undefined);
-    vi.mocked(mockToolRegistry.getAllToolNames).mockReturnValue([
-      'testTool',
-      'anotherTool',
-    ]);
+    vi.mocked(mockToolRegistry.getAllToolNames).mockReturnValue(['testTool', 'anotherTool']);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     const expectedErrorMessage =
       'Tool "nonexistentTool" not found in registry. Tools must use the exact names that are registered. Did you mean one of: "testTool", "anotherTool"?';
@@ -171,11 +152,7 @@ describe('executeToolCall', () => {
       throw new Error('Invalid parameters');
     });
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(response).toStrictEqual({
       callId: 'call3',
@@ -216,11 +193,7 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockResolvedValue(executionErrorResult);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
     expect(response).toStrictEqual({
       callId: 'call4',
       error: new Error('Execution failed'),
@@ -252,11 +225,7 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockRejectedValue(new Error('Something went very wrong'));
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(response).toStrictEqual({
       callId: 'call5',
@@ -294,11 +263,7 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockResolvedValue(toolResult);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(response).toStrictEqual({
       callId: 'call6',
@@ -337,16 +302,10 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockResolvedValue(toolResult);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(response.contentLength).toBe(
-      typeof toolResult.llmContent === 'string'
-        ? toolResult.llmContent.length
-        : undefined,
+      typeof toolResult.llmContent === 'string' ? toolResult.llmContent.length : undefined
     );
   });
 
@@ -365,11 +324,7 @@ describe('executeToolCall', () => {
     vi.mocked(mockToolRegistry.getTool).mockReturnValue(mockTool);
     executeFn.mockResolvedValue(toolResult);
 
-    const { response } = await executeToolCall(
-      mockConfig,
-      request,
-      abortController.signal,
-    );
+    const { response } = await executeToolCall(mockConfig, request, abortController.signal);
 
     expect(response.contentLength).toBeUndefined();
   });

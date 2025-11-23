@@ -17,12 +17,9 @@ export async function createCodeAssistContentGenerator(
   httpOptions: HttpOptions,
   authType: AuthType,
   config: Config,
-  sessionId?: string,
+  sessionId?: string
 ): Promise<ContentGenerator> {
-  if (
-    authType === AuthType.LOGIN_WITH_GOOGLE ||
-    authType === AuthType.COMPUTE_ADC
-  ) {
+  if (authType === AuthType.LOGIN_WITH_GOOGLE || authType === AuthType.COMPUTE_ADC) {
     const authClient = await getOauthClient(authType, config);
     const userData = await setupUser(authClient);
     return new CodeAssistServer(
@@ -30,16 +27,14 @@ export async function createCodeAssistContentGenerator(
       userData.projectId,
       httpOptions,
       sessionId,
-      userData.userTier,
+      userData.userTier
     );
   }
 
   throw new Error(`Unsupported authType: ${authType}`);
 }
 
-export function getCodeAssistServer(
-  config: Config,
-): CodeAssistServer | undefined {
+export function getCodeAssistServer(config: Config): CodeAssistServer | undefined {
   let server = config.getContentGenerator();
 
   // Unwrap LoggingContentGenerator if present

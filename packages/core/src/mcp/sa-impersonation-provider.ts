@@ -18,13 +18,11 @@ import { coreEvents } from '../utils/events.js';
 
 function createIamApiUrl(targetSA: string): string {
   return `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(
-    targetSA,
+    targetSA
   )}:generateIdToken`;
 }
 
-export class ServiceAccountImpersonationProvider
-  implements OAuthClientProvider
-{
+export class ServiceAccountImpersonationProvider implements OAuthClientProvider {
   private readonly targetServiceAccount: string;
   private readonly targetAudience: string; // OAuth Client Id
   private readonly auth: GoogleAuth;
@@ -46,20 +44,20 @@ export class ServiceAccountImpersonationProvider
     // This check is done in mcp-client.ts. This is just an additional check.
     if (!this.config.httpUrl && !this.config.url) {
       throw new Error(
-        'A url or httpUrl must be provided for the Service Account Impersonation provider',
+        'A url or httpUrl must be provided for the Service Account Impersonation provider'
       );
     }
 
     if (!config.targetAudience) {
       throw new Error(
-        'targetAudience must be provided for the Service Account Impersonation provider',
+        'targetAudience must be provided for the Service Account Impersonation provider'
       );
     }
     this.targetAudience = config.targetAudience;
 
     if (!config.targetServiceAccount) {
       throw new Error(
-        'targetServiceAccount must be provided for the Service Account Impersonation provider',
+        'targetServiceAccount must be provided for the Service Account Impersonation provider'
       );
     }
     this.targetServiceAccount = config.targetServiceAccount;
@@ -106,18 +104,11 @@ export class ServiceAccountImpersonationProvider
       idToken = res.data.token;
 
       if (!idToken || idToken.length === 0) {
-        coreEvents.emitFeedback(
-          'error',
-          'Failed to obtain authentication token.',
-        );
+        coreEvents.emitFeedback('error', 'Failed to obtain authentication token.');
         return undefined;
       }
     } catch (e) {
-      coreEvents.emitFeedback(
-        'error',
-        'Failed to obtain authentication token.',
-        e as Error,
-      );
+      coreEvents.emitFeedback('error', 'Failed to obtain authentication token.', e as Error);
       return undefined;
     }
 

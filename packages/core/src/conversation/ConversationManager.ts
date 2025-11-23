@@ -99,4 +99,3 @@ export class ConversationManager {
     return this.getMessageCount() === 0;
   }
 }
-

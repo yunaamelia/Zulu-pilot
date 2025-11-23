@@ -15,33 +15,16 @@ import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { resourceFromAttributes } from '@opentelemetry/resources';
-import {
-  BatchSpanProcessor,
-  ConsoleSpanExporter,
-} from '@opentelemetry/sdk-trace-node';
-import {
-  BatchLogRecordProcessor,
-  ConsoleLogRecordExporter,
-} from '@opentelemetry/sdk-logs';
-import {
-  ConsoleMetricExporter,
-  PeriodicExportingMetricReader,
-} from '@opentelemetry/sdk-metrics';
+import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
+import { BatchLogRecordProcessor, ConsoleLogRecordExporter } from '@opentelemetry/sdk-logs';
+import { ConsoleMetricExporter, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import type { Config } from '../config/config.js';
 import { SERVICE_NAME } from './constants.js';
 import { initializeMetrics } from './metrics.js';
 import { ClearcutLogger } from './clearcut-logger/clearcut-logger.js';
-import {
-  FileLogExporter,
-  FileMetricExporter,
-  FileSpanExporter,
-} from './file-exporters.js';
-import {
-  GcpTraceExporter,
-  GcpMetricExporter,
-  GcpLogExporter,
-} from './gcp-exporters.js';
+import { FileLogExporter, FileMetricExporter, FileSpanExporter } from './file-exporters.js';
+import { GcpTraceExporter, GcpMetricExporter, GcpLogExporter } from './gcp-exporters.js';
 import { TelemetryTarget } from './index.js';
 import { debugLogger } from '../utils/debugLogger.js';
 
@@ -57,7 +40,7 @@ export function isTelemetrySdkInitialized(): boolean {
 
 function parseOtlpEndpoint(
   otlpEndpointSetting: string | undefined,
-  protocol: 'grpc' | 'http',
+  protocol: 'grpc' | 'http'
 ): string | undefined {
   if (!otlpEndpointSetting) {
     return undefined;
@@ -100,8 +83,7 @@ export function initializeTelemetry(config: Config): void {
   const useOtlp = !!parsedEndpoint && !telemetryOutfile;
 
   const gcpProjectId =
-    process.env['OTLP_GOOGLE_CLOUD_PROJECT'] ||
-    process.env['GOOGLE_CLOUD_PROJECT'];
+    process.env['OTLP_GOOGLE_CLOUD_PROJECT'] || process.env['GOOGLE_CLOUD_PROJECT'];
   const useDirectGcpExport =
     telemetryTarget === TelemetryTarget.GCP && !!gcpProjectId && !useCollector;
 

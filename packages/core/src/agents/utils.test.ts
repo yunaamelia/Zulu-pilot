@@ -42,9 +42,7 @@ describe('templateString', () => {
     };
     const result = templateString(template, inputs);
     // All values are converted to their string representations
-    expect(result).toBe(
-      'Name: Jo, Age: 30, Active: true, Plan: null, Score: undefined',
-    );
+    expect(result).toBe('Name: Jo, Age: 30, Active: true, Plan: null, Score: undefined');
   });
 
   it('should return the original string if no placeholders are present', () => {
@@ -73,7 +71,7 @@ describe('templateString', () => {
     const inputs: AgentInputs = { other_input: 'some value' };
 
     expect(() => templateString(template, inputs)).toThrow(
-      'Template validation failed: Missing required input parameters: goal. Available inputs: other_input',
+      'Template validation failed: Missing required input parameters: goal. Available inputs: other_input'
     );
   });
 
@@ -83,7 +81,7 @@ describe('templateString', () => {
 
     // Using a regex to allow for any order of missing keys in the error message
     expect(() => templateString(template, inputs)).toThrow(
-      /Missing required input parameters: (file, tool|tool, file)/,
+      /Missing required input parameters: (file, tool|tool, file)/
     );
   });
 
@@ -92,18 +90,15 @@ describe('templateString', () => {
     const inputs: AgentInputs = { key: 'some value' }; // 'key' is lowercase
 
     expect(() => templateString(template, inputs)).toThrow(
-      'Template validation failed: Missing required input parameters: Key. Available inputs: key',
+      'Template validation failed: Missing required input parameters: Key. Available inputs: key'
     );
   });
 
   it('should not replace malformed or incomplete placeholders', () => {
-    const template =
-      'This is {not_a_placeholder} and this is $$escaped. Test: ${valid}';
+    const template = 'This is {not_a_placeholder} and this is $$escaped. Test: ${valid}';
     const inputs: AgentInputs = { valid: 'works' };
     const result = templateString(template, inputs);
-    expect(result).toBe(
-      'This is {not_a_placeholder} and this is $$escaped. Test: works',
-    );
+    expect(result).toBe('This is {not_a_placeholder} and this is $$escaped. Test: works');
   });
 
   it('should work correctly with an empty inputs object if the template has no placeholders', () => {

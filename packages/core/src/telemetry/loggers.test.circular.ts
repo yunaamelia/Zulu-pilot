@@ -13,10 +13,7 @@ import { logToolCall } from './loggers.js';
 import { ToolCallEvent } from './types.js';
 import type { Config } from '../config/config.js';
 import type { CompletedToolCall } from '../core/coreToolScheduler.js';
-import type {
-  ToolCallRequestInfo,
-  ToolCallResponseInfo,
-} from '../core/turn.js';
+import type { ToolCallRequestInfo, ToolCallResponseInfo } from '../core/turn.js';
 import { MockTool } from '../test-utils/mock-tool.js';
 
 describe('Circular Reference Handling', () => {
@@ -38,9 +35,7 @@ describe('Circular Reference Handling', () => {
       agent: null,
     };
     circularObject.agent = circularObject; // Create circular reference
-    circularObject.sockets['test-host'] = [
-      { _httpMessage: { agent: circularObject } },
-    ];
+    circularObject.sockets['test-host'] = [{ _httpMessage: { agent: circularObject } }];
 
     // Create a mock CompletedToolCall with circular references in function_args
     const mockRequest: ToolCallRequestInfo = {

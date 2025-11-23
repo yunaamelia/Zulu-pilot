@@ -19,10 +19,7 @@ import {
   getSpecificMimeType,
 } from '../utils/fileUtils.js';
 import type { PartListUnion } from '@google/genai';
-import {
-  type Config,
-  DEFAULT_FILE_FILTERING_OPTIONS,
-} from '../config/config.js';
+import { type Config, DEFAULT_FILE_FILTERING_OPTIONS } from '../config/config.js';
 import { FileOperation } from '../telemetry/metrics.js';
 import { getProgrammingLanguage } from '../telemetry/telemetry-utils.js';
 import { logFileOperation } from '../telemetry/loggers.js';
@@ -100,16 +97,13 @@ function getDefaultExcludes(config?: Config): string[] {
 const DEFAULT_OUTPUT_SEPARATOR_FORMAT = '--- {filePath} ---';
 const DEFAULT_OUTPUT_TERMINATOR = '\n--- End of content ---';
 
-class ReadManyFilesToolInvocation extends BaseToolInvocation<
-  ReadManyFilesParams,
-  ToolResult
-> {
+class ReadManyFilesToolInvocation extends BaseToolInvocation<ReadManyFilesParams, ToolResult> {
   constructor(
     private readonly config: Config,
     params: ReadManyFilesParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
   }
@@ -124,25 +118,22 @@ ${this.config.getTargetDir()}
     // Determine the final list of exclusion patterns exactly as in execute method
     const paramExcludes = this.params.exclude || [];
     const paramUseDefaultExcludes = this.params.useDefaultExcludes !== false;
-    const finalExclusionPatternsForDescription: string[] =
-      paramUseDefaultExcludes
-        ? [...getDefaultExcludes(this.config), ...paramExcludes]
-        : [...paramExcludes];
+    const finalExclusionPatternsForDescription: string[] = paramUseDefaultExcludes
+      ? [...getDefaultExcludes(this.config), ...paramExcludes]
+      : [...paramExcludes];
 
     const excludeDesc = `Excluding: ${
       finalExclusionPatternsForDescription.length > 0
         ? `patterns like 
 ${finalExclusionPatternsForDescription
   .slice(0, 2)
-  .join(
-    '`, `',
-  )}${finalExclusionPatternsForDescription.length > 2 ? '...`' : '`'}`
+  .join('`, `')}${finalExclusionPatternsForDescription.length > 2 ? '...`' : '`'}`
         : 'none specified'
     }`;
 
     return `Will attempt to read and concatenate files ${pathDesc}. ${excludeDesc}. File encoding: ${DEFAULT_ENCODING}. Separator: "${DEFAULT_OUTPUT_SEPARATOR_FORMAT.replace(
       '{filePath}',
-      'path/to/file.ext',
+      'path/to/file.ext'
     )}".`;
   }
 
@@ -189,29 +180,26 @@ ${finalExclusionPatternsForDescription
         }
       }
       const relativeEntries = Array.from(allEntries).map((p) =>
-        path.relative(this.config.getTargetDir(), p),
+        path.relative(this.config.getTargetDir(), p)
       );
 
       const fileDiscovery = this.config.getFileService();
-      const { filteredPaths, ignoredCount } =
-        fileDiscovery.filterFilesWithReport(relativeEntries, {
-          respectGitIgnore:
-            this.params.file_filtering_options?.respect_git_ignore ??
-            this.config.getFileFilteringOptions().respectGitIgnore ??
-            DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
-          respectGeminiIgnore:
-            this.params.file_filtering_options?.respect_gemini_ignore ??
-            this.config.getFileFilteringOptions().respectGeminiIgnore ??
-            DEFAULT_FILE_FILTERING_OPTIONS.respectGeminiIgnore,
-        });
+      const { filteredPaths, ignoredCount } = fileDiscovery.filterFilesWithReport(relativeEntries, {
+        respectGitIgnore:
+          this.params.file_filtering_options?.respect_git_ignore ??
+          this.config.getFileFilteringOptions().respectGitIgnore ??
+          DEFAULT_FILE_FILTERING_OPTIONS.respectGitIgnore,
+        respectGeminiIgnore:
+          this.params.file_filtering_options?.respect_gemini_ignore ??
+          this.config.getFileFilteringOptions().respectGeminiIgnore ??
+          DEFAULT_FILE_FILTERING_OPTIONS.respectGeminiIgnore,
+      });
 
       for (const relativePath of filteredPaths) {
         // Security check: ensure the glob library didn't return something outside the workspace.
 
         const fullPath = path.resolve(this.config.getTargetDir(), relativePath);
-        if (
-          !this.config.getWorkspaceContext().isPathWithinWorkspace(fullPath)
-        ) {
+        if (!this.config.getWorkspaceContext().isPathWithinWorkspace(fullPath)) {
           skippedFiles.push({
             path: fullPath,
             reason: `Security: Glob library returned path outside workspace. Path: ${fullPath}`,
@@ -253,14 +241,11 @@ ${finalExclusionPatternsForDescription
 
           if (fileType === 'image' || fileType === 'pdf') {
             const fileExtension = path.extname(filePath).toLowerCase();
-            const fileNameWithoutExtension = path.basename(
-              filePath,
-              fileExtension,
-            );
+            const fileNameWithoutExtension = path.basename(filePath, fileExtension);
             const requestedExplicitly = include.some(
               (pattern: string) =>
                 pattern.toLowerCase().includes(fileExtension) ||
-                pattern.includes(fileNameWithoutExtension),
+                pattern.includes(fileNameWithoutExtension)
             );
 
             if (!requestedExplicitly) {
@@ -268,8 +253,7 @@ ${finalExclusionPatternsForDescription
                 success: false,
                 filePath,
                 relativePathForDisplay,
-                reason:
-                  'asset file (image/pdf) was not explicitly requested by name or extension',
+                reason: 'asset file (image/pdf) was not explicitly requested by name or extension',
               };
             }
           }
@@ -278,7 +262,7 @@ ${finalExclusionPatternsForDescription
           const fileReadResult = await processSingleFileContent(
             filePath,
             this.config.getTargetDir(),
-            this.config.getFileSystemService(),
+            this.config.getFileSystemService()
           );
 
           if (fileReadResult.error) {
@@ -308,7 +292,7 @@ ${finalExclusionPatternsForDescription
             reason: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
           };
         }
-      },
+      }
     );
 
     const results = await Promise.allSettled(fileProcessingPromises);
@@ -325,14 +309,10 @@ ${finalExclusionPatternsForDescription
           });
         } else {
           // Handle successfully processed files
-          const { filePath, relativePathForDisplay, fileReadResult } =
-            fileResult;
+          const { filePath, relativePathForDisplay, fileReadResult } = fileResult;
 
           if (typeof fileReadResult.llmContent === 'string') {
-            const separator = DEFAULT_OUTPUT_SEPARATOR_FORMAT.replace(
-              '{filePath}',
-              filePath,
-            );
+            const separator = DEFAULT_OUTPUT_SEPARATOR_FORMAT.replace('{filePath}', filePath);
             let fileContentForLlm = '';
             if (fileReadResult.isTruncated) {
               fileContentForLlm += `[WARNING: This file was truncated. To view the full content, use the 'read_file' tool on this specific file.]\n\n`;
@@ -362,8 +342,8 @@ ${finalExclusionPatternsForDescription
               lines,
               mimetype,
               path.extname(filePath),
-              programming_language,
-            ),
+              programming_language
+            )
           );
         }
       } else {
@@ -380,14 +360,10 @@ ${finalExclusionPatternsForDescription
       displayMessage += `Successfully read and concatenated content from **${processedFilesRelativePaths.length} file(s)**.\n`;
       if (processedFilesRelativePaths.length <= 10) {
         displayMessage += `\n**Processed Files:**\n`;
-        processedFilesRelativePaths.forEach(
-          (p) => (displayMessage += `- \`${p}\`\n`),
-        );
+        processedFilesRelativePaths.forEach((p) => (displayMessage += `- \`${p}\`\n`));
       } else {
         displayMessage += `\n**Processed Files (first 10 shown):**\n`;
-        processedFilesRelativePaths
-          .slice(0, 10)
-          .forEach((p) => (displayMessage += `- \`${p}\`\n`));
+        processedFilesRelativePaths.slice(0, 10).forEach((p) => (displayMessage += `- \`${p}\`\n`));
         displayMessage += `- ...and ${processedFilesRelativePaths.length - 10} more.\n`;
       }
     }
@@ -403,25 +379,18 @@ ${finalExclusionPatternsForDescription
       }
       skippedFiles
         .slice(0, 5)
-        .forEach(
-          (f) => (displayMessage += `- \`${f.path}\` (Reason: ${f.reason})\n`),
-        );
+        .forEach((f) => (displayMessage += `- \`${f.path}\` (Reason: ${f.reason})\n`));
       if (skippedFiles.length > 5) {
         displayMessage += `- ...and ${skippedFiles.length - 5} more.\n`;
       }
-    } else if (
-      processedFilesRelativePaths.length === 0 &&
-      skippedFiles.length === 0
-    ) {
+    } else if (processedFilesRelativePaths.length === 0 && skippedFiles.length === 0) {
       displayMessage += `No files were read and concatenated based on the criteria.\n`;
     }
 
     if (contentParts.length > 0) {
       contentParts.push(DEFAULT_OUTPUT_TERMINATOR);
     } else {
-      contentParts.push(
-        'No files matching the criteria were found or all were skipped.',
-      );
+      contentParts.push('No files matching the criteria were found or all were skipped.');
     }
     return {
       llmContent: contentParts,
@@ -435,15 +404,12 @@ ${finalExclusionPatternsForDescription
  * within a specified target directory. The content is concatenated.
  * It is intended to run in an environment with access to the local file system (e.g., a Node.js backend).
  */
-export class ReadManyFilesTool extends BaseDeclarativeTool<
-  ReadManyFilesParams,
-  ToolResult
-> {
+export class ReadManyFilesTool extends BaseDeclarativeTool<ReadManyFilesParams, ToolResult> {
   static readonly Name = READ_MANY_FILES_TOOL_NAME;
 
   constructor(
     private config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     const parameterSchema = {
       type: 'object',
@@ -481,8 +447,7 @@ export class ReadManyFilesTool extends BaseDeclarativeTool<
           default: true,
         },
         file_filtering_options: {
-          description:
-            'Whether to respect ignore patterns from .gitignore or .geminiignore',
+          description: 'Whether to respect ignore patterns from .gitignore or .geminiignore',
           type: 'object',
           properties: {
             respect_git_ignore: {
@@ -518,7 +483,7 @@ Use this tool when the user's query implies needing the content of several files
       parameterSchema,
       true, // isOutputMarkdown
       false, // canUpdateOutput
-      messageBus,
+      messageBus
     );
   }
 
@@ -526,14 +491,14 @@ Use this tool when the user's query implies needing the content of several files
     params: ReadManyFilesParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<ReadManyFilesParams, ToolResult> {
     return new ReadManyFilesToolInvocation(
       this.config,
       params,
       messageBus,
       _toolName,
-      _toolDisplayName,
+      _toolDisplayName
     );
   }
 }

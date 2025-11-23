@@ -20,7 +20,7 @@ function ruleMatches(
   rule: PolicyRule | SafetyCheckerRule,
   toolCall: FunctionCall,
   stringifiedArgs: string | undefined,
-  serverName: string | undefined,
+  serverName: string | undefined
 ): boolean {
   // Check tool name if specified
   if (rule.toolName) {
@@ -50,10 +50,7 @@ function ruleMatches(
       return false;
     }
     // Use stable JSON stringification with sorted keys to ensure consistent matching
-    if (
-      stringifiedArgs === undefined ||
-      !rule.argsPattern.test(stringifiedArgs)
-    ) {
+    if (stringifiedArgs === undefined || !rule.argsPattern.test(stringifiedArgs)) {
       return false;
     }
   }
@@ -69,12 +66,8 @@ export class PolicyEngine {
   private readonly checkerRunner?: CheckerRunner;
 
   constructor(config: PolicyEngineConfig = {}, checkerRunner?: CheckerRunner) {
-    this.rules = (config.rules ?? []).sort(
-      (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
-    );
-    this.checkers = (config.checkers ?? []).sort(
-      (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
-    );
+    this.rules = (config.rules ?? []).sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    this.checkers = (config.checkers ?? []).sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     this.defaultDecision = config.defaultDecision ?? PolicyDecision.ASK_USER;
     this.nonInteractive = config.nonInteractive ?? false;
     this.checkerRunner = checkerRunner;
@@ -86,7 +79,7 @@ export class PolicyEngine {
    */
   async check(
     toolCall: FunctionCall,
-    serverName: string | undefined,
+    serverName: string | undefined
   ): Promise<{
     decision: PolicyDecision;
     rule?: PolicyRule;
@@ -102,7 +95,7 @@ export class PolicyEngine {
     }
 
     debugLogger.debug(
-      `[PolicyEngine.check] toolCall.name: ${toolCall.name}, stringifiedArgs: ${stringifiedArgs}`,
+      `[PolicyEngine.check] toolCall.name: ${toolCall.name}, stringifiedArgs: ${stringifiedArgs}`
     );
 
     // Find the first matching rule (already sorted by priority)
@@ -112,7 +105,7 @@ export class PolicyEngine {
     for (const rule of this.rules) {
       if (ruleMatches(rule, toolCall, stringifiedArgs, serverName)) {
         debugLogger.debug(
-          `[PolicyEngine.check] MATCHED rule: toolName=${rule.toolName}, decision=${rule.decision}, priority=${rule.priority}, argsPattern=${rule.argsPattern?.source || 'none'}`,
+          `[PolicyEngine.check] MATCHED rule: toolName=${rule.toolName}, decision=${rule.decision}, priority=${rule.priority}, argsPattern=${rule.argsPattern?.source || 'none'}`
         );
         matchedRule = rule;
         decision = this.applyNonInteractiveMode(rule.decision);
@@ -123,7 +116,7 @@ export class PolicyEngine {
     if (!decision) {
       // No matching rule found, use default decision
       debugLogger.debug(
-        `[PolicyEngine.check] NO MATCH - using default decision: ${this.defaultDecision}`,
+        `[PolicyEngine.check] NO MATCH - using default decision: ${this.defaultDecision}`
       );
       decision = this.applyNonInteractiveMode(this.defaultDecision);
     }
@@ -133,32 +126,25 @@ export class PolicyEngine {
       for (const checkerRule of this.checkers) {
         if (ruleMatches(checkerRule, toolCall, stringifiedArgs, serverName)) {
           debugLogger.debug(
-            `[PolicyEngine.check] Running safety checker: ${checkerRule.checker.name}`,
+            `[PolicyEngine.check] Running safety checker: ${checkerRule.checker.name}`
           );
           try {
-            const result = await this.checkerRunner.runChecker(
-              toolCall,
-              checkerRule.checker,
-            );
+            const result = await this.checkerRunner.runChecker(toolCall, checkerRule.checker);
 
             if (result.decision === SafetyCheckDecision.DENY) {
-              debugLogger.debug(
-                `[PolicyEngine.check] Safety checker denied: ${result.reason}`,
-              );
+              debugLogger.debug(`[PolicyEngine.check] Safety checker denied: ${result.reason}`);
               return {
                 decision: PolicyDecision.DENY,
                 rule: matchedRule,
               };
             } else if (result.decision === SafetyCheckDecision.ASK_USER) {
               debugLogger.debug(
-                `[PolicyEngine.check] Safety checker requested ASK_USER: ${result.reason}`,
+                `[PolicyEngine.check] Safety checker requested ASK_USER: ${result.reason}`
               );
               decision = PolicyDecision.ASK_USER;
             }
           } catch (error) {
-            debugLogger.debug(
-              `[PolicyEngine.check] Safety checker failed: ${error}`,
-            );
+            debugLogger.debug(`[PolicyEngine.check] Safety checker failed: ${error}`);
             return {
               decision: PolicyDecision.DENY,
               rule: matchedRule,

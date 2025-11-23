@@ -31,46 +31,40 @@ describe('OAuthUtils', () => {
     it('should build standard root-based URLs by default', () => {
       const urls = OAuthUtils.buildWellKnownUrls('https://example.com/mcp');
       expect(urls.protectedResource).toBe(
-        'https://example.com/.well-known/oauth-protected-resource',
+        'https://example.com/.well-known/oauth-protected-resource'
       );
       expect(urls.authorizationServer).toBe(
-        'https://example.com/.well-known/oauth-authorization-server',
+        'https://example.com/.well-known/oauth-authorization-server'
       );
     });
 
     it('should build path-based URLs when includePathSuffix is true', () => {
-      const urls = OAuthUtils.buildWellKnownUrls(
-        'https://example.com/mcp',
-        true,
-      );
+      const urls = OAuthUtils.buildWellKnownUrls('https://example.com/mcp', true);
       expect(urls.protectedResource).toBe(
-        'https://example.com/.well-known/oauth-protected-resource/mcp',
+        'https://example.com/.well-known/oauth-protected-resource/mcp'
       );
       expect(urls.authorizationServer).toBe(
-        'https://example.com/.well-known/oauth-authorization-server/mcp',
+        'https://example.com/.well-known/oauth-authorization-server/mcp'
       );
     });
 
     it('should handle root path correctly', () => {
       const urls = OAuthUtils.buildWellKnownUrls('https://example.com', true);
       expect(urls.protectedResource).toBe(
-        'https://example.com/.well-known/oauth-protected-resource',
+        'https://example.com/.well-known/oauth-protected-resource'
       );
       expect(urls.authorizationServer).toBe(
-        'https://example.com/.well-known/oauth-authorization-server',
+        'https://example.com/.well-known/oauth-authorization-server'
       );
     });
 
     it('should handle trailing slash in path', () => {
-      const urls = OAuthUtils.buildWellKnownUrls(
-        'https://example.com/mcp/',
-        true,
-      );
+      const urls = OAuthUtils.buildWellKnownUrls('https://example.com/mcp/', true);
       expect(urls.protectedResource).toBe(
-        'https://example.com/.well-known/oauth-protected-resource/mcp',
+        'https://example.com/.well-known/oauth-protected-resource/mcp'
       );
       expect(urls.authorizationServer).toBe(
-        'https://example.com/.well-known/oauth-authorization-server/mcp',
+        'https://example.com/.well-known/oauth-authorization-server/mcp'
       );
     });
   });
@@ -89,7 +83,7 @@ describe('OAuthUtils', () => {
       });
 
       const result = await OAuthUtils.fetchProtectedResourceMetadata(
-        'https://example.com/.well-known/oauth-protected-resource',
+        'https://example.com/.well-known/oauth-protected-resource'
       );
 
       expect(result).toEqual(mockResourceMetadata);
@@ -101,7 +95,7 @@ describe('OAuthUtils', () => {
       });
 
       const result = await OAuthUtils.fetchProtectedResourceMetadata(
-        'https://example.com/.well-known/oauth-protected-resource',
+        'https://example.com/.well-known/oauth-protected-resource'
       );
 
       expect(result).toBeNull();
@@ -123,7 +117,7 @@ describe('OAuthUtils', () => {
       });
 
       const result = await OAuthUtils.fetchAuthorizationServerMetadata(
-        'https://auth.example.com/.well-known/oauth-authorization-server',
+        'https://auth.example.com/.well-known/oauth-authorization-server'
       );
 
       expect(result).toEqual(mockAuthServerMetadata);
@@ -135,7 +129,7 @@ describe('OAuthUtils', () => {
       });
 
       const result = await OAuthUtils.fetchAuthorizationServerMetadata(
-        'https://auth.example.com/.well-known/oauth-authorization-server',
+        'https://auth.example.com/.well-known/oauth-authorization-server'
       );
 
       expect(result).toBeNull();
@@ -161,18 +155,18 @@ describe('OAuthUtils', () => {
         });
 
       const result = await OAuthUtils.discoverAuthorizationServerMetadata(
-        'https://auth.example.com/',
+        'https://auth.example.com/'
       );
 
       expect(result).toEqual(mockAuthServerMetadata);
 
       expect(mockFetch).nthCalledWith(
         1,
-        'https://auth.example.com/.well-known/oauth-authorization-server',
+        'https://auth.example.com/.well-known/oauth-authorization-server'
       );
       expect(mockFetch).nthCalledWith(
         2,
-        'https://auth.example.com/.well-known/openid-configuration',
+        'https://auth.example.com/.well-known/openid-configuration'
       );
     });
 
@@ -190,22 +184,22 @@ describe('OAuthUtils', () => {
         });
 
       const result = await OAuthUtils.discoverAuthorizationServerMetadata(
-        'https://auth.example.com/mcp',
+        'https://auth.example.com/mcp'
       );
 
       expect(result).toEqual(mockAuthServerMetadata);
 
       expect(mockFetch).nthCalledWith(
         1,
-        'https://auth.example.com/.well-known/oauth-authorization-server/mcp',
+        'https://auth.example.com/.well-known/oauth-authorization-server/mcp'
       );
       expect(mockFetch).nthCalledWith(
         2,
-        'https://auth.example.com/.well-known/openid-configuration/mcp',
+        'https://auth.example.com/.well-known/openid-configuration/mcp'
       );
       expect(mockFetch).nthCalledWith(
         3,
-        'https://auth.example.com/mcp/.well-known/openid-configuration',
+        'https://auth.example.com/mcp/.well-known/openid-configuration'
       );
     });
   });
@@ -246,9 +240,7 @@ describe('OAuthUtils', () => {
       const header =
         'Bearer realm="example", resource_metadata="https://example.com/.well-known/oauth-protected-resource"';
       const result = OAuthUtils.parseWWWAuthenticateHeader(header);
-      expect(result).toBe(
-        'https://example.com/.well-known/oauth-protected-resource',
-      );
+      expect(result).toBe('https://example.com/.well-known/oauth-protected-resource');
     });
 
     it('should return null when no resource metadata URI is found', () => {
@@ -265,9 +257,7 @@ describe('OAuthUtils', () => {
     });
 
     it('should handle URLs with ports', () => {
-      const result = OAuthUtils.extractBaseUrl(
-        'https://example.com:8080/mcp/v1',
-      );
+      const result = OAuthUtils.extractBaseUrl('https://example.com:8080/mcp/v1');
       expect(result).toBe('https://example.com:8080');
     });
   });
@@ -275,9 +265,7 @@ describe('OAuthUtils', () => {
   describe('isSSEEndpoint', () => {
     it('should return true for SSE endpoints', () => {
       expect(OAuthUtils.isSSEEndpoint('https://example.com/sse')).toBe(true);
-      expect(OAuthUtils.isSSEEndpoint('https://example.com/api/v1/sse')).toBe(
-        true,
-      );
+      expect(OAuthUtils.isSSEEndpoint('https://example.com/api/v1/sse')).toBe(true);
     });
 
     it('should return true for non-MCP endpoints', () => {
@@ -286,37 +274,31 @@ describe('OAuthUtils', () => {
 
     it('should return false for MCP endpoints', () => {
       expect(OAuthUtils.isSSEEndpoint('https://example.com/mcp')).toBe(false);
-      expect(OAuthUtils.isSSEEndpoint('https://example.com/api/mcp/v1')).toBe(
-        false,
-      );
+      expect(OAuthUtils.isSSEEndpoint('https://example.com/api/mcp/v1')).toBe(false);
     });
   });
 
   describe('buildResourceParameter', () => {
     it('should build resource parameter from endpoint URL', () => {
-      const result = OAuthUtils.buildResourceParameter(
-        'https://example.com/oauth/token',
-      );
+      const result = OAuthUtils.buildResourceParameter('https://example.com/oauth/token');
       expect(result).toBe('https://example.com/oauth/token');
     });
 
     it('should handle URLs with ports', () => {
-      const result = OAuthUtils.buildResourceParameter(
-        'https://example.com:8080/oauth/token',
-      );
+      const result = OAuthUtils.buildResourceParameter('https://example.com:8080/oauth/token');
       expect(result).toBe('https://example.com:8080/oauth/token');
     });
 
     it('should strip query parameters from the URL', () => {
       const result = OAuthUtils.buildResourceParameter(
-        'https://example.com/api/v1/data?user=123&scope=read',
+        'https://example.com/api/v1/data?user=123&scope=read'
       );
       expect(result).toBe('https://example.com/api/v1/data');
     });
 
     it('should strip URL fragments from the URL', () => {
       const result = OAuthUtils.buildResourceParameter(
-        'https://example.com/api/v1/data#section-one',
+        'https://example.com/api/v1/data#section-one'
       );
       expect(result).toBe('https://example.com/api/v1/data');
     });

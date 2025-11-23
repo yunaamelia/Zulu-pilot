@@ -219,7 +219,7 @@ describe('BINARY_EXTENSIONS', () => {
   it('should not contain invalid extensions from brace patterns', () => {
     // If brace expansion was not handled correctly, we would see invalid extensions like '.{jpg,png}'
     const invalidExtensions = BINARY_EXTENSIONS.filter(
-      (ext) => ext.includes('{') || ext.includes('}'),
+      (ext) => ext.includes('{') || ext.includes('}')
     );
     expect(invalidExtensions).toHaveLength(0);
   });
@@ -227,16 +227,8 @@ describe('BINARY_EXTENSIONS', () => {
 
 describe('extractExtensionsFromPatterns', () => {
   it.each([
-    [
-      'simple extensions',
-      ['**/*.exe', '**/*.jar', '**/*.zip'],
-      ['.exe', '.jar', '.zip'],
-    ],
-    [
-      'compound extensions',
-      ['**/*.tar.gz', '**/*.min.js', '**/*.d.ts'],
-      ['.gz', '.js', '.ts'],
-    ],
+    ['simple extensions', ['**/*.exe', '**/*.jar', '**/*.zip'], ['.exe', '.jar', '.zip']],
+    ['compound extensions', ['**/*.tar.gz', '**/*.min.js', '**/*.d.ts'], ['.gz', '.js', '.ts']],
     [
       'dotfiles',
       ['**/*.gitignore', '**/*.profile', '**/*.bashrc'],

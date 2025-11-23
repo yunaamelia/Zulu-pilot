@@ -5,11 +5,7 @@
  */
 
 import { FunctionCallingConfigMode } from '@google/genai';
-import type {
-  HookOutput,
-  HookExecutionResult,
-  BeforeToolSelectionOutput,
-} from './types.js';
+import type { HookOutput, HookExecutionResult, BeforeToolSelectionOutput } from './types.js';
 import {
   DefaultHookOutput,
   BeforeToolHookOutput,
@@ -37,10 +33,7 @@ export class HookAggregator {
   /**
    * Aggregate results from multiple hook executions
    */
-  aggregateResults(
-    results: HookExecutionResult[],
-    eventName: HookEventName,
-  ): AggregatedHookResult {
+  aggregateResults(results: HookExecutionResult[], eventName: HookEventName): AggregatedHookResult {
     const allOutputs: HookOutput[] = [];
     const errors: Error[] = [];
     let totalDuration = 0;
@@ -79,10 +72,7 @@ export class HookAggregator {
    * Note: We always use the merge logic even for single hooks to ensure
    * consistent default behaviors (e.g., default decision='allow' for OR logic)
    */
-  private mergeOutputs(
-    outputs: HookOutput[],
-    eventName: HookEventName,
-  ): HookOutput | undefined {
+  private mergeOutputs(outputs: HookOutput[], eventName: HookEventName): HookOutput | undefined {
     if (outputs.length === 0) {
       return undefined;
     }
@@ -100,9 +90,7 @@ export class HookAggregator {
         return this.mergeWithFieldReplacement(outputs);
 
       case HookEventName.BeforeToolSelection:
-        return this.mergeToolSelectionOutputs(
-          outputs as BeforeToolSelectionOutput[],
-        );
+        return this.mergeToolSelectionOutputs(outputs as BeforeToolSelectionOutput[]);
 
       default:
         // For other events, use simple merge
@@ -226,7 +214,7 @@ export class HookAggregator {
    * If one hook restricts and another re-enables, the union takes the re-enabled tool.
    */
   private mergeToolSelectionOutputs(
-    outputs: BeforeToolSelectionOutput[],
+    outputs: BeforeToolSelectionOutput[]
   ): BeforeToolSelectionOutput {
     const merged: BeforeToolSelectionOutput = {};
 
@@ -304,7 +292,7 @@ export class HookAggregator {
    */
   private createSpecificHookOutput(
     output: HookOutput,
-    eventName: HookEventName,
+    eventName: HookEventName
   ): DefaultHookOutput {
     switch (eventName) {
       case HookEventName.BeforeTool:
@@ -323,20 +311,14 @@ export class HookAggregator {
   /**
    * Extract additional context from hook-specific outputs
    */
-  private extractAdditionalContext(
-    output: HookOutput,
-    contexts: string[],
-  ): void {
+  private extractAdditionalContext(output: HookOutput, contexts: string[]): void {
     const specific = output.hookSpecificOutput;
     if (!specific) {
       return;
     }
 
     // Extract additionalContext from various hook types
-    if (
-      'additionalContext' in specific &&
-      typeof specific['additionalContext'] === 'string'
-    ) {
+    if ('additionalContext' in specific && typeof specific['additionalContext'] === 'string') {
       contexts.push(specific['additionalContext']);
     }
   }

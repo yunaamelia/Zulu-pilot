@@ -37,10 +37,7 @@ export class FileDiscoveryService {
     if (this.gitIgnoreFilter) {
       const geminiPatterns = this.geminiIgnoreFilter.getPatterns();
       // Create combined parser: .gitignore + .geminiignore
-      this.combinedIgnoreFilter = new GitIgnoreParser(
-        this.projectRoot,
-        geminiPatterns,
-      );
+      this.combinedIgnoreFilter = new GitIgnoreParser(this.projectRoot, geminiPatterns);
     }
   }
 
@@ -50,11 +47,7 @@ export class FileDiscoveryService {
   filterFiles(filePaths: string[], options: FilterFilesOptions = {}): string[] {
     const { respectGitIgnore = true, respectGeminiIgnore = true } = options;
     return filePaths.filter((filePath) => {
-      if (
-        respectGitIgnore &&
-        respectGeminiIgnore &&
-        this.combinedIgnoreFilter
-      ) {
+      if (respectGitIgnore && respectGeminiIgnore && this.combinedIgnoreFilter) {
         return !this.combinedIgnoreFilter.isIgnored(filePath);
       }
 
@@ -77,7 +70,7 @@ export class FileDiscoveryService {
     opts: FilterFilesOptions = {
       respectGitIgnore: true,
       respectGeminiIgnore: true,
-    },
+    }
   ): FilterReport {
     const filteredPaths = this.filterFiles(filePaths, opts);
     const ignoredCount = filePaths.length - filteredPaths.length;
@@ -91,10 +84,7 @@ export class FileDiscoveryService {
   /**
    * Unified method to check if a file should be ignored based on filtering options
    */
-  shouldIgnoreFile(
-    filePath: string,
-    options: FilterFilesOptions = {},
-  ): boolean {
+  shouldIgnoreFile(filePath: string, options: FilterFilesOptions = {}): boolean {
     return this.filterFiles([filePath], options).length === 0;
   }
 }

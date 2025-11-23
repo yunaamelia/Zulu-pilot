@@ -31,12 +31,12 @@ import type { IModelAdapter } from '@zulu-pilot/adapter';
 export interface ContentGenerator {
   generateContent(
     request: GenerateContentParameters,
-    userPromptId: string,
+    userPromptId: string
   ): Promise<GenerateContentResponse>;
 
   generateContentStream(
     request: GenerateContentParameters,
-    userPromptId: string,
+    userPromptId: string
   ): Promise<AsyncGenerator<GenerateContentResponse>>;
 
   countTokens(request: CountTokensParameters): Promise<CountTokensResponse>;
@@ -63,15 +63,12 @@ export type ContentGeneratorConfig = {
 
 export async function createContentGeneratorConfig(
   config: Config,
-  authType: AuthType | undefined,
+  authType: AuthType | undefined
 ): Promise<ContentGeneratorConfig> {
-  const geminiApiKey =
-    (await loadApiKey()) || process.env['GEMINI_API_KEY'] || undefined;
+  const geminiApiKey = (await loadApiKey()) || process.env['GEMINI_API_KEY'] || undefined;
   const googleApiKey = process.env['GOOGLE_API_KEY'] || undefined;
   const googleCloudProject =
-    process.env['GOOGLE_CLOUD_PROJECT'] ||
-    process.env['GOOGLE_CLOUD_PROJECT_ID'] ||
-    undefined;
+    process.env['GOOGLE_CLOUD_PROJECT'] || process.env['GOOGLE_CLOUD_PROJECT_ID'] || undefined;
   const googleCloudLocation = process.env['GOOGLE_CLOUD_LOCATION'] || undefined;
 
   const contentGeneratorConfig: ContentGeneratorConfig = {
@@ -80,10 +77,7 @@ export async function createContentGeneratorConfig(
   };
 
   // If we are using Google auth or we are in Cloud Shell, there is nothing else to validate for now
-  if (
-    authType === AuthType.LOGIN_WITH_GOOGLE ||
-    authType === AuthType.COMPUTE_ADC
-  ) {
+  if (authType === AuthType.LOGIN_WITH_GOOGLE || authType === AuthType.COMPUTE_ADC) {
     return contentGeneratorConfig;
   }
 
@@ -111,7 +105,7 @@ export async function createContentGenerator(
   config: ContentGeneratorConfig,
   gcConfig: Config,
   sessionId?: string,
-  zuluPilotAdapter?: IModelAdapter,
+  zuluPilotAdapter?: IModelAdapter
 ): Promise<ContentGenerator> {
   // Check if Zulu Pilot adapter is provided
   if (zuluPilotAdapter) {
@@ -133,20 +127,12 @@ export async function createContentGenerator(
     ) {
       const httpOptions = { headers: baseHeaders };
       return new LoggingContentGenerator(
-        await createCodeAssistContentGenerator(
-          httpOptions,
-          config.authType,
-          gcConfig,
-          sessionId,
-        ),
-        gcConfig,
+        await createCodeAssistContentGenerator(httpOptions, config.authType, gcConfig, sessionId),
+        gcConfig
       );
     }
 
-    if (
-      config.authType === AuthType.USE_GEMINI ||
-      config.authType === AuthType.USE_VERTEX_AI
-    ) {
+    if (config.authType === AuthType.USE_GEMINI || config.authType === AuthType.USE_VERTEX_AI) {
       let headers: Record<string, string> = { ...baseHeaders };
       if (gcConfig?.getUsageStatisticsEnabled()) {
         const installationManager = new InstallationManager();
@@ -165,9 +151,7 @@ export async function createContentGenerator(
       });
       return new LoggingContentGenerator(googleGenAI.models, gcConfig);
     }
-    throw new Error(
-      `Error creating contentGenerator: Unsupported authType: ${config.authType}`,
-    );
+    throw new Error(`Error creating contentGenerator: Unsupported authType: ${config.authType}`);
   })();
 
   if (gcConfig.recordResponses) {

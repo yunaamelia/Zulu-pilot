@@ -7,8 +7,7 @@
 import { vi } from 'vitest';
 
 vi.mock('node:child_process', async (importOriginal) => {
-  const actual =
-    (await importOriginal()) as typeof import('node:child_process');
+  const actual = (await importOriginal()) as typeof import('node:child_process');
   return {
     ...actual,
     execSync: vi.fn(),
@@ -38,15 +37,15 @@ describe('ide-installer', () => {
   });
 
   describe('getIdeInstaller', () => {
-    it.each([
-      { ide: IDE_DEFINITIONS.vscode },
-      { ide: IDE_DEFINITIONS.firebasestudio },
-    ])('returns a VsCodeInstaller for "$ide.name"', ({ ide }) => {
-      const installer = getIdeInstaller(ide);
+    it.each([{ ide: IDE_DEFINITIONS.vscode }, { ide: IDE_DEFINITIONS.firebasestudio }])(
+      'returns a VsCodeInstaller for "$ide.name"',
+      ({ ide }) => {
+        const installer = getIdeInstaller(ide);
 
-      expect(installer).not.toBeNull();
-      expect(installer?.install).toEqual(expect.any(Function));
-    });
+        expect(installer).not.toBeNull();
+        expect(installer?.install).toEqual(expect.any(Function));
+      }
+    );
 
     it('returns an AntigravityInstaller for "antigravity"', () => {
       const installer = getIdeInstaller(IDE_DEFINITIONS.antigravity);
@@ -81,10 +80,7 @@ describe('ide-installer', () => {
           platform: 'win32' as NodeJS.Platform,
           expectedLookupPaths: [
             path.join('C:\\Program Files', 'Microsoft VS Code/bin/code.cmd'),
-            path.join(
-              HOME_DIR,
-              '/AppData/Local/Programs/Microsoft VS Code/bin/code.cmd',
-            ),
+            path.join(HOME_DIR, '/AppData/Local/Programs/Microsoft VS Code/bin/code.cmd'),
           ],
         },
         {
@@ -111,7 +107,7 @@ describe('ide-installer', () => {
           for (const [idx, path] of expectedLookupPaths.entries()) {
             expect(fs.existsSync).toHaveBeenNthCalledWith(idx + 1, path);
           }
-        },
+        }
       );
 
       it('installs the extension using code cli', async () => {
@@ -121,12 +117,8 @@ describe('ide-installer', () => {
         await installer.install();
         expect(child_process.spawnSync).toHaveBeenCalledWith(
           'code',
-          [
-            '--install-extension',
-            'google.gemini-cli-vscode-ide-companion',
-            '--force',
-          ],
-          { stdio: 'pipe', shell: false },
+          ['--install-extension', 'google.gemini-cli-vscode-ide-companion', '--force'],
+          { stdio: 'pipe', shell: false }
         );
       });
 
@@ -138,35 +130,26 @@ describe('ide-installer', () => {
         await installer.install();
         expect(child_process.spawnSync).toHaveBeenCalledWith(
           'C:\\Program Files\\Microsoft VS Code\\bin\\code.cmd',
-          [
-            '--install-extension',
-            'google.gemini-cli-vscode-ide-companion',
-            '--force',
-          ],
-          { stdio: 'pipe', shell: true },
+          ['--install-extension', 'google.gemini-cli-vscode-ide-companion', '--force'],
+          { stdio: 'pipe', shell: true }
         );
       });
 
       it.each([
         {
           ide: IDE_DEFINITIONS.vscode,
-          expectedMessage:
-            'VS Code companion extension was installed successfully',
+          expectedMessage: 'VS Code companion extension was installed successfully',
         },
         {
           ide: IDE_DEFINITIONS.firebasestudio,
-          expectedMessage:
-            'Firebase Studio companion extension was installed successfully',
+          expectedMessage: 'Firebase Studio companion extension was installed successfully',
         },
-      ])(
-        'returns that the cli was installed successfully',
-        async ({ ide, expectedMessage }) => {
-          const { installer } = setup({ ide });
-          const result = await installer.install();
-          expect(result.success).toBe(true);
-          expect(result.message).toContain(expectedMessage);
-        },
-      );
+      ])('returns that the cli was installed successfully', async ({ ide, expectedMessage }) => {
+        const { installer } = setup({ ide });
+        const result = await installer.install();
+        expect(result.success).toBe(true);
+        expect(result.message).toContain(expectedMessage);
+      });
 
       it.each([
         {
@@ -190,7 +173,7 @@ describe('ide-installer', () => {
           const result = await installer.install();
           expect(result.success).toBe(false);
           expect(result.message).toContain(expectedErr);
-        },
+        }
       );
     });
   });
@@ -218,12 +201,8 @@ describe('AntigravityInstaller', () => {
     expect(result.success).toBe(true);
     expect(child_process.spawnSync).toHaveBeenCalledWith(
       'agy',
-      [
-        '--install-extension',
-        'google.gemini-cli-vscode-ide-companion',
-        '--force',
-      ],
-      { stdio: 'pipe', shell: false },
+      ['--install-extension', 'google.gemini-cli-vscode-ide-companion', '--force'],
+      { stdio: 'pipe', shell: false }
     );
   });
 
@@ -233,9 +212,7 @@ describe('AntigravityInstaller', () => {
     const result = await installer.install();
 
     expect(result.success).toBe(false);
-    expect(result.message).toContain(
-      'ANTIGRAVITY_CLI_ALIAS environment variable not set',
-    );
+    expect(result.message).toContain('ANTIGRAVITY_CLI_ALIAS environment variable not set');
   });
 
   it('returns a failure message if the command is not found', async () => {

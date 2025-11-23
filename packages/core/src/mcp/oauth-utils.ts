@@ -56,14 +56,8 @@ export class OAuthUtils {
     if (!includePathSuffix) {
       // Standard discovery: use root-based well-known URLs
       return {
-        protectedResource: new URL(
-          '/.well-known/oauth-protected-resource',
-          base,
-        ).toString(),
-        authorizationServer: new URL(
-          '/.well-known/oauth-authorization-server',
-          base,
-        ).toString(),
+        protectedResource: new URL('/.well-known/oauth-protected-resource', base).toString(),
+        authorizationServer: new URL('/.well-known/oauth-authorization-server', base).toString(),
       };
     }
 
@@ -72,11 +66,11 @@ export class OAuthUtils {
     return {
       protectedResource: new URL(
         `/.well-known/oauth-protected-resource${pathSuffix}`,
-        base,
+        base
       ).toString(),
       authorizationServer: new URL(
         `/.well-known/oauth-authorization-server${pathSuffix}`,
-        base,
+        base
       ).toString(),
     };
   }
@@ -88,7 +82,7 @@ export class OAuthUtils {
    * @returns The protected resource metadata or null if not available
    */
   static async fetchProtectedResourceMetadata(
-    resourceMetadataUrl: string,
+    resourceMetadataUrl: string
   ): Promise<OAuthProtectedResourceMetadata | null> {
     try {
       const response = await fetch(resourceMetadataUrl);
@@ -98,7 +92,7 @@ export class OAuthUtils {
       return (await response.json()) as OAuthProtectedResourceMetadata;
     } catch (error) {
       debugLogger.debug(
-        `Failed to fetch protected resource metadata from ${resourceMetadataUrl}: ${getErrorMessage(error)}`,
+        `Failed to fetch protected resource metadata from ${resourceMetadataUrl}: ${getErrorMessage(error)}`
       );
       return null;
     }
@@ -111,7 +105,7 @@ export class OAuthUtils {
    * @returns The authorization server metadata or null if not available
    */
   static async fetchAuthorizationServerMetadata(
-    authServerMetadataUrl: string,
+    authServerMetadataUrl: string
   ): Promise<OAuthAuthorizationServerMetadata | null> {
     try {
       const response = await fetch(authServerMetadataUrl);
@@ -121,7 +115,7 @@ export class OAuthUtils {
       return (await response.json()) as OAuthAuthorizationServerMetadata;
     } catch (error) {
       debugLogger.debug(
-        `Failed to fetch authorization server metadata from ${authServerMetadataUrl}: ${getErrorMessage(error)}`,
+        `Failed to fetch authorization server metadata from ${authServerMetadataUrl}: ${getErrorMessage(error)}`
       );
       return null;
     }
@@ -133,9 +127,7 @@ export class OAuthUtils {
    * @param metadata The authorization server metadata
    * @returns The OAuth configuration
    */
-  static metadataToOAuthConfig(
-    metadata: OAuthAuthorizationServerMetadata,
-  ): MCPOAuthConfig {
+  static metadataToOAuthConfig(metadata: OAuthAuthorizationServerMetadata): MCPOAuthConfig {
     return {
       authorizationUrl: metadata.authorization_endpoint,
       tokenUrl: metadata.token_endpoint,
@@ -152,7 +144,7 @@ export class OAuthUtils {
    * @returns The authorization server metadata or null if not found
    */
   static async discoverAuthorizationServerMetadata(
-    authServerUrl: string,
+    authServerUrl: string
   ): Promise<OAuthAuthorizationServerMetadata | null> {
     const authServerUrlObj = new URL(authServerUrl);
     const base = `${authServerUrlObj.protocol}//${authServerUrlObj.host}`;
@@ -166,24 +158,18 @@ export class OAuthUtils {
       endpointsToTry.push(
         new URL(
           `/.well-known/oauth-authorization-server${authServerUrlObj.pathname}`,
-          base,
-        ).toString(),
+          base
+        ).toString()
       );
 
       // 2. OpenID Connect Discovery 1.0 with path insertion
       endpointsToTry.push(
-        new URL(
-          `/.well-known/openid-configuration${authServerUrlObj.pathname}`,
-          base,
-        ).toString(),
+        new URL(`/.well-known/openid-configuration${authServerUrlObj.pathname}`, base).toString()
       );
 
       // 3. OpenID Connect Discovery 1.0 with path appending
       endpointsToTry.push(
-        new URL(
-          `${authServerUrlObj.pathname}/.well-known/openid-configuration`,
-          base,
-        ).toString(),
+        new URL(`${authServerUrlObj.pathname}/.well-known/openid-configuration`, base).toString()
       );
     }
 
@@ -191,26 +177,19 @@ export class OAuthUtils {
     // discoveries, try the following well-known endpoints in order:
 
     // 1. OAuth 2.0 Authorization Server Metadata
-    endpointsToTry.push(
-      new URL('/.well-known/oauth-authorization-server', base).toString(),
-    );
+    endpointsToTry.push(new URL('/.well-known/oauth-authorization-server', base).toString());
 
     // 2. OpenID Connect Discovery 1.0
-    endpointsToTry.push(
-      new URL('/.well-known/openid-configuration', base).toString(),
-    );
+    endpointsToTry.push(new URL('/.well-known/openid-configuration', base).toString());
 
     for (const endpoint of endpointsToTry) {
-      const authServerMetadata =
-        await this.fetchAuthorizationServerMetadata(endpoint);
+      const authServerMetadata = await this.fetchAuthorizationServerMetadata(endpoint);
       if (authServerMetadata) {
         return authServerMetadata;
       }
     }
 
-    debugLogger.debug(
-      `Metadata discovery failed for authorization server ${authServerUrl}`,
-    );
+    debugLogger.debug(`Metadata discovery failed for authorization server ${authServerUrl}`);
     return null;
   }
 
@@ -220,16 +199,14 @@ export class OAuthUtils {
    * @param serverUrl The base URL of the server
    * @returns The discovered OAuth configuration or null if not available
    */
-  static async discoverOAuthConfig(
-    serverUrl: string,
-  ): Promise<MCPOAuthConfig | null> {
+  static async discoverOAuthConfig(serverUrl: string): Promise<MCPOAuthConfig | null> {
     try {
       // First try standard root-based discovery
       const wellKnownUrls = this.buildWellKnownUrls(serverUrl, false);
 
       // Try to get the protected resource metadata at root
       let resourceMetadata = await this.fetchProtectedResourceMetadata(
-        wellKnownUrls.protectedResource,
+        wellKnownUrls.protectedResource
       );
 
       // If root discovery fails and we have a path, try path-based discovery
@@ -238,7 +215,7 @@ export class OAuthUtils {
         if (url.pathname && url.pathname !== '/') {
           const pathBasedUrls = this.buildWellKnownUrls(serverUrl, true);
           resourceMetadata = await this.fetchProtectedResourceMetadata(
-            pathBasedUrls.protectedResource,
+            pathBasedUrls.protectedResource
           );
         }
       }
@@ -246,15 +223,14 @@ export class OAuthUtils {
       if (resourceMetadata?.authorization_servers?.length) {
         // Use the first authorization server
         const authServerUrl = resourceMetadata.authorization_servers[0];
-        const authServerMetadata =
-          await this.discoverAuthorizationServerMetadata(authServerUrl);
+        const authServerMetadata = await this.discoverAuthorizationServerMetadata(authServerUrl);
 
         if (authServerMetadata) {
           const config = this.metadataToOAuthConfig(authServerMetadata);
           if (authServerMetadata.registration_endpoint) {
             debugLogger.log(
               'Dynamic client registration is supported at:',
-              authServerMetadata.registration_endpoint,
+              authServerMetadata.registration_endpoint
             );
           }
           return config;
@@ -263,15 +239,14 @@ export class OAuthUtils {
 
       // Fallback: try well-known endpoints at the base URL
       debugLogger.debug(`Trying OAuth discovery fallback at ${serverUrl}`);
-      const authServerMetadata =
-        await this.discoverAuthorizationServerMetadata(serverUrl);
+      const authServerMetadata = await this.discoverAuthorizationServerMetadata(serverUrl);
 
       if (authServerMetadata) {
         const config = this.metadataToOAuthConfig(authServerMetadata);
         if (authServerMetadata.registration_endpoint) {
           debugLogger.log(
             'Dynamic client registration is supported at:',
-            authServerMetadata.registration_endpoint,
+            authServerMetadata.registration_endpoint
           );
         }
         return config;
@@ -279,9 +254,7 @@ export class OAuthUtils {
 
       return null;
     } catch (error) {
-      debugLogger.debug(
-        `Failed to discover OAuth configuration: ${getErrorMessage(error)}`,
-      );
+      debugLogger.debug(`Failed to discover OAuth configuration: ${getErrorMessage(error)}`);
       return null;
     }
   }
@@ -308,23 +281,20 @@ export class OAuthUtils {
    * @returns The discovered OAuth configuration or null if not available
    */
   static async discoverOAuthFromWWWAuthenticate(
-    wwwAuthenticate: string,
+    wwwAuthenticate: string
   ): Promise<MCPOAuthConfig | null> {
-    const resourceMetadataUri =
-      this.parseWWWAuthenticateHeader(wwwAuthenticate);
+    const resourceMetadataUri = this.parseWWWAuthenticateHeader(wwwAuthenticate);
     if (!resourceMetadataUri) {
       return null;
     }
 
-    const resourceMetadata =
-      await this.fetchProtectedResourceMetadata(resourceMetadataUri);
+    const resourceMetadata = await this.fetchProtectedResourceMetadata(resourceMetadataUri);
     if (!resourceMetadata?.authorization_servers?.length) {
       return null;
     }
 
     const authServerUrl = resourceMetadata.authorization_servers[0];
-    const authServerMetadata =
-      await this.discoverAuthorizationServerMetadata(authServerUrl);
+    const authServerMetadata = await this.discoverAuthorizationServerMetadata(authServerUrl);
 
     if (authServerMetadata) {
       return this.metadataToOAuthConfig(authServerMetadata);
@@ -372,9 +342,7 @@ export class OAuthUtils {
    */
   static parseTokenExpiry(idToken: string): number | undefined {
     try {
-      const payload = JSON.parse(
-        Buffer.from(idToken.split('.')[1], 'base64').toString(),
-      );
+      const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
 
       if (payload && typeof payload.exp === 'number') {
         return payload.exp * 1000; // Convert seconds to milliseconds

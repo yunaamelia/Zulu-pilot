@@ -24,10 +24,7 @@ describe('AllowedPathChecker', () => {
     testRootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'safety-test-'));
     mockCwd = path.join(testRootDir, 'home', 'user', 'project');
     await fs.mkdir(mockCwd, { recursive: true });
-    mockWorkspaces = [
-      mockCwd,
-      path.join(testRootDir, 'home', 'user', 'other-project'),
-    ];
+    mockWorkspaces = [mockCwd, path.join(testRootDir, 'home', 'user', 'other-project')];
     await fs.mkdir(mockWorkspaces[1], { recursive: true });
   });
 
@@ -37,7 +34,7 @@ describe('AllowedPathChecker', () => {
 
   const createInput = (
     toolArgs: Record<string, unknown>,
-    config?: Record<string, unknown>,
+    config?: Record<string, unknown>
   ): SafetyCheckInput => ({
     protocolVersion: '1.0.0',
     toolCall: {
@@ -129,9 +126,7 @@ describe('AllowedPathChecker', () => {
     const input = createInput({ path: symlinkPath });
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.DENY);
-    expect(result.reason).toContain(
-      'outside of the allowed workspace directories',
-    );
+    expect(result.reason).toContain('outside of the allowed workspace directories');
   });
 
   it('should allow access if path contains a symlink pointing INSIDE allowed directories', async () => {
@@ -151,10 +146,7 @@ describe('AllowedPathChecker', () => {
     const outsidePath = path.join(testRootDir, 'etc', 'passwd');
     await fs.mkdir(path.dirname(outsidePath), { recursive: true });
     await fs.writeFile(outsidePath, 'secret');
-    const input = createInput(
-      { custom_arg: outsidePath },
-      { included_args: ['custom_arg'] },
-    );
+    const input = createInput({ custom_arg: outsidePath }, { included_args: ['custom_arg'] });
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.DENY);
     expect(result.reason).toContain('outside of the allowed workspace');
@@ -165,10 +157,7 @@ describe('AllowedPathChecker', () => {
     await fs.mkdir(path.dirname(outsidePath), { recursive: true });
     await fs.writeFile(outsidePath, 'secret');
     // Normally 'path' would be checked, but we exclude it
-    const input = createInput(
-      { path: outsidePath },
-      { excluded_args: ['path'] },
-    );
+    const input = createInput({ path: outsidePath }, { excluded_args: ['path'] });
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.ALLOW);
   });
@@ -185,7 +174,7 @@ describe('AllowedPathChecker', () => {
       {
         excluded_args: ['path'],
         included_args: ['custom_arg'],
-      },
+      }
     );
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.DENY);
@@ -218,7 +207,7 @@ describe('AllowedPathChecker', () => {
           custom: outsidePath,
         },
       },
-      { included_args: ['nested.custom'] },
+      { included_args: ['nested.custom'] }
     );
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.DENY);
@@ -236,7 +225,7 @@ describe('AllowedPathChecker', () => {
           path: outsidePath,
         },
       },
-      { excluded_args: ['nested.path'] },
+      { excluded_args: ['nested.path'] }
     );
     const result = await checker.check(input);
     expect(result.decision).toBe(SafetyCheckDecision.ALLOW);

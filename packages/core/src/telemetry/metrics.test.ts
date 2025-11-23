@@ -5,36 +5,21 @@
  */
 
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import type {
-  Counter,
-  Meter,
-  Attributes,
-  Context,
-  Histogram,
-} from '@opentelemetry/api';
+import type { Counter, Meter, Attributes, Context, Histogram } from '@opentelemetry/api';
 import type { Config } from '../config/config.js';
-import {
-  FileOperation,
-  MemoryMetricType,
-  ToolExecutionPhase,
-  ApiRequestPhase,
-} from './metrics.js';
+import { FileOperation, MemoryMetricType, ToolExecutionPhase, ApiRequestPhase } from './metrics.js';
 import { makeFakeConfig } from '../test-utils/config.js';
 import { ModelRoutingEvent, AgentFinishEvent } from './types.js';
 import { AgentTerminateMode } from '../agents/types.js';
 
-const mockCounterAddFn: Mock<
-  (value: number, attributes?: Attributes, context?: Context) => void
-> = vi.fn();
+const mockCounterAddFn: Mock<(value: number, attributes?: Attributes, context?: Context) => void> =
+  vi.fn();
 const mockHistogramRecordFn: Mock<
   (value: number, attributes?: Attributes, context?: Context) => void
 > = vi.fn();
 
-const mockCreateCounterFn: Mock<(name: string, options?: unknown) => Counter> =
-  vi.fn();
-const mockCreateHistogramFn: Mock<
-  (name: string, options?: unknown) => Histogram
-> = vi.fn();
+const mockCreateCounterFn: Mock<(name: string, options?: unknown) => Counter> = vi.fn();
+const mockCreateHistogramFn: Mock<(name: string, options?: unknown) => Histogram> = vi.fn();
 
 const mockCounterInstance: Counter = {
   add: mockCounterAddFn,
@@ -116,25 +101,20 @@ describe('Telemetry Metrics', () => {
     initializeMetricsModule = metricsJsModule.initializeMetrics;
     recordTokenUsageMetricsModule = metricsJsModule.recordTokenUsageMetrics;
     recordFileOperationMetricModule = metricsJsModule.recordFileOperationMetric;
-    recordChatCompressionMetricsModule =
-      metricsJsModule.recordChatCompressionMetrics;
+    recordChatCompressionMetricsModule = metricsJsModule.recordChatCompressionMetrics;
     recordModelRoutingMetricsModule = metricsJsModule.recordModelRoutingMetrics;
     recordStartupPerformanceModule = metricsJsModule.recordStartupPerformance;
     recordMemoryUsageModule = metricsJsModule.recordMemoryUsage;
     recordCpuUsageModule = metricsJsModule.recordCpuUsage;
     recordToolQueueDepthModule = metricsJsModule.recordToolQueueDepth;
-    recordToolExecutionBreakdownModule =
-      metricsJsModule.recordToolExecutionBreakdown;
+    recordToolExecutionBreakdownModule = metricsJsModule.recordToolExecutionBreakdown;
     recordTokenEfficiencyModule = metricsJsModule.recordTokenEfficiency;
     recordApiRequestBreakdownModule = metricsJsModule.recordApiRequestBreakdown;
     recordPerformanceScoreModule = metricsJsModule.recordPerformanceScore;
-    recordPerformanceRegressionModule =
-      metricsJsModule.recordPerformanceRegression;
+    recordPerformanceRegressionModule = metricsJsModule.recordPerformanceRegression;
     recordBaselineComparisonModule = metricsJsModule.recordBaselineComparison;
-    recordGenAiClientTokenUsageModule =
-      metricsJsModule.recordGenAiClientTokenUsage;
-    recordGenAiClientOperationDurationModule =
-      metricsJsModule.recordGenAiClientOperationDuration;
+    recordGenAiClientTokenUsageModule = metricsJsModule.recordGenAiClientTokenUsage;
+    recordGenAiClientOperationDurationModule = metricsJsModule.recordGenAiClientOperationDuration;
     recordFlickerFrameModule = metricsJsModule.recordFlickerFrame;
     recordExitFailModule = metricsJsModule.recordExitFail;
     recordAgentRunMetricsModule = metricsJsModule.recordAgentRunMetrics;
@@ -305,7 +285,7 @@ describe('Telemetry Metrics', () => {
           model,
           type,
         });
-      },
+      }
     );
   });
 
@@ -453,7 +433,7 @@ describe('Telemetry Metrics', () => {
         100,
         'test-reason',
         false,
-        undefined,
+        undefined
       );
       recordModelRoutingMetricsModule(mockConfig, event);
       expect(mockHistogramRecordFn).not.toHaveBeenCalled();
@@ -468,7 +448,7 @@ describe('Telemetry Metrics', () => {
         150,
         'test-reason',
         false,
-        undefined,
+        undefined
       );
       recordModelRoutingMetricsModule(mockConfig, event);
 
@@ -491,7 +471,7 @@ describe('Telemetry Metrics', () => {
         200,
         'test-reason',
         true,
-        'test-error',
+        'test-error'
       );
       recordModelRoutingMetricsModule(mockConfig, event);
 
@@ -526,7 +506,7 @@ describe('Telemetry Metrics', () => {
         'TestAgent',
         1000,
         5,
-        AgentTerminateMode.GOAL,
+        AgentTerminateMode.GOAL
       );
       recordAgentRunMetricsModule(mockConfig, event);
       expect(mockCounterAddFn).not.toHaveBeenCalled();
@@ -543,7 +523,7 @@ describe('Telemetry Metrics', () => {
         'TestAgent',
         1000,
         5,
-        AgentTerminateMode.GOAL,
+        AgentTerminateMode.GOAL
       );
       recordAgentRunMetricsModule(mockConfig, event);
 
@@ -843,17 +823,14 @@ describe('Telemetry Metrics', () => {
           },
         });
 
-        expect(mockHistogramRecordFn).toHaveBeenCalledWith(
-          floatingPointDuration,
-          {
-            'session.id': 'test-session-id',
-            'installation.id': 'test-installation-id',
-            'user.email': 'test@example.com',
-            phase: 'total_startup',
-            is_tty: true,
-            has_question: false,
-          },
-        );
+        expect(mockHistogramRecordFn).toHaveBeenCalledWith(floatingPointDuration, {
+          'session.id': 'test-session-id',
+          'installation.id': 'test-installation-id',
+          'user.email': 'test@example.com',
+          phase: 'total_startup',
+          is_tty: true,
+          has_question: false,
+        });
       });
     });
 
@@ -884,34 +861,28 @@ describe('Telemetry Metrics', () => {
           component: undefined,
           value: 15728640,
         },
-      ])(
-        'should record memory usage for $memory_type',
-        ({ memory_type, component, value }) => {
-          initializeMetricsModule(mockConfig);
-          mockHistogramRecordFn.mockClear();
+      ])('should record memory usage for $memory_type', ({ memory_type, component, value }) => {
+        initializeMetricsModule(mockConfig);
+        mockHistogramRecordFn.mockClear();
 
-          recordMemoryUsageModule(mockConfig, value, {
-            memory_type,
-            component,
-          });
+        recordMemoryUsageModule(mockConfig, value, {
+          memory_type,
+          component,
+        });
 
-          const expectedAttributes: Record<string, unknown> = {
-            'session.id': 'test-session-id',
-            'installation.id': 'test-installation-id',
-            'user.email': 'test@example.com',
-            memory_type,
-          };
+        const expectedAttributes: Record<string, unknown> = {
+          'session.id': 'test-session-id',
+          'installation.id': 'test-installation-id',
+          'user.email': 'test@example.com',
+          memory_type,
+        };
 
-          if (component) {
-            expectedAttributes['component'] = component;
-          }
+        if (component) {
+          expectedAttributes['component'] = component;
+        }
 
-          expect(mockHistogramRecordFn).toHaveBeenCalledWith(
-            value,
-            expectedAttributes,
-          );
-        },
-      );
+        expect(mockHistogramRecordFn).toHaveBeenCalledWith(value, expectedAttributes);
+      });
     });
 
     describe('recordCpuUsage', () => {
@@ -1336,9 +1307,7 @@ describe('Telemetry Metrics', () => {
           category: 'testing',
         });
 
-        expect(diagSpy).toHaveBeenCalledWith(
-          'Baseline value is zero, skipping comparison.',
-        );
+        expect(diagSpy).toHaveBeenCalledWith('Baseline value is zero, skipping comparison.');
         expect(mockHistogramRecordFn).not.toHaveBeenCalled();
       });
     });

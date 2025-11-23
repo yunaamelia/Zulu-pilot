@@ -13,9 +13,7 @@ import { getFolderStructure } from './getFolderStructure.js';
  * @param {Config} config - The runtime configuration and services.
  * @returns {Promise<string>} A promise that resolves to the directory context string.
  */
-export async function getDirectoryContextString(
-  config: Config,
-): Promise<string> {
+export async function getDirectoryContextString(config: Config): Promise<string> {
   const workspaceContext = config.getWorkspaceContext();
   const workspaceDirectories = workspaceContext.getDirectories();
 
@@ -23,8 +21,8 @@ export async function getDirectoryContextString(
     workspaceDirectories.map((dir) =>
       getFolderStructure(dir, {
         fileService: config.getFileService(),
-      }),
-    ),
+      })
+    )
   );
 
   const folderStructure = folderStructures.join('\n');
@@ -76,7 +74,7 @@ ${directoryContext}
 
 export async function getInitialChatHistory(
   config: Config,
-  extraHistory?: Content[],
+  extraHistory?: Content[]
 ): Promise<Content[]> {
   const envParts = await getEnvironmentContext(config);
   const envContextString = envParts.map((part) => part.text || '').join('\n\n');

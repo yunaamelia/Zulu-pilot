@@ -26,20 +26,13 @@ export class AllowedPathChecker implements InProcessChecker {
     const config = input.config as AllowedPathConfig | undefined;
 
     // Build list of allowed directories
-    const allowedDirs = [
-      context.environment.cwd,
-      ...context.environment.workspaces,
-    ];
+    const allowedDirs = [context.environment.cwd, ...context.environment.workspaces];
 
     // Find all arguments that look like paths
     const includedArgs = config?.included_args ?? [];
     const excludedArgs = config?.excluded_args ?? [];
 
-    const pathsToCheck = this.collectPathsToCheck(
-      toolCall.args,
-      includedArgs,
-      excludedArgs,
-    );
+    const pathsToCheck = this.collectPathsToCheck(toolCall.args, includedArgs, excludedArgs);
 
     // Check each path
     for (const { path: p, argName } of pathsToCheck) {
@@ -55,10 +48,7 @@ export class AllowedPathChecker implements InProcessChecker {
 
       const isAllowed = allowedDirs.some((dir) => {
         // Also resolve allowed directories to handle symlinks
-        const resolvedDir = this.safelyResolvePath(
-          dir,
-          context.environment.cwd,
-        );
+        const resolvedDir = this.safelyResolvePath(dir, context.environment.cwd);
         if (!resolvedDir) return false;
         return this.isPathAllowed(resolvedPath, resolvedDir);
       });
@@ -101,17 +91,14 @@ export class AllowedPathChecker implements InProcessChecker {
 
   private isPathAllowed(targetPath: string, allowedDir: string): boolean {
     const relative = path.relative(allowedDir, targetPath);
-    return (
-      relative === '' ||
-      (!relative.startsWith('..') && !path.isAbsolute(relative))
-    );
+    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
   }
 
   private collectPathsToCheck(
     args: unknown,
     includedArgs: string[],
     excludedArgs: string[],
-    prefix = '',
+    prefix = ''
   ): Array<{ path: string; argName: string }> {
     const paths: Array<{ path: string; argName: string }> = [];
 
@@ -138,14 +125,7 @@ export class AllowedPathChecker implements InProcessChecker {
           paths.push({ path: value, argName: fullKey });
         }
       } else if (typeof value === 'object') {
-        paths.push(
-          ...this.collectPathsToCheck(
-            value,
-            includedArgs,
-            excludedArgs,
-            fullKey,
-          ),
-        );
+        paths.push(...this.collectPathsToCheck(value, includedArgs, excludedArgs, fullKey));
       }
     }
 

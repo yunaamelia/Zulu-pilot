@@ -15,7 +15,7 @@ import type { WorkspaceContext } from '../utils/workspaceContext.js';
  */
 export function createMockWorkspaceContext(
   rootDir: string,
-  additionalDirs: string[] = [],
+  additionalDirs: string[] = []
 ): WorkspaceContext {
   const allDirs = [rootDir, ...additionalDirs];
 
@@ -24,9 +24,7 @@ export function createMockWorkspaceContext(
     getDirectories: vi.fn().mockReturnValue(allDirs),
     isPathWithinWorkspace: vi
       .fn()
-      .mockImplementation((path: string) =>
-        allDirs.some((dir) => path.startsWith(dir)),
-      ),
+      .mockImplementation((path: string) => allDirs.some((dir) => path.startsWith(dir))),
   } as unknown as WorkspaceContext;
 
   return mockWorkspaceContext;

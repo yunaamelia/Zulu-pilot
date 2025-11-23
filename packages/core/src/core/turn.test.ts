@@ -5,10 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type {
-  ServerGeminiToolCallRequestEvent,
-  ServerGeminiErrorEvent,
-} from './turn.js';
+import type { ServerGeminiToolCallRequestEvent, ServerGeminiErrorEvent } from './turn.js';
 import { Turn, GeminiEventType } from './turn.js';
 import type { GenerateContentResponse, Part, Content } from '@google/genai';
 import { reportError } from '../utils/errorReporting.js';
@@ -39,8 +36,7 @@ vi.mock('../utils/errorReporting', () => ({
 // Use the actual implementation from partUtils now that it's provided.
 vi.mock('../utils/generateContentResponseUtilities', () => ({
   getResponseText: (resp: GenerateContentResponse) =>
-    resp.candidates?.[0]?.content?.parts?.map((part) => part.text).join('') ||
-    undefined,
+    resp.candidates?.[0]?.content?.parts?.map((part) => part.text).join('') || undefined,
 }));
 
 describe('Turn', () => {
@@ -99,7 +95,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -108,7 +104,7 @@ describe('Turn', () => {
         { model: 'gemini' },
         reqParts,
         'prompt-id-1',
-        expect.any(AbortSignal),
+        expect.any(AbortSignal)
       );
 
       expect(events).toEqual([
@@ -146,7 +142,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -160,7 +156,7 @@ describe('Turn', () => {
           name: 'tool1',
           args: { arg1: 'val1' },
           isClientInitiated: false,
-        }),
+        })
       );
       expect(turn.pendingToolCalls[0]).toEqual(event1.value);
 
@@ -171,11 +167,9 @@ describe('Turn', () => {
           name: 'tool2',
           args: { arg2: 'val2' },
           isClientInitiated: false,
-        }),
+        })
       );
-      expect(event2.value.callId).toEqual(
-        expect.stringMatching(/^tool2-\d{13}-\w{10,}$/),
-      );
+      expect(event2.value.callId).toEqual(expect.stringMatching(/^tool2-\d{13}-\w{10,}$/));
       expect(turn.pendingToolCalls[1]).toEqual(event2.value);
       expect(turn.getDebugResponses().length).toBe(1);
     });
@@ -207,11 +201,7 @@ describe('Turn', () => {
 
       const events = [];
       const reqParts: Part[] = [{ text: 'Test abort' }];
-      for await (const event of turn.run(
-        { model: 'gemini' },
-        reqParts,
-        abortController.signal,
-      )) {
+      for await (const event of turn.run({ model: 'gemini' }, reqParts, abortController.signal)) {
         events.push(event);
       }
       expect(events).toEqual([
@@ -222,10 +212,7 @@ describe('Turn', () => {
     });
 
     it('should yield InvalidStream event if sendMessageStream throws InvalidStreamError', async () => {
-      const error = new InvalidStreamError(
-        'Test invalid stream',
-        'NO_FINISH_REASON',
-      );
+      const error = new InvalidStreamError('Test invalid stream', 'NO_FINISH_REASON');
       mockSendMessageStream.mockRejectedValue(error);
       const reqParts: Part[] = [{ text: 'Trigger invalid stream' }];
 
@@ -233,7 +220,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -247,16 +234,14 @@ describe('Turn', () => {
       const error = new Error('API Error');
       mockSendMessageStream.mockRejectedValue(error);
       const reqParts: Part[] = [{ text: 'Trigger error' }];
-      const historyContent: Content[] = [
-        { role: 'model', parts: [{ text: 'Previous history' }] },
-      ];
+      const historyContent: Content[] = [{ role: 'model', parts: [{ text: 'Previous history' }] }];
       mockGetHistory.mockReturnValue(historyContent);
       mockMaybeIncludeSchemaDepthContext.mockResolvedValue(undefined);
       const events = [];
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -272,7 +257,7 @@ describe('Turn', () => {
         error,
         'Error when talking to Gemini API',
         [...historyContent, { role: 'user', parts: reqParts }],
-        'Turn.run-sendMessageStream',
+        'Turn.run-sendMessageStream'
       );
     });
 
@@ -297,7 +282,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'Test undefined tool parts' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -329,8 +314,7 @@ describe('Turn', () => {
 
     it.each([
       {
-        description:
-          'should yield finished event when response has finish reason',
+        description: 'should yield finished event when response has finish reason',
         contentText: 'Partial response',
         finishReason: 'STOP',
         usageMetadata: {
@@ -374,7 +358,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'Test' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -411,7 +395,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -456,7 +440,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         reqParts,
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -499,7 +483,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'Test citations' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -549,7 +533,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'test' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -596,18 +580,14 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'test' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
 
-      expect(events).toEqual([
-        { type: GeminiEventType.Content, value: 'Some text.' },
-      ]);
+      expect(events).toEqual([{ type: GeminiEventType.Content, value: 'Some text.' }]);
       // No Citation event (but we do get a Finished event with undefined reason)
-      expect(events.some((e) => e.type === GeminiEventType.Citation)).toBe(
-        false,
-      );
+      expect(events.some((e) => e.type === GeminiEventType.Citation)).toBe(false);
     });
 
     it('should ignore citations without a URI', async () => {
@@ -642,7 +622,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'test' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -677,11 +657,7 @@ describe('Turn', () => {
       const events = [];
       const reqParts: Part[] = [{ text: 'Test malformed error handling' }];
 
-      for await (const event of turn.run(
-        { model: 'gemini' },
-        reqParts,
-        abortController.signal,
-      )) {
+      for await (const event of turn.run({ model: 'gemini' }, reqParts, abortController.signal)) {
         events.push(event);
       }
 
@@ -703,11 +679,7 @@ describe('Turn', () => {
       mockSendMessageStream.mockResolvedValue(mockResponseStream);
 
       const events = [];
-      for await (const event of turn.run(
-        { model: 'gemini' },
-        [],
-        new AbortController().signal,
-      )) {
+      for await (const event of turn.run({ model: 'gemini' }, [], new AbortController().signal)) {
         events.push(event);
       }
 
@@ -754,7 +726,7 @@ describe('Turn', () => {
       for await (const event of turn.run(
         { model: 'gemini' },
         [{ text: 'Hi' }],
-        new AbortController().signal,
+        new AbortController().signal
       )) {
         events.push(event);
       }
@@ -777,11 +749,7 @@ describe('Turn', () => {
       })();
       mockSendMessageStream.mockResolvedValue(mockResponseStream);
       const reqParts: Part[] = [{ text: 'Hi' }];
-      for await (const _ of turn.run(
-        { model: 'gemini' },
-        reqParts,
-        new AbortController().signal,
-      )) {
+      for await (const _ of turn.run({ model: 'gemini' }, reqParts, new AbortController().signal)) {
         // consume stream
       }
       expect(turn.getDebugResponses()).toEqual([resp1, resp2]);

@@ -55,7 +55,7 @@ export interface RoutingStrategy {
   route(
     context: RoutingContext,
     config: Config,
-    baseLlmClient: BaseLlmClient,
+    baseLlmClient: BaseLlmClient
   ): Promise<RoutingDecision | null>;
 }
 
@@ -71,6 +71,6 @@ export interface TerminalStrategy extends RoutingStrategy {
   route(
     context: RoutingContext,
     config: Config,
-    baseLlmClient: BaseLlmClient,
+    baseLlmClient: BaseLlmClient
   ): Promise<RoutingDecision>;
 }

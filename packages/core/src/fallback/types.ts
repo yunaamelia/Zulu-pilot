@@ -21,5 +21,5 @@ export type FallbackIntent =
 export type FallbackModelHandler = (
   failedModel: string,
   fallbackModel: string,
-  error?: unknown,
+  error?: unknown
 ) => Promise<FallbackIntent | null>;

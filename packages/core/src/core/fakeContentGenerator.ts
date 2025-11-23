@@ -61,13 +61,12 @@ export class FakeContentGenerator implements ContentGenerator {
     const response = this.responses[this.callCounter++];
     if (!response) {
       throw new Error(
-        `No more mock responses for ${method}, got request:\n` +
-          safeJsonStringify(request),
+        `No more mock responses for ${method}, got request:\n` + safeJsonStringify(request)
       );
     }
     if (response.method !== method) {
       throw new Error(
-        `Unexpected response type, next response was for ${response.method} but expected ${method}`,
+        `Unexpected response type, next response was for ${response.method} but expected ${method}`
       );
     }
     return response.response as R;
@@ -75,42 +74,35 @@ export class FakeContentGenerator implements ContentGenerator {
 
   async generateContent(
     request: GenerateContentParameters,
-    _userPromptId: string,
+    _userPromptId: string
   ): Promise<GenerateContentResponse> {
     return Object.setPrototypeOf(
       this.getNextResponse('generateContent', request),
-      GenerateContentResponse.prototype,
+      GenerateContentResponse.prototype
     );
   }
 
   async generateContentStream(
     request: GenerateContentParameters,
-    _userPromptId: string,
+    _userPromptId: string
   ): Promise<AsyncGenerator<GenerateContentResponse>> {
     const responses = this.getNextResponse('generateContentStream', request);
     async function* stream() {
       for (const response of responses) {
-        yield Object.setPrototypeOf(
-          response,
-          GenerateContentResponse.prototype,
-        );
+        yield Object.setPrototypeOf(response, GenerateContentResponse.prototype);
       }
     }
     return stream();
   }
 
-  async countTokens(
-    request: CountTokensParameters,
-  ): Promise<CountTokensResponse> {
+  async countTokens(request: CountTokensParameters): Promise<CountTokensResponse> {
     return this.getNextResponse('countTokens', request);
   }
 
-  async embedContent(
-    request: EmbedContentParameters,
-  ): Promise<EmbedContentResponse> {
+  async embedContent(request: EmbedContentParameters): Promise<EmbedContentResponse> {
     return Object.setPrototypeOf(
       this.getNextResponse('embedContent', request),
-      EmbedContentResponse.prototype,
+      EmbedContentResponse.prototype
     );
   }
 }

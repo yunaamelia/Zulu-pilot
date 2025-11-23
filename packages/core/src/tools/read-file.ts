@@ -11,10 +11,7 @@ import type { ToolInvocation, ToolLocation, ToolResult } from './tools.js';
 import { BaseDeclarativeTool, BaseToolInvocation, Kind } from './tools.js';
 
 import type { PartUnion } from '@google/genai';
-import {
-  processSingleFileContent,
-  getSpecificMimeType,
-} from '../utils/fileUtils.js';
+import { processSingleFileContent, getSpecificMimeType } from '../utils/fileUtils.js';
 import type { Config } from '../config/config.js';
 import { FileOperation } from '../telemetry/metrics.js';
 import { getProgrammingLanguage } from '../telemetry/telemetry-utils.js';
@@ -42,30 +39,21 @@ export interface ReadFileToolParams {
   limit?: number;
 }
 
-class ReadFileToolInvocation extends BaseToolInvocation<
-  ReadFileToolParams,
-  ToolResult
-> {
+class ReadFileToolInvocation extends BaseToolInvocation<ReadFileToolParams, ToolResult> {
   private readonly resolvedPath: string;
   constructor(
     private config: Config,
     params: ReadFileToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ) {
     super(params, messageBus, _toolName, _toolDisplayName);
-    this.resolvedPath = path.resolve(
-      this.config.getTargetDir(),
-      this.params.file_path,
-    );
+    this.resolvedPath = path.resolve(this.config.getTargetDir(), this.params.file_path);
   }
 
   getDescription(): string {
-    const relativePath = makeRelative(
-      this.resolvedPath,
-      this.config.getTargetDir(),
-    );
+    const relativePath = makeRelative(this.resolvedPath, this.config.getTargetDir());
     return shortenPath(relativePath);
   }
 
@@ -79,7 +67,7 @@ class ReadFileToolInvocation extends BaseToolInvocation<
       this.config.getTargetDir(),
       this.config.getFileSystemService(),
       this.params.offset,
-      this.params.limit,
+      this.params.limit
     );
 
     if (result.error) {
@@ -97,9 +85,7 @@ class ReadFileToolInvocation extends BaseToolInvocation<
     if (result.isTruncated) {
       const [start, end] = result.linesShown!;
       const total = result.originalLineCount!;
-      const nextOffset = this.params.offset
-        ? this.params.offset + end - start + 1
-        : end;
+      const nextOffset = this.params.offset ? this.params.offset + end - start + 1 : end;
       llmContent = `
 IMPORTANT: The file content has been truncated.
 Status: Showing lines ${start}-${end} of ${total} total lines.
@@ -112,9 +98,7 @@ ${result.llmContent}`;
     }
 
     const lines =
-      typeof result.llmContent === 'string'
-        ? result.llmContent.split('\n').length
-        : undefined;
+      typeof result.llmContent === 'string' ? result.llmContent.split('\n').length : undefined;
     const mimetype = getSpecificMimeType(this.resolvedPath);
     const programming_language = getProgrammingLanguage({
       file_path: this.resolvedPath,
@@ -127,8 +111,8 @@ ${result.llmContent}`;
         lines,
         mimetype,
         path.extname(this.resolvedPath),
-        programming_language,
-      ),
+        programming_language
+      )
     );
 
     return {
@@ -141,15 +125,12 @@ ${result.llmContent}`;
 /**
  * Implementation of the ReadFile tool logic
  */
-export class ReadFileTool extends BaseDeclarativeTool<
-  ReadFileToolParams,
-  ToolResult
-> {
+export class ReadFileTool extends BaseDeclarativeTool<ReadFileToolParams, ToolResult> {
   static readonly Name = READ_FILE_TOOL_NAME;
 
   constructor(
     private config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(
       ReadFileTool.Name,
@@ -178,32 +159,24 @@ export class ReadFileTool extends BaseDeclarativeTool<
       },
       true,
       false,
-      messageBus,
+      messageBus
     );
   }
 
-  protected override validateToolParamValues(
-    params: ReadFileToolParams,
-  ): string | null {
+  protected override validateToolParamValues(params: ReadFileToolParams): string | null {
     if (params.file_path.trim() === '') {
       return "The 'file_path' parameter must be non-empty.";
     }
 
     const workspaceContext = this.config.getWorkspaceContext();
     const projectTempDir = this.config.storage.getProjectTempDir();
-    const resolvedPath = path.resolve(
-      this.config.getTargetDir(),
-      params.file_path,
-    );
+    const resolvedPath = path.resolve(this.config.getTargetDir(), params.file_path);
     const resolvedProjectTempDir = path.resolve(projectTempDir);
     const isWithinTempDir =
       resolvedPath.startsWith(resolvedProjectTempDir + path.sep) ||
       resolvedPath === resolvedProjectTempDir;
 
-    if (
-      !workspaceContext.isPathWithinWorkspace(resolvedPath) &&
-      !isWithinTempDir
-    ) {
+    if (!workspaceContext.isPathWithinWorkspace(resolvedPath) && !isWithinTempDir) {
       const directories = workspaceContext.getDirectories();
       return `File path must be within one of the workspace directories: ${directories.join(', ')} or within the project temp directory: ${projectTempDir}`;
     }
@@ -227,14 +200,8 @@ export class ReadFileTool extends BaseDeclarativeTool<
     params: ReadFileToolParams,
     messageBus?: MessageBus,
     _toolName?: string,
-    _toolDisplayName?: string,
+    _toolDisplayName?: string
   ): ToolInvocation<ReadFileToolParams, ToolResult> {
-    return new ReadFileToolInvocation(
-      this.config,
-      params,
-      messageBus,
-      _toolName,
-      _toolDisplayName,
-    );
+    return new ReadFileToolInvocation(this.config, params, messageBus, _toolName, _toolDisplayName);
   }
 }

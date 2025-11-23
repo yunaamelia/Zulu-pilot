@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  CoreEventEmitter,
-  CoreEvent,
-  type UserFeedbackPayload,
-} from './events.js';
+import { CoreEventEmitter, CoreEvent, type UserFeedbackPayload } from './events.js';
 
 describe('CoreEventEmitter', () => {
   let events: CoreEventEmitter;
@@ -97,7 +93,7 @@ describe('CoreEventEmitter', () => {
         severity: 'error',
         message: 'Something went wrong',
         error,
-      }),
+      })
     );
   });
 

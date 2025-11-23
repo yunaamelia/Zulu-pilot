@@ -7,11 +7,7 @@
 import type { Config } from '../../config/config.js';
 import { getEffectiveModel } from '../../config/models.js';
 import type { BaseLlmClient } from '../../core/baseLlmClient.js';
-import type {
-  RoutingContext,
-  RoutingDecision,
-  RoutingStrategy,
-} from '../routingStrategy.js';
+import type { RoutingContext, RoutingDecision, RoutingStrategy } from '../routingStrategy.js';
 
 export class FallbackStrategy implements RoutingStrategy {
   readonly name = 'fallback';
@@ -19,7 +15,7 @@ export class FallbackStrategy implements RoutingStrategy {
   async route(
     _context: RoutingContext,
     config: Config,
-    _baseLlmClient: BaseLlmClient,
+    _baseLlmClient: BaseLlmClient
   ): Promise<RoutingDecision | null> {
     const isInFallbackMode: boolean = config.isInFallbackMode();
 
@@ -30,7 +26,7 @@ export class FallbackStrategy implements RoutingStrategy {
     const effectiveModel = getEffectiveModel(
       isInFallbackMode,
       config.getModel(),
-      config.getPreviewFeatures(),
+      config.getPreviewFeatures()
     );
     return {
       model: effectiveModel,

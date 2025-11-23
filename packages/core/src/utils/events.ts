@@ -111,22 +111,17 @@ export class CoreEventEmitter extends EventEmitter<CoreEvents> {
     super();
   }
 
-  private _emitOrQueue<K extends keyof CoreEvents>(
-    event: K,
-    ...args: CoreEvents[K]
-  ): void {
+  private _emitOrQueue<K extends keyof CoreEvents>(event: K, ...args: CoreEvents[K]): void {
     if (this.listenerCount(event) === 0) {
       if (this._eventBacklog.length >= CoreEventEmitter.MAX_BACKLOG_SIZE) {
         this._eventBacklog.shift();
       }
       this._eventBacklog.push({ event, args } as EventBacklogItem);
     } else {
-      (
-        this.emit as <K extends keyof CoreEvents>(
-          event: K,
-          ...args: CoreEvents[K]
-        ) => boolean
-      )(event, ...args);
+      (this.emit as <K extends keyof CoreEvents>(event: K, ...args: CoreEvents[K]) => boolean)(
+        event,
+        ...args
+      );
     }
   }
 
@@ -134,11 +129,7 @@ export class CoreEventEmitter extends EventEmitter<CoreEvents> {
    * Sends actionable feedback to the user.
    * Buffers automatically if the UI hasn't subscribed yet.
    */
-  emitFeedback(
-    severity: FeedbackSeverity,
-    message: string,
-    error?: unknown,
-  ): void {
+  emitFeedback(severity: FeedbackSeverity, message: string, error?: unknown): void {
     const payload: UserFeedbackPayload = { severity, message, error };
     this._emitOrQueue(CoreEvent.UserFeedback, payload);
   }
@@ -146,10 +137,7 @@ export class CoreEventEmitter extends EventEmitter<CoreEvents> {
   /**
    * Broadcasts a console log message.
    */
-  emitConsoleLog(
-    type: 'log' | 'warn' | 'error' | 'debug' | 'info',
-    content: string,
-  ): void {
+  emitConsoleLog(type: 'log' | 'warn' | 'error' | 'debug' | 'info', content: string): void {
     const payload: ConsoleLogPayload = { type, content };
     this._emitOrQueue(CoreEvent.ConsoleLog, payload);
   }
@@ -157,11 +145,7 @@ export class CoreEventEmitter extends EventEmitter<CoreEvents> {
   /**
    * Broadcasts stdout/stderr output.
    */
-  emitOutput(
-    isStderr: boolean,
-    chunk: Uint8Array | string,
-    encoding?: BufferEncoding,
-  ): void {
+  emitOutput(isStderr: boolean, chunk: Uint8Array | string, encoding?: BufferEncoding): void {
     const payload: OutputPayload = { isStderr, chunk, encoding };
     this._emitOrQueue(CoreEvent.Output, payload);
   }
@@ -191,12 +175,10 @@ export class CoreEventEmitter extends EventEmitter<CoreEvents> {
     const backlog = [...this._eventBacklog];
     this._eventBacklog.length = 0; // Clear in-place
     for (const item of backlog) {
-      (
-        this.emit as <K extends keyof CoreEvents>(
-          event: K,
-          ...args: CoreEvents[K]
-        ) => boolean
-      )(item.event, ...item.args);
+      (this.emit as <K extends keyof CoreEvents>(event: K, ...args: CoreEvents[K]) => boolean)(
+        item.event,
+        ...item.args
+      );
     }
   }
 }

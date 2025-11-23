@@ -18,30 +18,24 @@ describe('CheckerRegistry', () => {
   });
 
   it('should resolve built-in in-process checkers', () => {
-    const checker = registry.resolveInProcess(
-      InProcessCheckerType.ALLOWED_PATH,
-    );
+    const checker = registry.resolveInProcess(InProcessCheckerType.ALLOWED_PATH);
     expect(checker).toBeInstanceOf(AllowedPathChecker);
   });
 
   it('should throw for unknown in-process checkers', () => {
     expect(() => registry.resolveInProcess('unknown-checker')).toThrow(
-      'Unknown in-process checker "unknown-checker"',
+      'Unknown in-process checker "unknown-checker"'
     );
   });
 
   it('should validate checker names', () => {
-    expect(() => registry.resolveInProcess('invalid name!')).toThrow(
-      'Invalid checker name',
-    );
-    expect(() => registry.resolveInProcess('../escape')).toThrow(
-      'Invalid checker name',
-    );
+    expect(() => registry.resolveInProcess('invalid name!')).toThrow('Invalid checker name');
+    expect(() => registry.resolveInProcess('../escape')).toThrow('Invalid checker name');
   });
 
   it('should throw for unknown external checkers (for now)', () => {
     expect(() => registry.resolveExternal('some-external')).toThrow(
-      'Unknown external checker "some-external"',
+      'Unknown external checker "some-external"'
     );
   });
 });

@@ -72,13 +72,8 @@ describe('ReadFileTool', () => {
       };
       const result = tool.build(params);
       expect(typeof result).not.toBe('string');
-      const invocation = result as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
-      expect(invocation.toolLocations()[0].path).toBe(
-        path.join(tempRootDir, 'test.txt'),
-      );
+      const invocation = result as ToolInvocation<ReadFileToolParams, ToolResult>;
+      expect(invocation.toolLocations()[0].path).toBe(path.join(tempRootDir, 'test.txt'));
     });
 
     it('should throw error if path is outside root', () => {
@@ -86,7 +81,7 @@ describe('ReadFileTool', () => {
         file_path: '/outside/root.txt',
       };
       expect(() => tool.build(params)).toThrow(
-        /File path must be within one of the workspace directories/,
+        /File path must be within one of the workspace directories/
       );
     });
 
@@ -104,7 +99,7 @@ describe('ReadFileTool', () => {
         file_path: '/completely/outside/path.txt',
       };
       expect(() => tool.build(params)).toThrow(
-        /File path must be within one of the workspace directories.*or within the project temp directory/,
+        /File path must be within one of the workspace directories.*or within the project temp directory/
       );
     });
 
@@ -112,9 +107,7 @@ describe('ReadFileTool', () => {
       const params: ReadFileToolParams = {
         file_path: '',
       };
-      expect(() => tool.build(params)).toThrow(
-        /The 'file_path' parameter must be non-empty./,
-      );
+      expect(() => tool.build(params)).toThrow(/The 'file_path' parameter must be non-empty./);
     });
 
     it('should throw error if offset is negative', () => {
@@ -122,9 +115,7 @@ describe('ReadFileTool', () => {
         file_path: path.join(tempRootDir, 'test.txt'),
         offset: -1,
       };
-      expect(() => tool.build(params)).toThrow(
-        'Offset must be a non-negative number',
-      );
+      expect(() => tool.build(params)).toThrow('Offset must be a non-negative number');
     });
 
     it('should throw error if limit is zero or negative', () => {
@@ -132,9 +123,7 @@ describe('ReadFileTool', () => {
         file_path: path.join(tempRootDir, 'test.txt'),
         limit: 0,
       };
-      expect(() => tool.build(params)).toThrow(
-        'Limit must be a positive number',
-      );
+      expect(() => tool.build(params)).toThrow('Limit must be a positive number');
     });
   });
 
@@ -146,11 +135,9 @@ describe('ReadFileTool', () => {
       };
       const invocation = tool.build(params);
       expect(typeof invocation).not.toBe('string');
-      expect(
-        (
-          invocation as ToolInvocation<ReadFileToolParams, ToolResult>
-        ).getDescription(),
-      ).toBe(path.join('sub', 'dir', 'file.txt'));
+      expect((invocation as ToolInvocation<ReadFileToolParams, ToolResult>).getDescription()).toBe(
+        path.join('sub', 'dir', 'file.txt')
+      );
     });
 
     it('should return shortened path when file path is deep', () => {
@@ -165,14 +152,12 @@ describe('ReadFileTool', () => {
         'the',
         'normal',
         'limit',
-        'file.txt',
+        'file.txt'
       );
       const params: ReadFileToolParams = { file_path: deepPath };
       const invocation = tool.build(params);
       expect(typeof invocation).not.toBe('string');
-      const desc = (
-        invocation as ToolInvocation<ReadFileToolParams, ToolResult>
-      ).getDescription();
+      const desc = (invocation as ToolInvocation<ReadFileToolParams, ToolResult>).getDescription();
       expect(desc).toContain('...');
       expect(desc).toContain('file.txt');
     });
@@ -184,22 +169,18 @@ describe('ReadFileTool', () => {
       };
       const invocation = tool.build(params);
       expect(typeof invocation).not.toBe('string');
-      expect(
-        (
-          invocation as ToolInvocation<ReadFileToolParams, ToolResult>
-        ).getDescription(),
-      ).toBe(path.join('sub', 'dir', 'file.txt'));
+      expect((invocation as ToolInvocation<ReadFileToolParams, ToolResult>).getDescription()).toBe(
+        path.join('sub', 'dir', 'file.txt')
+      );
     });
 
     it('should return . if path is the root directory', () => {
       const params: ReadFileToolParams = { file_path: tempRootDir };
       const invocation = tool.build(params);
       expect(typeof invocation).not.toBe('string');
-      expect(
-        (
-          invocation as ToolInvocation<ReadFileToolParams, ToolResult>
-        ).getDescription(),
-      ).toBe('.');
+      expect((invocation as ToolInvocation<ReadFileToolParams, ToolResult>).getDescription()).toBe(
+        '.'
+      );
     });
   });
 
@@ -209,10 +190,7 @@ describe('ReadFileTool', () => {
       const fileContent = 'This is a test file.';
       await fsp.writeFile(filePath, fileContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: 'textfile.txt' };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       expect(await invocation.execute(abortSignal)).toEqual({
         llmContent: fileContent,
@@ -223,15 +201,11 @@ describe('ReadFileTool', () => {
     it('should return error if file does not exist', async () => {
       const filePath = path.join(tempRootDir, 'nonexistent.txt');
       const params: ReadFileToolParams = { file_path: filePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result).toEqual({
-        llmContent:
-          'Could not read file because no file was found at the specified path.',
+        llmContent: 'Could not read file because no file was found at the specified path.',
         returnDisplay: 'File not found.',
         error: {
           message: `File not found: ${filePath}`,
@@ -245,10 +219,7 @@ describe('ReadFileTool', () => {
       const fileContent = 'This is a test file.';
       await fsp.writeFile(filePath, fileContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: filePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       expect(await invocation.execute(abortSignal)).toEqual({
         llmContent: fileContent,
@@ -260,15 +231,11 @@ describe('ReadFileTool', () => {
       const dirPath = path.join(tempRootDir, 'directory');
       await fsp.mkdir(dirPath);
       const params: ReadFileToolParams = { file_path: dirPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result).toEqual({
-        llmContent:
-          'Could not read file because the provided path is a directory, not a file.',
+        llmContent: 'Could not read file because the provided path is a directory, not a file.',
         returnDisplay: 'Path is a directory.',
         error: {
           message: `Path is a directory, not a file: ${dirPath}`,
@@ -283,17 +250,12 @@ describe('ReadFileTool', () => {
       const largeContent = 'x'.repeat(21 * 1024 * 1024);
       await fsp.writeFile(filePath, largeContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: filePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result).toHaveProperty('error');
       expect(result.error?.type).toBe(ToolErrorType.FILE_TOO_LARGE);
-      expect(result.error?.message).toContain(
-        'File size exceeds the 20MB limit',
-      );
+      expect(result.error?.message).toContain('File size exceeds the 20MB limit');
     });
 
     it('should handle text file with lines exceeding maximum length', async () => {
@@ -302,15 +264,10 @@ describe('ReadFileTool', () => {
       const fileContent = `Short line\n${longLine}\nAnother short line`;
       await fsp.writeFile(filePath, fileContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: filePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
-      expect(result.llmContent).toContain(
-        'IMPORTANT: The file content has been truncated',
-      );
+      expect(result.llmContent).toContain('IMPORTANT: The file content has been truncated');
       expect(result.llmContent).toContain('--- FILE CONTENT (truncated) ---');
       expect(result.returnDisplay).toContain('some lines were shortened');
     });
@@ -318,15 +275,10 @@ describe('ReadFileTool', () => {
     it('should handle image file and return appropriate content', async () => {
       const imagePath = path.join(tempRootDir, 'image.png');
       // Minimal PNG header
-      const pngHeader = Buffer.from([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-      ]);
+      const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
       await fsp.writeFile(imagePath, pngHeader);
       const params: ReadFileToolParams = { file_path: imagePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toEqual({
@@ -344,10 +296,7 @@ describe('ReadFileTool', () => {
       const pdfHeader = Buffer.from('%PDF-1.4');
       await fsp.writeFile(pdfPath, pdfHeader);
       const params: ReadFileToolParams = { file_path: pdfPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toEqual({
@@ -365,15 +314,10 @@ describe('ReadFileTool', () => {
       const binaryData = Buffer.from([0x00, 0xff, 0x00, 0xff]);
       await fsp.writeFile(binPath, binaryData);
       const params: ReadFileToolParams = { file_path: binPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
-      expect(result.llmContent).toBe(
-        'Cannot display content of binary file: binary.bin',
-      );
+      expect(result.llmContent).toBe('Cannot display content of binary file: binary.bin');
       expect(result.returnDisplay).toBe('Skipped binary file: binary.bin');
     });
 
@@ -382,10 +326,7 @@ describe('ReadFileTool', () => {
       const svgContent = '<svg><circle cx="50" cy="50" r="40"/></svg>';
       await fsp.writeFile(svgPath, svgContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: svgPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toBe(svgContent);
@@ -398,28 +339,20 @@ describe('ReadFileTool', () => {
       const largeContent = '<svg>' + 'x'.repeat(1024 * 1024 + 1) + '</svg>';
       await fsp.writeFile(svgPath, largeContent, 'utf-8');
       const params: ReadFileToolParams = { file_path: svgPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toBe(
-        'Cannot display content of SVG file larger than 1MB: large.svg',
+        'Cannot display content of SVG file larger than 1MB: large.svg'
       );
-      expect(result.returnDisplay).toBe(
-        'Skipped large SVG file (>1MB): large.svg',
-      );
+      expect(result.returnDisplay).toBe('Skipped large SVG file (>1MB): large.svg');
     });
 
     it('should handle empty file', async () => {
       const emptyPath = path.join(tempRootDir, 'empty.txt');
       await fsp.writeFile(emptyPath, '', 'utf-8');
       const params: ReadFileToolParams = { file_path: emptyPath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toBe('');
@@ -437,24 +370,15 @@ describe('ReadFileTool', () => {
         offset: 5, // Start from line 6
         limit: 3,
       };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
-      expect(result.llmContent).toContain(
-        'IMPORTANT: The file content has been truncated',
-      );
-      expect(result.llmContent).toContain(
-        'Status: Showing lines 6-8 of 20 total lines',
-      );
+      expect(result.llmContent).toContain('IMPORTANT: The file content has been truncated');
+      expect(result.llmContent).toContain('Status: Showing lines 6-8 of 20 total lines');
       expect(result.llmContent).toContain('Line 6');
       expect(result.llmContent).toContain('Line 7');
       expect(result.llmContent).toContain('Line 8');
-      expect(result.returnDisplay).toBe(
-        'Read lines 6-8 of 20 from paginated.txt',
-      );
+      expect(result.returnDisplay).toBe('Read lines 6-8 of 20 from paginated.txt');
     });
 
     it('should successfully read files from project temp directory', async () => {
@@ -465,10 +389,7 @@ describe('ReadFileTool', () => {
       await fsp.writeFile(tempFilePath, tempFileContent, 'utf-8');
 
       const params: ReadFileToolParams = { file_path: tempFilePath };
-      const invocation = tool.build(params) as ToolInvocation<
-        ReadFileToolParams,
-        ToolResult
-      >;
+      const invocation = tool.build(params) as ToolInvocation<ReadFileToolParams, ToolResult>;
 
       const result = await invocation.execute(abortSignal);
       expect(result.llmContent).toBe(tempFileContent);
@@ -479,7 +400,7 @@ describe('ReadFileTool', () => {
       beforeEach(async () => {
         await fsp.writeFile(
           path.join(tempRootDir, '.geminiignore'),
-          ['foo.*', 'ignored/'].join('\n'),
+          ['foo.*', 'ignored/'].join('\n')
         );
         const mockConfigInstance = {
           getFileService: () => new FileDiscoveryService(tempRootDir),

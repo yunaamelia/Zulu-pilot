@@ -55,4 +55,3 @@ export const FILE_OPERATIONS_VERIFICATION = {
     reason: 'SmartEditTool uses BaseLlmClient from Config which uses custom adapter',
   },
 };
-

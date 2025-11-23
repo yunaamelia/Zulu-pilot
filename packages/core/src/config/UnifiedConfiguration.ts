@@ -41,6 +41,15 @@ export interface MCPServerConfig {
 }
 
 /**
+ * Google Search Configuration
+ * T144: Add Google Search configuration in UnifiedConfiguration
+ */
+export interface GoogleSearchConfig {
+  enabled?: boolean; // Enable/disable Google Search tool
+  allowAllProviders?: boolean; // Allow Google Search with all providers (default: false, only Gemini providers)
+}
+
+/**
  * Unified Configuration
  *
  * Root configuration object that combines Gemini CLI config with custom provider configs
@@ -49,6 +58,7 @@ export interface UnifiedConfiguration {
   defaultProvider: string;
   defaultModel?: string;
   providers: Record<string, ProviderConfiguration>;
+  googleSearch?: GoogleSearchConfig; // T144: Google Search configuration
   geminiCLI?: {
     mcpServers?: Record<string, MCPServerConfig>;
     tools?: {
@@ -64,4 +74,3 @@ export interface UnifiedConfiguration {
     [key: string]: unknown;
   };
 }
-

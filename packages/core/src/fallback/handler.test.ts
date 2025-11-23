@@ -71,11 +71,7 @@ describe('handleFallback', () => {
   });
 
   it('should return null immediately if authType is not OAuth', async () => {
-    const result = await handleFallback(
-      mockConfig,
-      MOCK_PRO_MODEL,
-      AUTH_API_KEY,
-    );
+    const result = await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_API_KEY);
     expect(result).toBeNull();
     expect(mockHandler).not.toHaveBeenCalled();
     expect(mockConfig.setFallbackMode).not.toHaveBeenCalled();
@@ -86,7 +82,7 @@ describe('handleFallback', () => {
     const result = await handleFallback(
       mockConfig,
       FALLBACK_MODEL, // Failed model is Flash
-      AUTH_OAUTH,
+      AUTH_OAUTH
     );
     expect(result).toBe(false);
     expect(mockHandler).toHaveBeenCalled();
@@ -96,11 +92,7 @@ describe('handleFallback', () => {
     const configWithoutHandler = createMockConfig({
       fallbackModelHandler: undefined,
     });
-    const result = await handleFallback(
-      configWithoutHandler,
-      MOCK_PRO_MODEL,
-      AUTH_OAUTH,
-    );
+    const result = await handleFallback(configWithoutHandler, MOCK_PRO_MODEL, AUTH_OAUTH);
     expect(result).toBeNull();
   });
 
@@ -108,11 +100,7 @@ describe('handleFallback', () => {
     it('should activate fallback mode, log telemetry, and return true', async () => {
       mockHandler.mockResolvedValue('retry_always');
 
-      const result = await handleFallback(
-        mockConfig,
-        MOCK_PRO_MODEL,
-        AUTH_OAUTH,
-      );
+      const result = await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_OAUTH);
 
       expect(result).toBe(true);
       expect(mockConfig.setFallbackMode).toHaveBeenCalledWith(true);
@@ -124,11 +112,7 @@ describe('handleFallback', () => {
     it('should activate fallback mode, log telemetry, and return false', async () => {
       mockHandler.mockResolvedValue('stop');
 
-      const result = await handleFallback(
-        mockConfig,
-        MOCK_PRO_MODEL,
-        AUTH_OAUTH,
-      );
+      const result = await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_OAUTH);
 
       expect(result).toBe(false);
       expect(mockConfig.setFallbackMode).toHaveBeenCalledWith(true);
@@ -140,18 +124,12 @@ describe('handleFallback', () => {
     it('should log an error and return null', async () => {
       mockHandler.mockResolvedValue(null);
 
-      const result = await handleFallback(
-        mockConfig,
-        MOCK_PRO_MODEL,
-        AUTH_OAUTH,
-      );
+      const result = await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_OAUTH);
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Fallback UI handler failed:',
-        new Error(
-          'Unexpected fallback intent received from fallbackModelHandler: "null"',
-        ),
+        new Error('Unexpected fallback intent received from fallbackModelHandler: "null"')
       );
       expect(mockConfig.setFallbackMode).not.toHaveBeenCalled();
     });
@@ -163,11 +141,7 @@ describe('handleFallback', () => {
 
     await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_OAUTH, mockError);
 
-    expect(mockHandler).toHaveBeenCalledWith(
-      MOCK_PRO_MODEL,
-      FALLBACK_MODEL,
-      mockError,
-    );
+    expect(mockHandler).toHaveBeenCalledWith(MOCK_PRO_MODEL, FALLBACK_MODEL, mockError);
   });
 
   it('should not call setFallbackMode or log telemetry if already in fallback mode', async () => {
@@ -180,11 +154,7 @@ describe('handleFallback', () => {
 
     mockHandler.mockResolvedValue('retry_always');
 
-    const result = await handleFallback(
-      activeFallbackConfig,
-      MOCK_PRO_MODEL,
-      AUTH_OAUTH,
-    );
+    const result = await handleFallback(activeFallbackConfig, MOCK_PRO_MODEL, AUTH_OAUTH);
 
     // Should still return true to allow the retry (which will use the active fallback mode)
     expect(result).toBe(true);
@@ -202,10 +172,7 @@ describe('handleFallback', () => {
     const result = await handleFallback(mockConfig, MOCK_PRO_MODEL, AUTH_OAUTH);
 
     expect(result).toBeNull();
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Fallback UI handler failed:',
-      handlerError,
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Fallback UI handler failed:', handlerError);
     expect(mockConfig.setFallbackMode).not.toHaveBeenCalled();
   });
 
@@ -243,7 +210,7 @@ describe('handleFallback', () => {
         mockConfig,
         PREVIEW_GEMINI_MODEL,
         AuthType.LOGIN_WITH_GOOGLE,
-        new Error('Capacity'),
+        new Error('Capacity')
       );
 
       expect(result).toBe(true);
@@ -258,7 +225,7 @@ describe('handleFallback', () => {
         mockConfig,
         PREVIEW_GEMINI_MODEL,
         AuthType.LOGIN_WITH_GOOGLE,
-        new Error('Capacity'),
+        new Error('Capacity')
       );
 
       expect(result).toBe(true);
@@ -267,20 +234,14 @@ describe('handleFallback', () => {
     });
     it('should pass DEFAULT_GEMINI_MODEL as fallback when Preview Model fails', async () => {
       const mockFallbackHandler = vi.fn().mockResolvedValue('stop');
-      vi.mocked(mockConfig.fallbackModelHandler!).mockImplementation(
-        mockFallbackHandler,
-      );
+      vi.mocked(mockConfig.fallbackModelHandler!).mockImplementation(mockFallbackHandler);
 
-      await handleFallback(
-        mockConfig,
-        PREVIEW_GEMINI_MODEL,
-        AuthType.LOGIN_WITH_GOOGLE,
-      );
+      await handleFallback(mockConfig, PREVIEW_GEMINI_MODEL, AuthType.LOGIN_WITH_GOOGLE);
 
       expect(mockConfig.fallbackModelHandler).toHaveBeenCalledWith(
         PREVIEW_GEMINI_MODEL,
         DEFAULT_GEMINI_MODEL,
-        undefined,
+        undefined
       );
     });
   });
@@ -291,7 +252,7 @@ describe('handleFallback', () => {
       mockConfig,
       DEFAULT_GEMINI_MODEL, // Not preview model
       AUTH_OAUTH,
-      modelNotFoundError,
+      modelNotFoundError
     );
     expect(result).toBeNull();
     expect(mockHandler).not.toHaveBeenCalled();
@@ -305,7 +266,7 @@ describe('handleFallback', () => {
       mockConfig,
       PREVIEW_GEMINI_MODEL,
       AUTH_OAUTH,
-      modelNotFoundError,
+      modelNotFoundError
     );
 
     expect(result).toBe(true);

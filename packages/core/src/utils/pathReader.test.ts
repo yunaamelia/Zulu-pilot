@@ -23,7 +23,7 @@ const createMockConfig = (
   fileFiltering: {
     respectGitIgnore?: boolean;
     respectGeminiIgnore?: boolean;
-  } = {},
+  } = {}
 ): Config => {
   const { respectGitIgnore = true, respectGeminiIgnore = true } = fileFiltering;
   const workspace = new WorkspaceContext(cwd, otherDirs);
@@ -99,9 +99,7 @@ describe('readPathFromWorkspace', () => {
 
   it('should read an image file and return it as inlineData (Part object)', async () => {
     // Use a real PNG header for robustness
-    const imageData = Buffer.from([
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-    ]);
+    const imageData = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     mock({
       [CWD]: {
         'image.png': imageData,
@@ -183,16 +181,12 @@ describe('readPathFromWorkspace', () => {
         })
         .join('');
 
-      expect(resultText).toContain(
-        '--- Start of content for directory: my-dir ---',
-      );
+      expect(resultText).toContain('--- Start of content for directory: my-dir ---');
       expect(resultText).toContain('--- file1.txt ---');
       expect(resultText).toContain('content of file 1');
       expect(resultText).toContain('--- file2.md ---');
       expect(resultText).toContain('content of file 2');
-      expect(resultText).toContain(
-        '--- End of content for directory: my-dir ---',
-      );
+      expect(resultText).toContain('--- End of content for directory: my-dir ---');
     });
 
     it('should recursively expand a directory and read all nested files', async () => {
@@ -222,15 +216,11 @@ describe('readPathFromWorkspace', () => {
 
       expect(resultText).toContain('content of file 1');
       expect(resultText).toContain('nested content');
-      expect(resultText).toContain(
-        `--- ${path.join('sub-dir', 'nested.txt')} ---`,
-      );
+      expect(resultText).toContain(`--- ${path.join('sub-dir', 'nested.txt')} ---`);
     });
 
     it('should handle mixed content and include files from subdirectories', async () => {
-      const imageData = Buffer.from([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-      ]);
+      const imageData = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
       mock({
         [CWD]: {
           'mixed-dir': {
@@ -261,9 +251,7 @@ describe('readPathFromWorkspace', () => {
       expect(textContent).toContain('this should be included');
 
       // Check for the image part
-      const imagePart = result.find(
-        (p) => typeof p === 'object' && 'inlineData' in p,
-      );
+      const imagePart = result.find((p) => typeof p === 'object' && 'inlineData' in p);
       expect(imagePart).toEqual({
         inlineData: {
           mimeType: 'image/png',
@@ -303,13 +291,10 @@ describe('readPathFromWorkspace', () => {
       const config = createMockConfig(CWD, [], mockFileService);
       const result = await readPathFromWorkspace('ignored.txt', config);
       expect(result).toEqual([]);
-      expect(mockFileService.filterFiles).toHaveBeenCalledWith(
-        ['ignored.txt'],
-        {
-          respectGitIgnore: true,
-          respectGeminiIgnore: true,
-        },
-      );
+      expect(mockFileService.filterFiles).toHaveBeenCalledWith(['ignored.txt'], {
+        respectGitIgnore: true,
+        respectGeminiIgnore: true,
+      });
     });
 
     it('should not read ignored files when expanding a directory', async () => {
@@ -322,9 +307,7 @@ describe('readPathFromWorkspace', () => {
         },
       });
       const mockFileService = {
-        filterFiles: vi.fn((files: string[]) =>
-          files.filter((f) => !f.endsWith('ignored.log')),
-        ),
+        filterFiles: vi.fn((files: string[]) => files.filter((f) => !f.endsWith('ignored.log'))),
       } as unknown as FileDiscoveryService;
       const config = createMockConfig(CWD, [], mockFileService);
       const result = await readPathFromWorkspace('my-dir', config);
@@ -377,13 +360,10 @@ describe('readPathFromWorkspace', () => {
         respectGeminiIgnore: false,
       });
       await readPathFromWorkspace('my-dir', config);
-      expect(mockFileService.filterFiles).toHaveBeenCalledWith(
-        [path.join('my-dir', 'file.txt')],
-        {
-          respectGitIgnore: true,
-          respectGeminiIgnore: false,
-        },
-      );
+      expect(mockFileService.filterFiles).toHaveBeenCalledWith([path.join('my-dir', 'file.txt')], {
+        respectGitIgnore: true,
+        respectGeminiIgnore: false,
+      });
     });
   });
 
@@ -398,7 +378,7 @@ describe('readPathFromWorkspace', () => {
     // OUTSIDE_DIR is not added to the config's workspace
     const config = createMockConfig(CWD);
     await expect(readPathFromWorkspace(absPath, config)).rejects.toThrow(
-      `Absolute path is outside of the allowed workspace: ${absPath}`,
+      `Absolute path is outside of the allowed workspace: ${absPath}`
     );
   });
 
@@ -408,9 +388,9 @@ describe('readPathFromWorkspace', () => {
       [OTHER_DIR]: {},
     });
     const config = createMockConfig(CWD, [OTHER_DIR]);
-    await expect(
-      readPathFromWorkspace('not-found.txt', config),
-    ).rejects.toThrow('Path not found in workspace: not-found.txt');
+    await expect(readPathFromWorkspace('not-found.txt', config)).rejects.toThrow(
+      'Path not found in workspace: not-found.txt'
+    );
   });
 
   // mock-fs permission simulation is unreliable on Windows.
@@ -436,7 +416,7 @@ describe('readPathFromWorkspace', () => {
       // processSingleFileContent formats errors using the relative path from the target dir (CWD).
       expect(textResult).toContain('Error reading file unreadable.txt');
       expect(textResult).toMatch(/(EACCES|permission denied)/i);
-    },
+    }
   );
 
   it('should return an error string for files exceeding the size limit', async () => {

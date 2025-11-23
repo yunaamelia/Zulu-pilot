@@ -18,9 +18,7 @@ export class InstallationManager {
   private readInstallationIdFromFile(): string | null {
     const installationIdFile = this.getInstallationIdPath();
     if (fs.existsSync(installationIdFile)) {
-      const installationid = fs
-        .readFileSync(installationIdFile, 'utf-8')
-        .trim();
+      const installationid = fs.readFileSync(installationIdFile, 'utf-8').trim();
       return installationid || null;
     }
     return null;
@@ -49,10 +47,7 @@ export class InstallationManager {
 
       return installationId;
     } catch (error) {
-      debugLogger.warn(
-        'Error accessing installation ID file, generating ephemeral ID:',
-        error,
-      );
+      debugLogger.warn('Error accessing installation ID file, generating ephemeral ID:', error);
       return '123456789';
     }
   }

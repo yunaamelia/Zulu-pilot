@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  readPackageUp,
-  type PackageJson as BasePackageJson,
-} from 'read-package-up';
+import { readPackageUp, type PackageJson as BasePackageJson } from 'read-package-up';
 
 export type PackageJson = BasePackageJson & {
   config?: {
@@ -15,9 +12,7 @@ export type PackageJson = BasePackageJson & {
   };
 };
 
-export async function getPackageJson(
-  cwd: string,
-): Promise<PackageJson | undefined> {
+export async function getPackageJson(cwd: string): Promise<PackageJson | undefined> {
   const result = await readPackageUp({ cwd });
   if (!result) {
     // TODO: Maybe bubble this up as an error.

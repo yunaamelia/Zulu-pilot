@@ -9,11 +9,7 @@ import { AgentExecutor } from './executor.js';
 import type { AnsiOutput } from '../utils/terminalSerializer.js';
 import { BaseToolInvocation, type ToolResult } from '../tools/tools.js';
 import { ToolErrorType } from '../tools/tool-error.js';
-import type {
-  AgentDefinition,
-  AgentInputs,
-  SubagentActivityEvent,
-} from './types.js';
+import type { AgentDefinition, AgentInputs, SubagentActivityEvent } from './types.js';
 import type { MessageBus } from '../confirmation-bus/message-bus.js';
 import { type z } from 'zod';
 
@@ -30,9 +26,10 @@ const DESCRIPTION_MAX_LENGTH = 200;
  * live output stream.
  * 4. Formatting the final result into a {@link ToolResult}.
  */
-export class SubagentInvocation<
-  TOutput extends z.ZodTypeAny,
-> extends BaseToolInvocation<AgentInputs, ToolResult> {
+export class SubagentInvocation<TOutput extends z.ZodTypeAny> extends BaseToolInvocation<
+  AgentInputs,
+  ToolResult
+> {
   /**
    * @param params The validated input parameters for the agent.
    * @param definition The definition object that configures the agent.
@@ -43,7 +40,7 @@ export class SubagentInvocation<
     params: AgentInputs,
     private readonly definition: AgentDefinition<TOutput>,
     private readonly config: Config,
-    messageBus?: MessageBus,
+    messageBus?: MessageBus
   ) {
     super(params, messageBus);
   }
@@ -54,10 +51,7 @@ export class SubagentInvocation<
    */
   getDescription(): string {
     const inputSummary = Object.entries(this.params)
-      .map(
-        ([key, value]) =>
-          `${key}: ${String(value).slice(0, INPUT_PREVIEW_MAX_LENGTH)}`,
-      )
+      .map(([key, value]) => `${key}: ${String(value).slice(0, INPUT_PREVIEW_MAX_LENGTH)}`)
       .join(', ');
 
     const description = `Running subagent '${this.definition.name}' with inputs: { ${inputSummary} }`;
@@ -74,7 +68,7 @@ export class SubagentInvocation<
    */
   async execute(
     signal: AbortSignal,
-    updateOutput?: (output: string | AnsiOutput) => void,
+    updateOutput?: (output: string | AnsiOutput) => void
   ): Promise<ToolResult> {
     try {
       if (updateOutput) {
@@ -86,19 +80,12 @@ export class SubagentInvocation<
       const onActivity = (activity: SubagentActivityEvent): void => {
         if (!updateOutput) return;
 
-        if (
-          activity.type === 'THOUGHT_CHUNK' &&
-          typeof activity.data['text'] === 'string'
-        ) {
+        if (activity.type === 'THOUGHT_CHUNK' && typeof activity.data['text'] === 'string') {
           updateOutput(`🤖💭 ${activity.data['text']}`);
         }
       };
 
-      const executor = await AgentExecutor.create(
-        this.definition,
-        this.config,
-        onActivity,
-      );
+      const executor = await AgentExecutor.create(this.definition, this.config, onActivity);
 
       const output = await executor.run(this.params, signal);
 
@@ -121,8 +108,7 @@ ${output.result}
         returnDisplay: displayContent,
       };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
 
       return {
         llmContent: `Subagent '${this.definition.name}' failed. Error: ${errorMessage}`,

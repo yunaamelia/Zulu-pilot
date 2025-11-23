@@ -7,10 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ModelRouterService } from './modelRouterService.js';
 import { Config } from '../config/config.js';
-import {
-  PREVIEW_GEMINI_MODEL,
-  DEFAULT_GEMINI_MODEL,
-} from '../config/models.js';
+import { PREVIEW_GEMINI_MODEL, DEFAULT_GEMINI_MODEL } from '../config/models.js';
 import type { BaseLlmClient } from '../core/baseLlmClient.js';
 import type { RoutingContext, RoutingDecision } from './routingStrategy.js';
 import { DefaultStrategy } from './strategies/defaultStrategy.js';
@@ -52,11 +49,9 @@ describe('ModelRouterService', () => {
         new ClassifierStrategy(),
         new DefaultStrategy(),
       ],
-      'agent-router',
+      'agent-router'
     );
-    vi.mocked(CompositeStrategy).mockImplementation(
-      () => mockCompositeStrategy,
-    );
+    vi.mocked(CompositeStrategy).mockImplementation(() => mockCompositeStrategy);
 
     service = new ModelRouterService(mockConfig);
 
@@ -102,18 +97,12 @@ describe('ModelRouterService', () => {
 
       const decision = await service.route(mockContext);
 
-      expect(strategySpy).toHaveBeenCalledWith(
-        mockContext,
-        mockConfig,
-        mockBaseLlmClient,
-      );
+      expect(strategySpy).toHaveBeenCalledWith(mockContext, mockConfig, mockBaseLlmClient);
       expect(decision).toEqual(strategyDecision);
     });
 
     it('should log a telemetry event on a successful decision', async () => {
-      vi.spyOn(mockCompositeStrategy, 'route').mockResolvedValue(
-        strategyDecision,
-      );
+      vi.spyOn(mockCompositeStrategy, 'route').mockResolvedValue(strategyDecision);
 
       await service.route(mockContext);
 
@@ -123,12 +112,9 @@ describe('ModelRouterService', () => {
         10,
         'Strategy reasoning',
         false,
-        undefined,
+        undefined
       );
-      expect(logModelRouting).toHaveBeenCalledWith(
-        mockConfig,
-        expect.any(ModelRoutingEvent),
-      );
+      expect(logModelRouting).toHaveBeenCalledWith(mockConfig, expect.any(ModelRoutingEvent));
     });
 
     it('should log a telemetry event and re-throw on a failed decision', async () => {
@@ -144,12 +130,9 @@ describe('ModelRouterService', () => {
         expect.any(Number),
         'An exception occurred during routing.',
         true,
-        'Strategy failed',
+        'Strategy failed'
       );
-      expect(logModelRouting).toHaveBeenCalledWith(
-        mockConfig,
-        expect.any(ModelRoutingEvent),
-      );
+      expect(logModelRouting).toHaveBeenCalledWith(mockConfig, expect.any(ModelRoutingEvent));
     });
 
     it('should upgrade to Preview Model when preview features are enabled and model is 2.5 Pro', async () => {

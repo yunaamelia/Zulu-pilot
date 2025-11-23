@@ -308,22 +308,22 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 10
 
-- [ ] T126 [P] [US10] Write unit tests for model configuration in tests/unit/config/ModelConfiguration.test.ts
-- [ ] T127 [P] [US10] Write integration test for model listing in tests/integration/cli/model-list.test.ts
-- [ ] T128 [P] [US10] Write integration test for model switching in tests/integration/cli/model-switch.test.ts
+- [x] T126 [P] [US10] Write unit tests for model configuration in tests/unit/config/ModelConfiguration.test.ts
+- [x] T127 [P] [US10] Write integration test for model listing in tests/integration/cli/model-list.test.ts
+- [x] T128 [P] [US10] Write integration test for model switching in tests/integration/cli/model-switch.test.ts
 
 ### Implementation for User Story 10
 
-- [ ] T129 [P] [US10] Enhance ModelCommand class in packages/cli/src/commands/model.ts
-- [ ] T130 [US10] Implement model list functionality per provider in packages/cli/src/commands/model.ts
-- [ ] T131 [US10] Implement model set functionality per provider in packages/cli/src/commands/model.ts
-- [ ] T132 [US10] Implement model discovery for Ollama in packages/providers/src/OllamaProvider.ts
-- [ ] T133 [US10] Implement model discovery for OpenAI in packages/providers/src/OpenAIProvider.ts
-- [ ] T134 [US10] Implement model discovery for Google Cloud in packages/providers/src/GoogleCloudProvider.ts
-- [ ] T135 [US10] Add setModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T136 [US10] Add getModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
-- [ ] T137 [US10] Implement model switching in adapter in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T138 [US10] Write unit tests for ModelCommand in tests/unit/cli/commands/model.test.ts (90%+ coverage)
+- [x] T129 [P] [US10] Enhance ModelCommand class in packages/cli/src/commands/model.ts
+- [x] T130 [US10] Implement model list functionality per provider in packages/cli/src/commands/model.ts
+- [x] T131 [US10] Implement model set functionality per provider in packages/cli/src/commands/model.ts
+- [x] T132 [US10] Implement model discovery for Ollama in packages/providers/src/OllamaProvider.ts
+- [x] T133 [US10] Implement model discovery for OpenAI in packages/providers/src/OpenAIProvider.ts
+- [x] T134 [US10] Implement model discovery for Google Cloud in packages/providers/src/GoogleCloudProvider.ts
+- [x] T135 [US10] Add setModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [x] T136 [US10] Add getModel method to IModelProvider interface in packages/providers/src/IModelProvider.ts
+- [x] T137 [US10] Implement model switching in adapter in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T138 [US10] Write unit tests for ModelCommand in tests/unit/cli/commands/model.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 10 complete - model configuration working per provider
 
@@ -337,15 +337,15 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 5
 
-- [ ] T139 [P] [US5] Write integration test for Google Search tool in tests/integration/tools/google-search.test.ts
-- [ ] T140 [P] [US5] Write E2E test for Google Search workflow in tests/e2e/full-workflows/google-search.test.ts
+- [x] T139 [P] [US5] Write integration test for Google Search tool in tests/integration/tools/google-search.test.ts
+- [x] T140 [P] [US5] Write E2E test for Google Search workflow in tests/e2e/full-workflows/google-search.test.ts
 
 ### Implementation for User Story 5
 
-- [ ] T141 [US5] Verify Google Search tool works with custom adapter in packages/core/src/tools/GoogleSearchTool.ts
-- [ ] T142 [US5] Test Google Search tool with all providers in tests/integration/tools/GoogleSearchTool.test.ts
-- [ ] T143 [US5] Implement graceful degradation for providers without Google Search in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T144 [US5] Add Google Search configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
+- [x] T141 [US5] Verify Google Search tool works with custom adapter in packages/core/src/tools/GoogleSearchTool.ts
+- [x] T142 [US5] Test Google Search tool with all providers in tests/integration/tools/GoogleSearchTool.test.ts
+- [x] T143 [US5] Implement graceful degradation for providers without Google Search in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T144 [US5] Add Google Search configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
 
 **Checkpoint**: User Story 5 complete - Google Search working with custom models
 
@@ -359,16 +359,16 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 6
 
-- [ ] T145 [P] [US6] Write integration test for MCP server connection in tests/integration/mcp/server-connection.test.ts
-- [ ] T146 [P] [US6] Write integration test for MCP tool execution in tests/integration/mcp/tool-execution.test.ts
-- [ ] T147 [P] [US6] Write E2E test for MCP workflow in tests/e2e/full-workflows/mcp-integration.test.ts
+- [x] T145 [P] [US6] Write integration test for MCP server connection in tests/integration/mcp/server-connection.test.ts
+- [x] T146 [P] [US6] Write integration test for MCP tool execution in tests/integration/mcp/tool-execution.test.ts
+- [x] T147 [P] [US6] Write E2E test for MCP workflow in tests/e2e/full-workflows/mcp-integration.test.ts
 
 ### Implementation for User Story 6
 
-- [ ] T148 [US6] Verify MCP server integration works with custom adapter in packages/core/src/mcp/MCPServerManager.ts
-- [ ] T149 [US6] Test MCP servers with custom providers in tests/integration/mcp/MCPServerManager.test.ts
-- [ ] T150 [US6] Implement MCP server configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
-- [ ] T151 [US6] Add MCP server management commands in packages/cli/src/commands/mcp.ts
+- [x] T148 [US6] Verify MCP server integration works with custom adapter in packages/core/src/mcp/MCPServerManager.ts
+- [x] T149 [US6] Test MCP servers with custom providers in tests/integration/mcp/MCPServerManager.test.ts
+- [x] T150 [US6] Implement MCP server configuration in UnifiedConfiguration in packages/core/src/config/UnifiedConfiguration.ts
+- [x] T151 [US6] Add MCP server management commands in packages/cli/src/commands/mcp.ts
 
 **Checkpoint**: User Story 6 complete - MCP servers working with custom models
 

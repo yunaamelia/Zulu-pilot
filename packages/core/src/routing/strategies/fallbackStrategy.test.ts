@@ -39,11 +39,7 @@ describe('FallbackStrategy', () => {
         getPreviewFeatures: () => false,
       } as Config;
 
-      const decision = await strategy.route(
-        mockContext,
-        mockConfig,
-        mockClient,
-      );
+      const decision = await strategy.route(mockContext, mockConfig, mockClient);
 
       expect(decision).not.toBeNull();
       expect(decision?.model).toBe(DEFAULT_GEMINI_FLASH_MODEL);
@@ -58,11 +54,7 @@ describe('FallbackStrategy', () => {
         getPreviewFeatures: () => false,
       } as Config;
 
-      const decision = await strategy.route(
-        mockContext,
-        mockConfig,
-        mockClient,
-      );
+      const decision = await strategy.route(mockContext, mockConfig, mockClient);
 
       expect(decision).not.toBeNull();
       expect(decision?.model).toBe(DEFAULT_GEMINI_FLASH_LITE_MODEL);
@@ -76,11 +68,7 @@ describe('FallbackStrategy', () => {
         getPreviewFeatures: () => false,
       } as Config;
 
-      const decision = await strategy.route(
-        mockContext,
-        mockConfig,
-        mockClient,
-      );
+      const decision = await strategy.route(mockContext, mockConfig, mockClient);
 
       expect(decision).not.toBeNull();
       expect(decision?.model).toBe(DEFAULT_GEMINI_FLASH_MODEL);

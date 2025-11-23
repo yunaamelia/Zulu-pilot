@@ -58,24 +58,19 @@ class TestApprovalTool extends BaseDeclarativeTool<{ id: string }, ToolResult> {
         properties: { id: { type: 'string' } },
         required: ['id'],
         type: 'object',
-      },
+      }
     );
   }
 
-  protected createInvocation(params: {
-    id: string;
-  }): ToolInvocation<{ id: string }, ToolResult> {
+  protected createInvocation(params: { id: string }): ToolInvocation<{ id: string }, ToolResult> {
     return new TestApprovalInvocation(this.config, params);
   }
 }
 
-class TestApprovalInvocation extends BaseToolInvocation<
-  { id: string },
-  ToolResult
-> {
+class TestApprovalInvocation extends BaseToolInvocation<{ id: string }, ToolResult> {
   constructor(
     private config: Config,
-    params: { id: string },
+    params: { id: string }
   ) {
     super(params);
   }
@@ -84,9 +79,7 @@ class TestApprovalInvocation extends BaseToolInvocation<
     return `Test tool ${this.params.id}`;
   }
 
-  override async shouldConfirmExecute(): Promise<
-    ToolCallConfirmationDetails | false
-  > {
+  override async shouldConfirmExecute(): Promise<ToolCallConfirmationDetails | false> {
     // Need confirmation unless approval mode is AUTO_EDIT
     if (this.config.getApprovalMode() === ApprovalMode.AUTO_EDIT) {
       return false;
@@ -123,13 +116,13 @@ class AbortDuringConfirmationInvocation extends BaseToolInvocation<
   constructor(
     private readonly abortController: AbortController,
     private readonly abortError: Error,
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ) {
     super(params);
   }
 
   override async shouldConfirmExecute(
-    _signal: AbortSignal,
+    _signal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     this.abortController.abort();
     throw this.abortError;
@@ -144,13 +137,10 @@ class AbortDuringConfirmationInvocation extends BaseToolInvocation<
   }
 }
 
-class AbortDuringConfirmationTool extends BaseDeclarativeTool<
-  Record<string, unknown>,
-  ToolResult
-> {
+class AbortDuringConfirmationTool extends BaseDeclarativeTool<Record<string, unknown>, ToolResult> {
   constructor(
     private readonly abortController: AbortController,
-    private readonly abortError: Error,
+    private readonly abortError: Error
   ) {
     super(
       'abortDuringConfirmationTool',
@@ -160,25 +150,21 @@ class AbortDuringConfirmationTool extends BaseDeclarativeTool<
       {
         type: 'object',
         properties: {},
-      },
+      }
     );
   }
 
   protected createInvocation(
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ): ToolInvocation<Record<string, unknown>, ToolResult> {
-    return new AbortDuringConfirmationInvocation(
-      this.abortController,
-      this.abortError,
-      params,
-    );
+    return new AbortDuringConfirmationInvocation(this.abortController, this.abortError, params);
   }
 }
 
 async function waitForStatus(
   onToolCallsUpdate: Mock,
   status: 'awaiting_approval' | 'executing' | 'success' | 'error' | 'cancelled',
-  timeout = 5000,
+  timeout = 5000
 ): Promise<ToolCall> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
@@ -189,10 +175,8 @@ async function waitForStatus(
           .map((toolCall: ToolCall) => toolCall.status);
         reject(
           new Error(
-            `Timed out waiting for status "${status}". Seen statuses: ${seenStatuses.join(
-              ', ',
-            )}`,
-          ),
+            `Timed out waiting for status "${status}". Seen statuses: ${seenStatuses.join(', ')}`
+          )
         );
         return;
       }
@@ -244,8 +228,7 @@ function createMockConfig(overrides: Partial<Config> = {}): Config {
     storage: {
       getProjectTempDir: () => '/tmp',
     },
-    getTruncateToolOutputThreshold: () =>
-      DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
+    getTruncateToolOutputThreshold: () => DEFAULT_TRUNCATE_TOOL_OUTPUT_THRESHOLD,
     getTruncateToolOutputLines: () => DEFAULT_TRUNCATE_TOOL_OUTPUT_LINES,
     getToolRegistry: () => defaultToolRegistry,
     getUseSmartEdit: () => false,
@@ -308,8 +291,7 @@ describe('CoreToolScheduler', () => {
     await scheduler.schedule([request], abortController.signal);
 
     expect(onAllToolCallsComplete).toHaveBeenCalled();
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls[0].status).toBe('cancelled');
   });
 
@@ -399,19 +381,12 @@ describe('CoreToolScheduler', () => {
       expect(onAllToolCallsComplete).toHaveBeenCalled();
     });
 
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
 
     expect(completedCalls).toHaveLength(3);
-    expect(completedCalls.find((c) => c.request.callId === '1')?.status).toBe(
-      'cancelled',
-    );
-    expect(completedCalls.find((c) => c.request.callId === '2')?.status).toBe(
-      'cancelled',
-    );
-    expect(completedCalls.find((c) => c.request.callId === '3')?.status).toBe(
-      'cancelled',
-    );
+    expect(completedCalls.find((c) => c.request.callId === '1')?.status).toBe('cancelled');
+    expect(completedCalls.find((c) => c.request.callId === '2')?.status).toBe('cancelled');
+    expect(completedCalls.find((c) => c.request.callId === '3')?.status).toBe('cancelled');
   });
 
   it('should cancel all tools in a batch when one is cancelled via confirmation', async () => {
@@ -492,41 +467,29 @@ describe('CoreToolScheduler', () => {
     // Wait for the first tool to be awaiting approval
     const awaitingCall = (await waitForStatus(
       onToolCallsUpdate,
-      'awaiting_approval',
+      'awaiting_approval'
     )) as WaitingToolCall;
 
     // Cancel the first tool via its confirmation handler
-    await awaitingCall.confirmationDetails.onConfirm(
-      ToolConfirmationOutcome.Cancel,
-    );
+    await awaitingCall.confirmationDetails.onConfirm(ToolConfirmationOutcome.Cancel);
     abortController.abort(); // User cancelling often involves an abort signal
 
     await vi.waitFor(() => {
       expect(onAllToolCallsComplete).toHaveBeenCalled();
     });
 
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
 
     expect(completedCalls).toHaveLength(3);
-    expect(completedCalls.find((c) => c.request.callId === '1')?.status).toBe(
-      'cancelled',
-    );
-    expect(completedCalls.find((c) => c.request.callId === '2')?.status).toBe(
-      'cancelled',
-    );
-    expect(completedCalls.find((c) => c.request.callId === '3')?.status).toBe(
-      'cancelled',
-    );
+    expect(completedCalls.find((c) => c.request.callId === '1')?.status).toBe('cancelled');
+    expect(completedCalls.find((c) => c.request.callId === '2')?.status).toBe('cancelled');
+    expect(completedCalls.find((c) => c.request.callId === '3')?.status).toBe('cancelled');
   });
 
   it('should mark tool call as cancelled when abort happens during confirmation error', async () => {
     const abortController = new AbortController();
     const abortError = new Error('Abort requested during confirmation');
-    const declarativeTool = new AbortDuringConfirmationTool(
-      abortController,
-      abortError,
-    );
+    const declarativeTool = new AbortDuringConfirmationTool(abortController, abortError);
 
     const mockToolRegistry = {
       getTool: () => declarativeTool,
@@ -568,11 +531,10 @@ describe('CoreToolScheduler', () => {
     await scheduler.schedule([request], abortController.signal);
 
     expect(onAllToolCallsComplete).toHaveBeenCalled();
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls[0].status).toBe('cancelled');
     const statuses = onToolCallsUpdate.mock.calls.flatMap((call) =>
-      (call[0] as ToolCall[]).map((toolCall) => toolCall.status),
+      (call[0] as ToolCall[]).map((toolCall) => toolCall.status)
     );
     expect(statuses).not.toContain('error');
   });
@@ -608,7 +570,7 @@ describe('CoreToolScheduler', () => {
       // @ts-expect-error accessing private method
       const suggestionMultiple = scheduler.getToolSuggestion('list_fils');
       expect(suggestionMultiple).toBe(
-        ' Did you mean one of: "list_files", "read_file", "write_file"?',
+        ' Did you mean one of: "list_files", "read_file", "write_file"?'
       );
     });
   });
@@ -661,16 +623,13 @@ describe('CoreToolScheduler with payload', () => {
 
     const awaitingCall = (await waitForStatus(
       onToolCallsUpdate,
-      'awaiting_approval',
+      'awaiting_approval'
     )) as WaitingToolCall;
     const confirmationDetails = awaitingCall.confirmationDetails;
 
     if (confirmationDetails) {
       const payload: ToolConfirmationPayload = { newContent: 'final version' };
-      await confirmationDetails.onConfirm(
-        ToolConfirmationOutcome.ProceedOnce,
-        payload,
-      );
+      await confirmationDetails.onConfirm(ToolConfirmationOutcome.ProceedOnce, payload);
     }
 
     // Wait for the tool execution to complete
@@ -678,8 +637,7 @@ describe('CoreToolScheduler with payload', () => {
       expect(onAllToolCallsComplete).toHaveBeenCalled();
     });
 
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls[0].status).toBe('success');
     expect(mockTool.executeFn).toHaveBeenCalledWith({
       newContent: 'final version',
@@ -866,10 +824,7 @@ describe('convertToFunctionResponse', () => {
   });
 });
 
-class MockEditToolInvocation extends BaseToolInvocation<
-  Record<string, unknown>,
-  ToolResult
-> {
+class MockEditToolInvocation extends BaseToolInvocation<Record<string, unknown>, ToolResult> {
   constructor(params: Record<string, unknown>) {
     super(params);
   }
@@ -879,15 +834,14 @@ class MockEditToolInvocation extends BaseToolInvocation<
   }
 
   override async shouldConfirmExecute(
-    _abortSignal: AbortSignal,
+    _abortSignal: AbortSignal
   ): Promise<ToolCallConfirmationDetails | false> {
     return {
       type: 'edit',
       title: 'Confirm Edit',
       fileName: 'test.txt',
       filePath: 'test.txt',
-      fileDiff:
-        '--- test.txt\n+++ test.txt\n@@ -1,1 +1,1 @@\n-old content\n+new content',
+      fileDiff: '--- test.txt\n+++ test.txt\n@@ -1,1 +1,1 @@\n-old content\n+new content',
       originalContent: 'old content',
       newContent: 'new content',
       onConfirm: async () => {},
@@ -902,16 +856,13 @@ class MockEditToolInvocation extends BaseToolInvocation<
   }
 }
 
-class MockEditTool extends BaseDeclarativeTool<
-  Record<string, unknown>,
-  ToolResult
-> {
+class MockEditTool extends BaseDeclarativeTool<Record<string, unknown>, ToolResult> {
   constructor() {
     super('mockEditTool', 'mockEditTool', 'A mock edit tool', Kind.Edit, {});
   }
 
   protected createInvocation(
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ): ToolInvocation<Record<string, unknown>, ToolResult> {
     return new MockEditToolInvocation(params);
   }
@@ -962,7 +913,7 @@ describe('CoreToolScheduler edit cancellation', () => {
 
     const awaitingCall = (await waitForStatus(
       onToolCallsUpdate,
-      'awaiting_approval',
+      'awaiting_approval'
     )) as WaitingToolCall;
 
     // Cancel the edit
@@ -972,8 +923,7 @@ describe('CoreToolScheduler edit cancellation', () => {
     }
 
     expect(onAllToolCallsComplete).toHaveBeenCalled();
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
 
     expect(completedCalls[0].status).toBe('cancelled');
 
@@ -982,7 +932,7 @@ describe('CoreToolScheduler edit cancellation', () => {
     const cancelledCall = completedCalls[0] as any;
     expect(cancelledCall.response.resultDisplay).toBeDefined();
     expect(cancelledCall.response.resultDisplay.fileDiff).toBe(
-      '--- test.txt\n+++ test.txt\n@@ -1,1 +1,1 @@\n-old content\n+new content',
+      '--- test.txt\n+++ test.txt\n@@ -1,1 +1,1 @@\n-old content\n+new content'
     );
     expect(cancelledCall.response.resultDisplay.fileName).toBe('test.txt');
   });
@@ -1060,16 +1010,10 @@ describe('CoreToolScheduler YOLO mode', () => {
       .map((call) => (call[0][0] as ToolCall)?.status)
       .filter(Boolean);
     expect(statusUpdates).not.toContain('awaiting_approval');
-    expect(statusUpdates).toEqual([
-      'validating',
-      'scheduled',
-      'executing',
-      'success',
-    ]);
+    expect(statusUpdates).toEqual(['validating', 'scheduled', 'executing', 'success']);
 
     // 3. The final callback indicates the tool call was successful.
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls).toHaveLength(1);
     const completedCall = completedCalls[0];
     expect(completedCall.status).toBe('success');
@@ -1143,10 +1087,7 @@ describe('CoreToolScheduler request queueing', () => {
     await waitForStatus(onToolCallsUpdate, 'executing');
 
     // Schedule the second call while the first is "running".
-    const schedulePromise2 = scheduler.schedule(
-      [request2],
-      abortController.signal,
-    );
+    const schedulePromise2 = scheduler.schedule([request2], abortController.signal);
 
     // Ensure the second tool call hasn't been executed yet.
     expect(executeFn).toHaveBeenCalledWith({ a: 1 });
@@ -1259,17 +1200,11 @@ describe('CoreToolScheduler request queueing', () => {
       .map((call) => (call[0][0] as ToolCall)?.status)
       .filter(Boolean);
     expect(statusUpdates).not.toContain('awaiting_approval');
-    expect(statusUpdates).toEqual([
-      'validating',
-      'scheduled',
-      'executing',
-      'success',
-    ]);
+    expect(statusUpdates).toEqual(['validating', 'scheduled', 'executing', 'success']);
 
     // 3. The final callback indicates the tool call was successful.
     expect(onAllToolCallsComplete).toHaveBeenCalled();
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls).toHaveLength(1);
     const completedCall = completedCalls[0];
     expect(completedCall.status).toBe('success');
@@ -1284,8 +1219,8 @@ describe('CoreToolScheduler request queueing', () => {
         {
           params: { command: 'git status && rm -rf /tmp/should-not-run' },
         } as unknown as AnyToolInvocation,
-        ['run_shell_command(git)'],
-      ),
+        ['run_shell_command(git)']
+      )
     ).toBe(false);
 
     const executeFn = vi.fn().mockResolvedValue({
@@ -1413,14 +1348,8 @@ describe('CoreToolScheduler request queueing', () => {
     };
 
     // Schedule two calls synchronously.
-    const schedulePromise1 = scheduler.schedule(
-      [request1],
-      abortController.signal,
-    );
-    const schedulePromise2 = scheduler.schedule(
-      [request2],
-      abortController.signal,
-    );
+    const schedulePromise1 = scheduler.schedule([request1], abortController.signal);
+    const schedulePromise2 = scheduler.schedule([request2], abortController.signal);
 
     // Wait for both promises to resolve.
     await Promise.all([schedulePromise1, schedulePromise2]);
@@ -1470,9 +1399,7 @@ describe('CoreToolScheduler request queueing', () => {
 
     const onAllToolCallsComplete = vi.fn();
     const onToolCallsUpdate = vi.fn();
-    const pendingConfirmations: Array<
-      (outcome: ToolConfirmationOutcome) => void
-    > = [];
+    const pendingConfirmations: Array<(outcome: ToolConfirmationOutcome) => void> = [];
 
     const scheduler = new CoreToolScheduler({
       config: mockConfig,
@@ -1485,12 +1412,10 @@ describe('CoreToolScheduler request queueing', () => {
             const waitingCall = call as WaitingToolCall;
             if (waitingCall.confirmationDetails?.onConfirm) {
               const originalHandler = pendingConfirmations.find(
-                (h) => h === waitingCall.confirmationDetails.onConfirm,
+                (h) => h === waitingCall.confirmationDetails.onConfirm
               );
               if (!originalHandler) {
-                pendingConfirmations.push(
-                  waitingCall.confirmationDetails.onConfirm,
-                );
+                pendingConfirmations.push(waitingCall.confirmationDetails.onConfirm);
               }
             }
           }
@@ -1551,13 +1476,9 @@ describe('CoreToolScheduler request queueing', () => {
       expect(onAllToolCallsComplete).toHaveBeenCalled();
     });
 
-    const completedCalls = onAllToolCallsComplete.mock.calls.at(
-      -1,
-    )?.[0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls.at(-1)?.[0] as ToolCall[];
     expect(completedCalls?.length).toBe(3);
-    expect(completedCalls?.every((call) => call.status === 'success')).toBe(
-      true,
-    );
+    expect(completedCalls?.every((call) => call.status === 'success')).toBe(true);
 
     // Verify approval mode was changed
     expect(approvalMode).toBe(ApprovalMode.AUTO_EDIT);
@@ -1568,26 +1489,22 @@ describe('CoreToolScheduler Sequential Execution', () => {
   it('should execute tool calls in a batch sequentially', async () => {
     // Arrange
     let firstCallFinished = false;
-    const executeFn = vi
-      .fn()
-      .mockImplementation(async (args: { call: number }) => {
-        if (args.call === 1) {
-          // First call, wait for a bit to simulate work
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          firstCallFinished = true;
-          return { llmContent: 'First call done' };
+    const executeFn = vi.fn().mockImplementation(async (args: { call: number }) => {
+      if (args.call === 1) {
+        // First call, wait for a bit to simulate work
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        firstCallFinished = true;
+        return { llmContent: 'First call done' };
+      }
+      if (args.call === 2) {
+        // Second call, should only happen after the first is finished
+        if (!firstCallFinished) {
+          throw new Error('Second tool call started before the first one finished!');
         }
-        if (args.call === 2) {
-          // Second call, should only happen after the first is finished
-          if (!firstCallFinished) {
-            throw new Error(
-              'Second tool call started before the first one finished!',
-            );
-          }
-          return { llmContent: 'Second call done' };
-        }
-        return { llmContent: 'default' };
-      });
+        return { llmContent: 'Second call done' };
+      }
+      return { llmContent: 'default' };
+    });
 
     const mockTool = new MockTool({ name: 'mockTool', execute: executeFn });
     const declarativeTool = mockTool;
@@ -1657,8 +1574,7 @@ describe('CoreToolScheduler Sequential Execution', () => {
     expect(calls[1][0]).toEqual({ call: 2 });
 
     // The onAllToolCallsComplete should be called once with both results
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls).toHaveLength(2);
     expect(completedCalls[0].status).toBe('success');
     expect(completedCalls[1].status).toBe('success');
@@ -1669,24 +1585,22 @@ describe('CoreToolScheduler Sequential Execution', () => {
     const abortController = new AbortController();
     let secondCallStarted = false;
 
-    const executeFn = vi
-      .fn()
-      .mockImplementation(async (args: { call: number }) => {
-        if (args.call === 1) {
-          return { llmContent: 'First call done' };
-        }
-        if (args.call === 2) {
-          secondCallStarted = true;
-          // This call will be cancelled while it's "running".
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          // It should not return a value because it will be cancelled.
-          return { llmContent: 'Second call should not complete' };
-        }
-        if (args.call === 3) {
-          return { llmContent: 'Third call done' };
-        }
-        return { llmContent: 'default' };
-      });
+    const executeFn = vi.fn().mockImplementation(async (args: { call: number }) => {
+      if (args.call === 1) {
+        return { llmContent: 'First call done' };
+      }
+      if (args.call === 2) {
+        secondCallStarted = true;
+        // This call will be cancelled while it's "running".
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        // It should not return a value because it will be cancelled.
+        return { llmContent: 'Second call should not complete' };
+      }
+      if (args.call === 3) {
+        return { llmContent: 'Third call done' };
+      }
+      return { llmContent: 'default' };
+    });
 
     const mockTool = new MockTool({ name: 'mockTool', execute: executeFn });
     const declarativeTool = mockTool;
@@ -1746,10 +1660,7 @@ describe('CoreToolScheduler Sequential Execution', () => {
     ];
 
     // Act
-    const schedulePromise = scheduler.schedule(
-      requests,
-      abortController.signal,
-    );
+    const schedulePromise = scheduler.schedule(requests, abortController.signal);
 
     // Wait for the second call to start, then abort.
     await vi.waitFor(() => {
@@ -1769,8 +1680,7 @@ describe('CoreToolScheduler Sequential Execution', () => {
     expect(executeFn).toHaveBeenCalledWith({ call: 1 });
     expect(executeFn).toHaveBeenCalledWith({ call: 2 });
 
-    const completedCalls = onAllToolCallsComplete.mock
-      .calls[0][0] as ToolCall[];
+    const completedCalls = onAllToolCallsComplete.mock.calls[0][0] as ToolCall[];
     expect(completedCalls).toHaveLength(3);
 
     const call1 = completedCalls.find((c) => c.request.callId === '1');
@@ -1831,7 +1741,7 @@ describe('CoreToolScheduler Sequential Execution', () => {
           prompt_id: 'prompt-1',
         },
       ],
-      abortController.signal,
+      abortController.signal
     );
 
     const toolCall = (scheduler as unknown as { toolCalls: ToolCall[] })
@@ -1843,14 +1753,11 @@ describe('CoreToolScheduler Sequential Execution', () => {
       toolCall.request.callId,
       async () => {},
       ToolConfirmationOutcome.ModifyWithEditor,
-      confirmationSignal,
+      confirmationSignal
     );
 
     expect(modifyWithEditorSpy).toHaveBeenCalled();
-    const overrides =
-      modifyWithEditorSpy.mock.calls[
-        modifyWithEditorSpy.mock.calls.length - 1
-      ][4];
+    const overrides = modifyWithEditorSpy.mock.calls[modifyWithEditorSpy.mock.calls.length - 1][4];
     expect(overrides).toEqual({
       currentContent: 'originalContent',
       proposedContent: 'newContent',
@@ -1879,7 +1786,7 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
     expect(result).toEqual({ content });
@@ -1900,15 +1807,13 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
-    expect(result.outputFile).toBe(
-      path.join(projectTempDir, `${callId}.output`),
-    );
+    expect(result.outputFile).toBe(path.join(projectTempDir, `${callId}.output`));
     expect(mockWriteFile).toHaveBeenCalledWith(
       path.join(projectTempDir, `${callId}.output`),
-      content,
+      content
     );
 
     // Should contain the first and last lines with 1/5 head and 4/5 tail
@@ -1918,9 +1823,7 @@ describe('truncateAndSaveToFile', () => {
     const expectedTruncated =
       beginning.join('\n') + '\n... [CONTENT TRUNCATED] ...\n' + end.join('\n');
 
-    expect(result.content).toContain(
-      'Tool output was too large and has been truncated',
-    );
+    expect(result.content).toContain('Tool output was too large and has been truncated');
     expect(result.content).toContain('Truncated part of the output:');
     expect(result.content).toContain(expectedTruncated);
   });
@@ -1945,16 +1848,14 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
-    expect(result.outputFile).toBe(
-      path.join(projectTempDir, `${callId}.output`),
-    );
+    expect(result.outputFile).toBe(path.join(projectTempDir, `${callId}.output`));
     // Check that the file was written with the wrapped content
     expect(mockWriteFile).toHaveBeenCalledWith(
       path.join(projectTempDir, `${callId}.output`),
-      expectedFileContent,
+      expectedFileContent
     );
 
     // Should contain the first and last lines with 1/5 head and 4/5 tail of the wrapped content
@@ -1963,9 +1864,7 @@ describe('truncateAndSaveToFile', () => {
     const end = wrappedLines.slice(-(TRUNCATE_LINES - head));
     const expectedTruncated =
       beginning.join('\n') + '\n... [CONTENT TRUNCATED] ...\n' + end.join('\n');
-    expect(result.content).toContain(
-      'Tool output was too large and has been truncated',
-    );
+    expect(result.content).toContain('Tool output was too large and has been truncated');
     expect(result.content).toContain('Truncated part of the output:');
     expect(result.content).toContain(expectedTruncated);
   });
@@ -1982,13 +1881,11 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
     expect(result.outputFile).toBeUndefined();
-    expect(result.content).toContain(
-      '[Note: Could not save full output to file]',
-    );
+    expect(result.content).toContain('[Note: Could not save full output to file]');
     expect(mockWriteFile).toHaveBeenCalled();
   });
 
@@ -2012,15 +1909,12 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
     const expectedPath = path.join(projectTempDir, `${callId}.output`);
     expect(result.outputFile).toBe(expectedPath);
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      expectedPath,
-      expectedFileContent,
-    );
+    expect(mockWriteFile).toHaveBeenCalledWith(expectedPath, expectedFileContent);
   });
 
   it('should include helpful instructions in truncated message', async () => {
@@ -2035,19 +1929,13 @@ describe('truncateAndSaveToFile', () => {
       callId,
       projectTempDir,
       THRESHOLD,
-      TRUNCATE_LINES,
+      TRUNCATE_LINES
     );
 
-    expect(result.content).toContain(
-      'read_file tool with the absolute file path above',
-    );
+    expect(result.content).toContain('read_file tool with the absolute file path above');
     expect(result.content).toContain('read_file tool with offset=0, limit=100');
-    expect(result.content).toContain(
-      'read_file tool with offset=N to skip N lines',
-    );
-    expect(result.content).toContain(
-      'read_file tool with limit=M to read only M lines',
-    );
+    expect(result.content).toContain('read_file tool with offset=N to skip N lines');
+    expect(result.content).toContain('read_file tool with limit=M to read only M lines');
   });
 
   it('should sanitize callId to prevent path traversal', async () => {
@@ -2065,18 +1953,9 @@ describe('truncateAndSaveToFile', () => {
     }
     const expectedFileContent = wrappedLines.join('\n');
 
-    await truncateAndSaveToFile(
-      content,
-      callId,
-      projectTempDir,
-      THRESHOLD,
-      TRUNCATE_LINES,
-    );
+    await truncateAndSaveToFile(content, callId, projectTempDir, THRESHOLD, TRUNCATE_LINES);
 
     const expectedPath = path.join(projectTempDir, 'passwd.output');
-    expect(mockWriteFile).toHaveBeenCalledWith(
-      expectedPath,
-      expectedFileContent,
-    );
+    expect(mockWriteFile).toHaveBeenCalledWith(expectedPath, expectedFileContent);
   });
 });

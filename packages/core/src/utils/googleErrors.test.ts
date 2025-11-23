@@ -76,9 +76,7 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.code).toBe(429);
     expect(parsed?.message).toBe('Inner quota message');
     expect(parsed?.details).toHaveLength(1);
-    expect(parsed?.details[0]['@type']).toBe(
-      'type.googleapis.com/google.rpc.RetryInfo',
-    );
+    expect(parsed?.details[0]['@type']).toBe('type.googleapis.com/google.rpc.RetryInfo');
   });
 
   it('should return null if details are not in the expected format', () => {
@@ -158,9 +156,7 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.code).toBe(429);
     expect(parsed?.message).toBe('Innermost quota message');
     expect(parsed?.details).toHaveLength(1);
-    expect(parsed?.details[0]['@type']).toBe(
-      'type.googleapis.com/google.rpc.RetryInfo',
-    );
+    expect(parsed?.details[0]['@type']).toBe('type.googleapis.com/google.rpc.RetryInfo');
   });
 
   it('should parse an error that is not in a response object', () => {
@@ -190,9 +186,7 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.code).toBe(429);
     expect(parsed?.message).toBe('Innermost quota message');
     expect(parsed?.details).toHaveLength(1);
-    expect(parsed?.details[0]['@type']).toBe(
-      'type.googleapis.com/google.rpc.RetryInfo',
-    );
+    expect(parsed?.details[0]['@type']).toBe('type.googleapis.com/google.rpc.RetryInfo');
   });
 
   it('should parse an error that is a JSON string', () => {
@@ -222,9 +216,7 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.code).toBe(429);
     expect(parsed?.message).toBe('Innermost quota message');
     expect(parsed?.details).toHaveLength(1);
-    expect(parsed?.details[0]['@type']).toBe(
-      'type.googleapis.com/google.rpc.RetryInfo',
-    );
+    expect(parsed?.details[0]['@type']).toBe('type.googleapis.com/google.rpc.RetryInfo');
   });
 
   it('should parse the user-provided nested error string', () => {
@@ -237,14 +229,10 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.message).toContain('You exceeded your current quota');
     expect(parsed?.details).toHaveLength(4);
     expect(
-      parsed?.details.some(
-        (d) => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure',
-      ),
+      parsed?.details.some((d) => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure')
     ).toBe(true);
     expect(
-      parsed?.details.some(
-        (d) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo',
-      ),
+      parsed?.details.some((d) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo')
     ).toBe(true);
   });
 
@@ -343,14 +331,10 @@ describe('parseGoogleApiError', () => {
     expect(parsed?.message).toContain('You exceeded your current quota');
     expect(parsed?.details).toHaveLength(4);
     expect(
-      parsed?.details.some(
-        (d) => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure',
-      ),
+      parsed?.details.some((d) => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure')
     ).toBe(true);
     expect(
-      parsed?.details.some(
-        (d) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo',
-      ),
+      parsed?.details.some((d) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo')
     ).toBe(true);
   });
 });

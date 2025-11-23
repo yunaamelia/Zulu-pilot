@@ -9,11 +9,7 @@ import { UiTelemetryService } from './uiTelemetry.js';
 import { ToolCallDecision } from './tool-call-decision.js';
 import type { ApiErrorEvent, ApiResponseEvent } from './types.js';
 import { ToolCallEvent } from './types.js';
-import {
-  EVENT_API_ERROR,
-  EVENT_API_RESPONSE,
-  EVENT_TOOL_CALL,
-} from './types.js';
+import { EVENT_API_ERROR, EVENT_API_RESPONSE, EVENT_TOOL_CALL } from './types.js';
 import type {
   CompletedToolCall,
   ErroredToolCall,
@@ -28,7 +24,7 @@ const createFakeCompletedToolCall = (
   success: boolean,
   duration = 100,
   outcome?: ToolConfirmationOutcome,
-  error?: Error,
+  error?: Error
 ): CompletedToolCall => {
   const request = {
     callId: `call_${name}_${Date.now()}`,
@@ -362,7 +358,7 @@ describe('UiTelemetryService', () => {
         'test_tool',
         true,
         150,
-        ToolConfirmationOutcome.ProceedOnce,
+        ToolConfirmationOutcome.ProceedOnce
       );
       service.addEvent({
         ...structuredClone(new ToolCallEvent(toolCall)),
@@ -396,7 +392,7 @@ describe('UiTelemetryService', () => {
         'test_tool',
         false,
         200,
-        ToolConfirmationOutcome.Cancel,
+        ToolConfirmationOutcome.Cancel
       );
       service.addEvent({
         ...structuredClone(new ToolCallEvent(toolCall)),
@@ -430,7 +426,7 @@ describe('UiTelemetryService', () => {
         'test_tool',
         true,
         250,
-        ToolConfirmationOutcome.ModifyWithEditor,
+        ToolConfirmationOutcome.ModifyWithEditor
       );
       service.addEvent({
         ...structuredClone(new ToolCallEvent(toolCall)),
@@ -441,9 +437,7 @@ describe('UiTelemetryService', () => {
       const { tools } = metrics;
 
       expect(tools.totalDecisions[ToolCallDecision.MODIFY]).toBe(1);
-      expect(tools.byName['test_tool'].decisions[ToolCallDecision.MODIFY]).toBe(
-        1,
-      );
+      expect(tools.byName['test_tool'].decisions[ToolCallDecision.MODIFY]).toBe(1);
     });
 
     it('should process a ToolCallEvent without a decision', () => {
@@ -475,13 +469,13 @@ describe('UiTelemetryService', () => {
         'test_tool',
         true,
         100,
-        ToolConfirmationOutcome.ProceedOnce,
+        ToolConfirmationOutcome.ProceedOnce
       );
       const toolCall2 = createFakeCompletedToolCall(
         'test_tool',
         false,
         150,
-        ToolConfirmationOutcome.Cancel,
+        ToolConfirmationOutcome.Cancel
       );
 
       service.addEvent({
