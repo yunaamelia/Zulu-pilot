@@ -10,3 +10,4 @@ export * from './GeminiCLIModelAdapter.js';
 export * from './converters/OpenAIConverter.js';
 export * from './converters/GoogleCloudConverter.js';
 export * from './converters/GeminiConverter.js';
+export * from './errorHandlers/ProviderErrorHandler.js';

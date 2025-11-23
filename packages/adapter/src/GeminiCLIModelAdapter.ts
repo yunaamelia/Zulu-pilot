@@ -14,6 +14,14 @@ import type { IModelProvider, FileContext } from '@zulu-pilot/providers';
 import { MultiProviderRouter } from './MultiProviderRouter.js';
 import type { UnifiedConfiguration } from '@zulu-pilot/core';
 import type { ContextManager } from '@zulu-pilot/core';
+import {
+  ConnectionError,
+  RateLimitError,
+  ValidationError,
+  ModelNotFoundError,
+  InvalidApiKeyError,
+  AppError,
+} from '@zulu-pilot/core';
 
 /**
  * Gemini CLI Model Adapter
@@ -107,39 +115,164 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
   }
 
   /**
+   * T121: Handle errors from provider and convert to user-friendly messages
+   * Wraps provider errors and ensures they have actionable guidance
+   *
+   * @param error - Error from provider
+   * @param providerName - Name of the provider that threw the error
+   * @param modelId - Model identifier that was requested
+   * @returns Error with user-friendly message
+   */
+  private handleProviderError(
+    error: unknown,
+    providerName: string,
+    modelId: string
+  ): Error {
+    // If error is already one of our custom errors, return it as-is
+    if (
+      error instanceof ConnectionError ||
+      error instanceof RateLimitError ||
+      error instanceof ValidationError ||
+      error instanceof ModelNotFoundError ||
+      error instanceof InvalidApiKeyError ||
+      error instanceof AppError
+    ) {
+      return error;
+    }
+
+    // If error is a plain Error, try to wrap it appropriately
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+
+      // Connection errors
+      if (
+        message.includes('connection') ||
+        message.includes('timeout') ||
+        message.includes('econnrefused') ||
+        message.includes('etimedout') ||
+        message.includes('network')
+      ) {
+        return new ConnectionError(error.message, providerName, error);
+      }
+
+      // Rate limit errors
+      if (
+        message.includes('rate limit') ||
+        message.includes('429') ||
+        message.includes('too many requests')
+      ) {
+        return new RateLimitError(error.message, undefined, error);
+      }
+
+      // Model not found errors
+      if (
+        message.includes('model') &&
+        (message.includes('not found') || message.includes('404'))
+      ) {
+        return new ModelNotFoundError(error.message, modelId, providerName, error);
+      }
+
+      // API key errors
+      if (
+        message.includes('api key') ||
+        message.includes('authentication') ||
+        message.includes('401') ||
+        message.includes('unauthorized')
+      ) {
+        return new InvalidApiKeyError(error.message, providerName, error);
+      }
+
+      // Validation errors
+      if (
+        message.includes('validation') ||
+        message.includes('invalid') ||
+        message.includes('400')
+      ) {
+        return new ValidationError(error.message, undefined, error);
+      }
+
+      // Default: wrap as ConnectionError for unknown errors
+      return new ConnectionError(
+        `Provider error: ${error.message}`,
+        providerName,
+        error
+      );
+    }
+
+    // Unknown error type - wrap as generic error
+    return new ConnectionError(
+      `Unexpected error from ${providerName}: ${String(error)}`,
+      providerName
+    );
+  }
+
+  /**
    * Generate content - implements Gemini CLI's expected interface
+   * T121: Implement error handling in adapter layer
    *
    * @param params - Gemini CLI format parameters
    * @returns Promise resolving to Gemini CLI format response
+   * @throws {ConnectionError} When connection to provider fails
+   * @throws {RateLimitError} When rate limit is exceeded
+   * @throws {ValidationError} When input validation fails
+   * @throws {ModelNotFoundError} When model is not found
+   * @throws {InvalidApiKeyError} When API key is invalid
    */
   async generateContent(params: GenerateContentParams): Promise<GenerateContentResponse> {
-    const { prompt, context } = this.convertToProviderFormat(params.contents);
-    const defaultProvider = this.config.defaultProvider;
+    try {
+      const { prompt, context } = this.convertToProviderFormat(params.contents);
+      const defaultProvider = this.config.defaultProvider;
 
-    const provider = this.router.getProviderForModel(params.model, defaultProvider);
-    const response = await provider.generateResponse(prompt, context);
+      const provider = this.router.getProviderForModel(params.model, defaultProvider);
+      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
 
-    return this.convertToGeminiFormat(response);
+      const response = await provider.generateResponse(prompt, context);
+
+      return this.convertToGeminiFormat(response);
+    } catch (error) {
+      const defaultProvider = this.config.defaultProvider;
+      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
+      throw this.handleProviderError(error, providerName, params.model);
+    }
   }
 
   /**
    * Stream generate content - implements Gemini CLI's expected interface
+   * T121: Implement error handling in adapter layer
    *
    * @param params - Gemini CLI format parameters
    * @returns AsyncGenerator yielding Gemini CLI format responses
+   * @throws {ConnectionError} When connection to provider fails
+   * @throws {RateLimitError} When rate limit is exceeded
+   * @throws {ValidationError} When input validation fails
+   * @throws {ModelNotFoundError} When model is not found
+   * @throws {InvalidApiKeyError} When API key is invalid
    */
   async *streamGenerateContent(
     params: GenerateContentParams
   ): AsyncGenerator<GenerateContentResponse, void, unknown> {
-    const { prompt, context } = this.convertToProviderFormat(params.contents);
-    const defaultProvider = this.config.defaultProvider;
+    try {
+      const { prompt, context } = this.convertToProviderFormat(params.contents);
+      const defaultProvider = this.config.defaultProvider;
 
-    const provider = this.router.getProviderForModel(params.model, defaultProvider);
-    let accumulatedText = '';
+      const provider = this.router.getProviderForModel(params.model, defaultProvider);
+      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
 
-    for await (const token of provider.streamResponse(prompt, context)) {
-      accumulatedText += token;
-      yield this.convertToGeminiFormat(accumulatedText);
+      let accumulatedText = '';
+
+      try {
+        for await (const token of provider.streamResponse(prompt, context)) {
+          accumulatedText += token;
+          yield this.convertToGeminiFormat(accumulatedText);
+        }
+      } catch (error) {
+        // Handle errors during streaming
+        throw this.handleProviderError(error, providerName, params.model);
+      }
+    } catch (error) {
+      const defaultProvider = this.config.defaultProvider;
+      const providerName = this.router.parseModelId(params.model, defaultProvider).provider;
+      throw this.handleProviderError(error, providerName, params.model);
     }
   }
 
@@ -184,7 +317,7 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
 
   /**
    * Get MultiProviderRouter instance
-   * 
+   *
    * @returns Router instance
    */
   getRouter(): MultiProviderRouter {

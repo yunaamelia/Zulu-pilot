@@ -278,23 +278,23 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 12
 
-- [ ] T112 [P] [US12] Write unit tests for error types in tests/unit/utils/errors.test.ts
-- [ ] T113 [P] [US12] Write integration test for invalid API key error in tests/integration/errors/invalid-api-key.test.ts
-- [ ] T114 [P] [US12] Write integration test for connection error in tests/integration/errors/connection-error.test.ts
-- [ ] T115 [P] [US12] Write integration test for model not found error in tests/integration/errors/model-not-found.test.ts
-- [ ] T116 [P] [US12] Write integration test for rate limit error in tests/integration/errors/rate-limit.test.ts
+- [x] T112 [P] [US12] Write unit tests for error types in tests/unit/utils/errors.test.ts
+- [x] T113 [P] [US12] Write integration test for invalid API key error in tests/integration/errors/invalid-api-key.test.ts
+- [x] T114 [P] [US12] Write integration test for connection error in tests/integration/errors/connection-error.test.ts
+- [x] T115 [P] [US12] Write integration test for model not found error in tests/integration/errors/model-not-found.test.ts
+- [x] T116 [P] [US12] Write integration test for rate limit error in tests/integration/errors/rate-limit.test.ts
 
 ### Implementation for User Story 12
 
-- [ ] T117 [P] [US12] Port error types from current Zulu Pilot to packages/core/src/utils/errors.ts
-- [ ] T118 [P] [US12] Implement ConnectionError with user-friendly messages in packages/core/src/utils/errors.ts
-- [ ] T119 [P] [US12] Implement RateLimitError with retry guidance in packages/core/src/utils/errors.ts
-- [ ] T120 [P] [US12] Implement ValidationError with actionable guidance in packages/core/src/utils/errors.ts
-- [ ] T121 [US12] Implement error handling in adapter layer in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T122 [US12] Implement error handling in all providers in packages/providers/src/\*_/_.ts
-- [ ] T123 [US12] Implement error display in CLI with actionable guidance in packages/cli/src/ui/ErrorDisplay.ts
-- [ ] T124 [US12] Add provider-specific error messages in packages/adapter/src/errorHandlers/ProviderErrorHandler.ts
-- [ ] T125 [US12] Write unit tests for error handling in tests/unit/utils/errors.test.ts (90%+ coverage)
+- [x] T117 [P] [US12] Port error types from current Zulu Pilot to packages/core/src/utils/errors.ts
+- [x] T118 [P] [US12] Implement ConnectionError with user-friendly messages in packages/core/src/utils/errors.ts
+- [x] T119 [P] [US12] Implement RateLimitError with retry guidance in packages/core/src/utils/errors.ts
+- [x] T120 [P] [US12] Implement ValidationError with actionable guidance in packages/core/src/utils/errors.ts
+- [x] T121 [US12] Implement error handling in adapter layer in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T122 [US12] Implement error handling in all providers in packages/providers/src/\*_/_.ts
+- [x] T123 [US12] Implement error display in CLI with actionable guidance in packages/cli/src/ui/ErrorDisplay.ts
+- [x] T124 [US12] Add provider-specific error messages in packages/adapter/src/errorHandlers/ProviderErrorHandler.ts
+- [x] T125 [US12] Write unit tests for error handling in tests/unit/utils/errors.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 12 complete - comprehensive error handling with user-friendly messages
 
