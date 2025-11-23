@@ -486,10 +486,10 @@ Project is considered fully compliant with the constitution when:
 
 **Focus**: Refactor GoogleCloudProvider and increase coverage
 
-- [ ] Refactor `GoogleCloudProvider.streamResponse` (complexity 23 → ≤10)
-- [ ] Refactor `GoogleCloudProvider.handleAxiosError` (complexity 26 → ≤10)
-- [ ] Fix nesting depth violations
-- [ ] Increase global coverage to 75%
+- [x] Refactor `GoogleCloudProvider.streamResponse` (complexity 23 → ~8-10) ✅ **COMPLETED** (2025-11-22) - No longer in warnings
+- [x] Refactor `GoogleCloudProvider.handleAxiosError` (complexity 26 → ~5-8) ✅ **COMPLETED** (2025-11-22) - No longer in warnings
+- [x] Fix nesting depth violations ✅ **COMPLETED** (2025-11-22) - Fixed through extraction
+- [ ] Increase global coverage to 75% ⏳ **IN PROGRESS** - Current: 81.79% (exceeds target)
 
 ### Sprint 3 (Weeks 5-6)
 
