@@ -52,10 +52,11 @@ export class ProviderRegistry {
   }
 
   /**
-   * Get provider instance (lazy initialization)
+   * T207: Provider instance caching with lazy initialization
+   * Get provider instance (lazy initialization with caching)
    *
    * @param name - Provider name
-   * @returns Provider instance
+   * @returns Provider instance (cached after first creation)
    * @throws {Error} If provider not found or cannot be initialized
    */
   getProvider(name: string): IModelProvider {
@@ -68,7 +69,7 @@ export class ProviderRegistry {
       throw new Error(`Provider "${name}" is disabled`);
     }
 
-    // Lazy initialization
+    // T207: Cached lazy initialization - instance is created once and reused
     if (!entry.instance) {
       if (!entry.factory) {
         throw new Error(`No factory registered for provider type "${entry.config.type}"`);
@@ -86,10 +87,31 @@ export class ProviderRegistry {
         ...entry.config.providerSpecific,
       };
 
+      // T207: Create and cache instance
       entry.instance = entry.factory(providerConfig);
     }
 
+    // T207: Return cached instance
     return entry.instance;
+  }
+
+  /**
+   * T207: Clear provider instance cache (useful for testing or reinitialization)
+   * 
+   * @param name - Provider name (optional, clears all if not provided)
+   */
+  clearCache(name?: string): void {
+    if (name) {
+      const entry = this.providers.get(name);
+      if (entry) {
+        entry.instance = null;
+      }
+    } else {
+      // Clear all provider instances
+      for (const entry of this.providers.values()) {
+        entry.instance = null;
+      }
+    }
   }
 
   /**

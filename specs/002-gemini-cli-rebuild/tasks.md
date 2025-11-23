@@ -412,26 +412,26 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 8
 
-- [ ] T166 [P] [US8] Write unit tests for ConversationCheckpoint entity in tests/unit/core/checkpoint/ConversationCheckpoint.test.ts
-- [ ] T167 [P] [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts
-- [ ] T168 [P] [US8] Write integration test for checkpoint save in tests/integration/cli/checkpoint-save.test.ts
-- [ ] T169 [P] [US8] Write integration test for checkpoint resume in tests/integration/cli/checkpoint-resume.test.ts
-- [ ] T170 [P] [US8] Write E2E test for checkpoint workflow in tests/e2e/full-workflows/checkpoint.test.ts
+- [x] T166 [P] [US8] Write unit tests for ConversationCheckpoint entity in tests/unit/core/checkpoint/ConversationCheckpoint.test.ts
+- [x] T167 [P] [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts
+- [x] T168 [P] [US8] Write integration test for checkpoint save in tests/integration/cli/checkpoint-save.test.ts
+- [x] T169 [P] [US8] Write integration test for checkpoint resume in tests/integration/cli/checkpoint-resume.test.ts
+- [x] T170 [P] [US8] Write E2E test for checkpoint workflow in tests/e2e/full-workflows/checkpoint.test.ts
 
 ### Implementation for User Story 8
 
-- [ ] T171 [P] [US8] Create ConversationCheckpoint interface in packages/core/src/checkpoint/ConversationCheckpoint.ts
-- [ ] T172 [P] [US8] Create CheckpointManager class in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T173 [US8] Implement checkpoint saving to ~/.zulu-pilot/checkpoints/ in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T174 [US8] Implement checkpoint loading from files in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T175 [US8] Implement checkpoint listing in packages/core/src/checkpoint/CheckpointManager.ts
-- [ ] T176 [US8] Create CheckpointCommand class in packages/cli/src/commands/checkpoint.ts
-- [ ] T177 [US8] Implement checkpoint save command in packages/cli/src/commands/checkpoint.ts
-- [ ] T178 [US8] Implement checkpoint list command in packages/cli/src/commands/checkpoint.ts
-- [ ] T179 [US8] Implement checkpoint resume in chat command in packages/cli/src/commands/chat.ts
-- [ ] T180 [US8] Implement checkpoint deletion in packages/cli/src/commands/checkpoint.ts
-- [ ] T181 [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts (90%+ coverage)
-- [ ] T182 [US8] Write unit tests for CheckpointCommand in tests/unit/cli/commands/checkpoint.test.ts (90%+ coverage)
+- [x] T171 [P] [US8] Create ConversationCheckpoint interface in packages/core/src/checkpoint/ConversationCheckpoint.ts
+- [x] T172 [P] [US8] Create CheckpointManager class in packages/core/src/checkpoint/CheckpointManager.ts
+- [x] T173 [US8] Implement checkpoint saving to ~/.zulu-pilot/checkpoints/ in packages/core/src/checkpoint/CheckpointManager.ts
+- [x] T174 [US8] Implement checkpoint loading from files in packages/core/src/checkpoint/CheckpointManager.ts
+- [x] T175 [US8] Implement checkpoint listing in packages/core/src/checkpoint/CheckpointManager.ts
+- [x] T176 [US8] Create CheckpointCommand class in packages/cli/src/commands/checkpoint.ts
+- [x] T177 [US8] Implement checkpoint save command in packages/cli/src/commands/checkpoint.ts
+- [x] T178 [US8] Implement checkpoint list command in packages/cli/src/commands/checkpoint.ts
+- [x] T179 [US8] Implement checkpoint resume in chat command in packages/cli/src/commands/chat.ts
+- [x] T180 [US8] Implement checkpoint deletion in packages/cli/src/commands/checkpoint.ts
+- [x] T181 [US8] Write unit tests for CheckpointManager in tests/unit/core/checkpoint/CheckpointManager.test.ts (90%+ coverage)
+- [x] T182 [US8] Write unit tests for CheckpointCommand in tests/unit/cli/commands/checkpoint.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 8 complete - conversation checkpointing working
 
@@ -445,18 +445,18 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 9
 
-- [ ] T183 [P] [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts
-- [ ] T184 [P] [US9] Write integration test for context file loading in tests/integration/cli/context-file.test.ts
-- [ ] T185 [P] [US9] Write E2E test for context file workflow in tests/e2e/full-workflows/context-file.test.ts
+- [x] T183 [P] [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts
+- [x] T184 [P] [US9] Write integration test for context file loading in tests/integration/cli/context-file.test.ts
+- [x] T185 [P] [US9] Write E2E test for context file workflow in tests/e2e/full-workflows/context-file.test.ts
 
 ### Implementation for User Story 9
 
-- [ ] T186 [P] [US9] Create ContextFileLoader class in packages/core/src/context/ContextFileLoader.ts
-- [ ] T187 [US9] Implement context file discovery (project root and subdirectories) in packages/core/src/context/ContextFileLoader.ts
-- [ ] T188 [US9] Implement context file loading and merging in packages/core/src/context/ContextFileLoader.ts
-- [ ] T189 [US9] Integrate context files with conversation manager in packages/core/src/conversation/ConversationManager.ts
-- [ ] T190 [US9] Add context file priority (subdirectory > root) in packages/core/src/context/ContextFileLoader.ts
-- [ ] T191 [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts (90%+ coverage)
+- [x] T186 [P] [US9] Create ContextFileLoader class in packages/core/src/context/ContextFileLoader.ts
+- [x] T187 [US9] Implement context file discovery (project root and subdirectories) in packages/core/src/context/ContextFileLoader.ts
+- [x] T188 [US9] Implement context file loading and merging in packages/core/src/context/ContextFileLoader.ts
+- [x] T189 [US9] Integrate context files with conversation manager in packages/core/src/conversation/ConversationManager.ts
+- [x] T190 [US9] Add context file priority (subdirectory > root) in packages/core/src/context/ContextFileLoader.ts
+- [x] T191 [US9] Write unit tests for ContextFileLoader in tests/unit/core/context/ContextFileLoader.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 9 complete - custom context files working
 
@@ -470,17 +470,17 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Tests for User Story 11
 
-- [ ] T192 [P] [US11] Write integration test for headless mode in tests/integration/cli/headless-mode.test.ts
-- [ ] T193 [P] [US11] Write E2E test for headless mode workflow in tests/e2e/full-workflows/headless-mode.test.ts
+- [x] T192 [P] [US11] Write integration test for headless mode in tests/integration/cli/headless-mode.test.ts
+- [x] T193 [P] [US11] Write E2E test for headless mode workflow in tests/e2e/full-workflows/headless-mode.test.ts
 
 ### Implementation for User Story 11
 
-- [ ] T194 [US11] Add headless flag to ChatCommand in packages/cli/src/commands/chat.ts
-- [ ] T195 [US11] Implement JSON output format in packages/cli/src/ui/OutputFormatter.ts
-- [ ] T196 [US11] Implement stream-json output format in packages/cli/src/ui/OutputFormatter.ts
-- [ ] T197 [US11] Implement non-interactive mode (no prompts) in packages/cli/src/commands/chat.ts
-- [ ] T198 [US11] Add environment variable support for headless config in packages/core/src/config/UnifiedConfigManager.ts
-- [ ] T199 [US11] Write unit tests for OutputFormatter in tests/unit/cli/ui/OutputFormatter.test.ts (90%+ coverage)
+- [x] T194 [US11] Add headless flag to ChatCommand in packages/cli/src/commands/chat.ts
+- [x] T195 [US11] Implement JSON output format in packages/cli/src/ui/OutputFormatter.ts
+- [x] T196 [US11] Implement stream-json output format in packages/cli/src/ui/OutputFormatter.ts
+- [x] T197 [US11] Implement non-interactive mode (no prompts) in packages/cli/src/commands/chat.ts
+- [x] T198 [US11] Add environment variable support for headless config in packages/core/src/config/UnifiedConfigManager.ts
+- [x] T199 [US11] Write unit tests for OutputFormatter in tests/unit/cli/ui/OutputFormatter.test.ts (90%+ coverage)
 
 **Checkpoint**: User Story 11 complete - headless mode working
 
@@ -492,41 +492,41 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 
 ### Documentation
 
-- [ ] T200 [P] Write comprehensive README.md in README.md
-- [ ] T201 [P] Write migration guide from Zulu Pilot v1 in docs/migration-guide.md
-- [ ] T202 [P] Write API documentation in docs/api.md
-- [ ] T203 [P] Write architecture documentation in docs/architecture.md
-- [ ] T204 [P] Update quickstart guide in specs/002-gemini-cli-rebuild/quickstart.md
+- [x] T200 [P] Write comprehensive README.md in README.md
+- [x] T201 [P] Write migration guide from Zulu Pilot v1 in docs/migration-guide.md
+- [x] T202 [P] Write API documentation in docs/api.md
+- [x] T203 [P] Write architecture documentation in docs/architecture.md
+- [x] T204 [P] Update quickstart guide in specs/002-gemini-cli-rebuild/quickstart.md
 
 ### Performance Optimization
 
-- [ ] T205 [P] Optimize adapter request/response conversion in packages/adapter/src/GeminiCLIModelAdapter.ts
-- [ ] T206 [P] Optimize context loading for large file sets in packages/core/src/context/ContextManager.ts
-- [ ] T207 [P] Add caching for provider instances in packages/adapter/src/ProviderRegistry.ts
-- [ ] T208 [P] Profile and optimize streaming performance in packages/cli/src/ui/StreamOutput.ts
+- [x] T205 [P] Optimize adapter request/response conversion in packages/adapter/src/GeminiCLIModelAdapter.ts
+- [x] T206 [P] Optimize context loading for large file sets in packages/core/src/context/ContextManager.ts
+- [x] T207 [P] Add caching for provider instances in packages/adapter/src/ProviderRegistry.ts
+- [x] T208 [P] Profile and optimize streaming performance in packages/cli/src/ui/StreamOutput.ts
 
 ### Additional Providers
 
-- [ ] T209 [P] Implement DeepSeekProvider in packages/providers/src/DeepSeekProvider.ts
-- [ ] T210 [P] Implement QwenProvider in packages/providers/src/QwenProvider.ts
-- [ ] T211 [P] Write tests for DeepSeekProvider in tests/unit/providers/DeepSeekProvider.test.ts
-- [ ] T212 [P] Write tests for QwenProvider in tests/unit/providers/QwenProvider.test.ts
+- [x] T209 [P] Implement DeepSeekProvider in packages/providers/src/DeepSeekProvider.ts
+- [x] T210 [P] Implement QwenProvider in packages/providers/src/QwenProvider.ts
+- [x] T211 [P] Write tests for DeepSeekProvider in tests/unit/providers/DeepSeekProvider.test.ts
+- [x] T212 [P] Write tests for QwenProvider in tests/unit/providers/QwenProvider.test.ts
 
 ### Quality Improvements
 
-- [ ] T213 [P] Ensure all packages meet 90%+ coverage threshold
-- [ ] T214 [P] Run full test suite and fix any failing tests
-- [ ] T215 [P] Fix all ESLint warnings and errors
-- [ ] T216 [P] Ensure all TypeScript strict mode checks pass
-- [ ] T217 [P] Add missing JSDoc comments for public APIs
-- [ ] T218 [P] Update CHANGELOG.md with all features
+- [x] T213 [P] Ensure all packages meet 90%+ coverage threshold
+- [x] T214 [P] Run full test suite and fix any failing tests
+- [x] T215 [P] Fix all ESLint warnings and errors
+- [x] T216 [P] Ensure all TypeScript strict mode checks pass
+- [x] T217 [P] Add missing JSDoc comments for public APIs
+- [x] T218 [P] Update CHANGELOG.md with all features
 
 ### CI/CD Setup
 
-- [ ] T219 [P] Configure GitHub Actions workflow in .github/workflows/ci.yml
-- [ ] T220 [P] Setup coverage reporting (Codecov/Coveralls) in CI
-- [ ] T221 [P] Configure branch protection rules
-- [ ] T222 [P] Setup automated deployment pipeline
+- [x] T219 [P] Configure GitHub Actions workflow in .github/workflows/ci.yml
+- [x] T220 [P] Setup coverage reporting (Codecov/Coveralls) in CI
+- [x] T221 [P] Configure branch protection rules
+- [x] T222 [P] Setup automated deployment pipeline
 
 **Checkpoint**: Project ready for release
 

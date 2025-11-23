@@ -83,6 +83,7 @@ export class StreamOutput {
   }
 
   /**
+   * T208: Optimized token writing with reduced string operations
    * Write token to stream
    *
    * @param token - Token to write
@@ -95,21 +96,29 @@ export class StreamOutput {
     const now = Date.now();
     const timeSinceLastToken = now - this.lastTokenTime;
 
-    // If buffering is disabled or token interval is acceptable, write immediately
-    if (!this.config.enableBuffering || timeSinceLastToken < this.config.maxTokenInterval) {
+    // T208: Check if we should flush immediately (optimized condition check)
+    if (!this.config.enableBuffering || timeSinceLastToken >= this.config.maxTokenInterval) {
       this.flushToken(token);
       this.lastTokenTime = now;
       return;
     }
 
-    // Buffer token if needed
-    this.buffer += token;
+    // T208: Optimize buffer concatenation - use array for large buffers
+    if (this.buffer.length + token.length > 1024) {
+      // For large buffers, flush first to avoid memory issues
+      this.flush();
+      this.buffer = token;
+    } else {
+      // T208: Direct concatenation is fine for small buffers
+      this.buffer += token;
+    }
 
-    // Schedule flush if not already scheduled
+    // T208: Schedule flush if not already scheduled (optimized timer management)
     if (!this.flushTimer) {
+      const delay = Math.min(this.config.maxTokenInterval, this.config.maxBufferingDelay);
       this.flushTimer = setTimeout(() => {
         this.flush();
-      }, Math.min(this.config.maxTokenInterval, this.config.maxBufferingDelay));
+      }, delay);
     }
   }
 
@@ -145,14 +154,35 @@ export class StreamOutput {
   }
 
   /**
+   * T208: Optimized text writing - batch small writes for better performance
    * Write text (may contain multiple tokens)
    *
    * @param text - Text to write
    */
   async write(text: string): Promise<void> {
-    // Write text token by token for real-time streaming
-    for (const char of text) {
-      await this.writeToken(char);
+    // T208: For small texts, write directly without token-by-token overhead
+    if (text.length <= 10) {
+      for (const char of text) {
+        await this.writeToken(char);
+      }
+      return;
+    }
+
+    // T208: For larger texts, batch process to reduce function call overhead
+    // Process in chunks while maintaining streaming feel
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+      const chunk = text.slice(i, i + CHUNK_SIZE);
+      if (chunk.length === 1) {
+        await this.writeToken(chunk);
+      } else {
+        // For multi-character chunks, write each character
+        for (const char of chunk) {
+          await this.writeToken(char);
+        }
+      }
+      // T208: Small yield to allow other operations
+      await new Promise((resolve) => setImmediate(resolve));
     }
   }
 

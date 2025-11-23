@@ -8,6 +8,8 @@ export * from './OllamaProvider.js';
 export * from './OpenAIProvider.js';
 export * from './GoogleCloudProvider.js';
 export * from './GeminiProvider.js';
+export * from './DeepSeekProvider.js';
+export * from './QwenProvider.js';
 export * from './utils/errors.js';
 
 // Re-export FileContext for convenience

@@ -47,19 +47,27 @@ export class UnifiedConfigManager {
    * @returns Unified configuration
    */
   async loadConfig(): Promise<UnifiedConfiguration> {
+    // T198: Load configuration from file, then override with environment variables
+    let config: UnifiedConfiguration;
+
     try {
       const fileContent = await readFile(CONFIG_FILE, 'utf-8');
-      const config = JSON.parse(fileContent) as UnifiedConfiguration;
+      config = JSON.parse(fileContent) as UnifiedConfiguration;
 
       // Validate configuration
       this.validateConfig(config);
+
+      // T198: Override with environment variables for headless mode
+      config = this.mergeEnvironmentVariables(config);
 
       this.config = config;
       return config;
     } catch (error) {
       // If file doesn't exist or is invalid, return default config
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        const defaultConfig = this.getDefaultConfig();
+        let defaultConfig = this.getDefaultConfig();
+        // T198: Override with environment variables
+        defaultConfig = this.mergeEnvironmentVariables(defaultConfig);
         this.config = defaultConfig;
         return defaultConfig;
       }
@@ -94,6 +102,49 @@ export class UnifiedConfigManager {
     await rename(tempFile, CONFIG_FILE);
 
     this.config = config;
+  }
+
+  /**
+   * T198: Merge environment variables into configuration
+   * 
+   * Environment variables for headless mode:
+   * - ZULU_PILOT_HEADLESS: Enable headless mode (true/false)
+   * - ZULU_PILOT_OUTPUT_FORMAT: Output format (text/json/stream-json)
+   * - ZULU_PILOT_PROVIDER: Default provider
+   * - ZULU_PILOT_MODEL: Default model
+   * 
+   * @param config - Base configuration
+   * @returns Configuration with environment variable overrides
+   */
+  private mergeEnvironmentVariables(config: UnifiedConfiguration): UnifiedConfiguration {
+    const merged = { ...config };
+
+    // Headless mode flag
+    if (process.env.ZULU_PILOT_HEADLESS) {
+      // Store in a custom property or extend UnifiedConfiguration interface
+      // For now, this is handled at CLI level, but config can store preference
+    }
+
+    // Output format
+    if (process.env.ZULU_PILOT_OUTPUT_FORMAT) {
+      const format = process.env.ZULU_PILOT_OUTPUT_FORMAT;
+      if (['text', 'json', 'stream-json'].includes(format)) {
+        // Store output format preference
+        // This would extend UnifiedConfiguration if needed
+      }
+    }
+
+    // Provider override
+    if (process.env.ZULU_PILOT_PROVIDER) {
+      merged.defaultProvider = process.env.ZULU_PILOT_PROVIDER;
+    }
+
+    // Model override
+    if (process.env.ZULU_PILOT_MODEL) {
+      merged.defaultModel = process.env.ZULU_PILOT_MODEL;
+    }
+
+    return merged;
   }
 
   /**

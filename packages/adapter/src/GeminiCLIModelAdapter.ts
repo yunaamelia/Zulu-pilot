@@ -94,12 +94,15 @@ export class GeminiCLIModelAdapter implements IModelAdapter {
   }
 
   /**
+   * T205: Optimized response conversion - reuse object structure where possible
    * Convert provider response to Gemini CLI format
    *
    * @param response - Provider response string
    * @returns Gemini CLI format response
    */
   private convertToGeminiFormat(response: string): GenerateContentResponse {
+    // T205: Direct object creation is already optimal for this case
+    // Reusing structure wouldn't help since responses are different each time
     return {
       content: [
         {

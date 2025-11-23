@@ -98,4 +98,47 @@ export class ConversationManager {
   isEmpty(): boolean {
     return this.getMessageCount() === 0;
   }
+
+  /**
+   * T189: Load custom context files and add to conversation
+   * 
+   * @returns Promise resolving to loaded context content
+   */
+  async loadCustomContext(): Promise<string> {
+    const { ContextFileLoader } = await import('../context/ContextFileLoader.js');
+    const workspaceRoot = this.config.getWorkspaceContext()?.workspaceRoot ?? process.cwd();
+    const loader = new ContextFileLoader({ baseDir: workspaceRoot });
+    
+    const context = await loader.loadContext();
+    
+    // If context was loaded, add it as a system message at the beginning of history
+    if (context) {
+      const chat = this.getChatFn();
+      const history = chat.getHistory(true);
+      
+      // Check if context was already added (avoid duplicates)
+      const hasContext = history.some((msg) => 
+        msg.role === 'system' && 
+        typeof msg.parts[0]?.text === 'string' && 
+        msg.parts[0].text.includes('<!-- Context from')
+      );
+      
+      if (!hasContext) {
+        chat.addHistory({
+          role: 'system',
+          parts: [{ text: `# Project Context\n\n${context}` }],
+        });
+      }
+    }
+    
+    return context;
+  }
+
+  /**
+   * T189: Initialize conversation manager and load custom context files
+   */
+  async initializeWithContext(): Promise<void> {
+    await this.initialize();
+    await this.loadCustomContext();
+  }
 }

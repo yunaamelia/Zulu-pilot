@@ -124,6 +124,7 @@ export class ContextManager {
   }
 
   /**
+   * T206: Optimized file loading with parallel processing for large file sets
    * Add multiple files using glob pattern.
    */
   private async addFilesByGlob(globPattern: string): Promise<void> {
@@ -136,17 +137,39 @@ export class ContextManager {
       absolute: true,
     });
 
-    for (const file of files) {
-      try {
-        await this.addFile(file);
-      } catch (error) {
-        // Skip files that can't be added (binary, too large, etc.)
-        // Log but don't fail the entire operation
-        if (error instanceof ValidationError) {
-          continue;
+    // T206: Process files in parallel batches for better performance with large file sets
+    const BATCH_SIZE = 10; // Process 10 files concurrently
+    const errors: Error[] = [];
+
+    for (let i = 0; i < files.length; i += BATCH_SIZE) {
+      const batch = files.slice(i, i + BATCH_SIZE);
+      
+      // T206: Process batch in parallel
+      const results = await Promise.allSettled(
+        batch.map(async (file) => {
+          try {
+            await this.addFile(file);
+          } catch (error) {
+            // Skip files that can't be added (binary, too large, etc.)
+            if (error instanceof ValidationError) {
+              return { skipped: true, file, error };
+            }
+            throw error;
+          }
+        })
+      );
+
+      // Collect any errors that weren't ValidationErrors
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          errors.push(result.reason);
         }
-        throw error;
       }
+    }
+
+    // Throw first non-validation error if any
+    if (errors.length > 0) {
+      throw errors[0];
     }
   }
 
