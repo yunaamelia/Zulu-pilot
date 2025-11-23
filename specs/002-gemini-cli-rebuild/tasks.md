@@ -254,9 +254,9 @@ description: 'Task list for Zulu Pilot v2 - Multi-Provider AI Coding Assistant d
 - [x] T098 [P] [US4] Port OpenAIProvider from current Zulu Pilot to packages/providers/src/OpenAIProvider.ts
 - [x] T099 [P] [US4] Port GoogleCloudProvider from current Zulu Pilot to packages/providers/src/GoogleCloudProvider.ts
 - [x] T100 [P] [US4] Port GeminiProvider from current Zulu Pilot to packages/providers/src/GeminiProvider.ts
-- [ ] T101 [P] [US4] Implement request/response conversion for OpenAI in packages/adapter/src/converters/OpenAIConverter.ts
-- [ ] T102 [P] [US4] Implement request/response conversion for Google Cloud in packages/adapter/src/converters/GoogleCloudConverter.ts
-- [ ] T103 [P] [US4] Implement request/response conversion for Gemini in packages/adapter/src/converters/GeminiConverter.ts
+- [x] T101 [P] [US4] Implement request/response conversion for OpenAI in packages/adapter/src/converters/OpenAIConverter.ts
+- [x] T102 [P] [US4] Implement request/response conversion for Google Cloud in packages/adapter/src/converters/GoogleCloudConverter.ts
+- [x] T103 [P] [US4] Implement request/response conversion for Gemini in packages/adapter/src/converters/GeminiConverter.ts
 - [x] T104 [US4] Create ProviderCommand class in packages/cli/src/commands/provider.ts
 - [x] T105 [US4] Implement provider list functionality in packages/cli/src/commands/provider.ts
 - [x] T106 [US4] Implement provider set functionality in packages/cli/src/commands/provider.ts
