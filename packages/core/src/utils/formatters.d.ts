@@ -1,0 +1,8 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+export declare const bytesToMB: (bytes: number) => number;
+export declare const formatMemoryUsage: (bytes: number) => string;
+//# sourceMappingURL=formatters.d.ts.map

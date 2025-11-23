@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { CodeChangeParser } from '../../../../src/core/parser/CodeChangeParser.js';
+import { CodeChangeParser } from '../../../../packages/core/src/parser/CodeChangeParser.js';
 
 describe('CodeChangeParser', () => {
   let parser: CodeChangeParser;

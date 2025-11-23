@@ -30,71 +30,125 @@ const AVAILABLE_MODELS: Record<string, string[]> = {
 };
 
 /**
- * Model command handler.
+ * Show configured provider models.
  */
-export async function handleModelCommand(options: { list?: boolean; set?: string }): Promise<void> {
+function showConfiguredProviders(config: {
+  providers?: Record<string, { model?: string }>;
+  provider?: string;
+}): void {
+  if (!config.providers) {
+    return;
+  }
+
+  for (const [providerName, providerConfig] of Object.entries(config.providers)) {
+    if (providerConfig.model) {
+      const isPrimary = providerName === config.provider ? ' (PRIMARY)' : '';
+      console.log(`    ${providerName}: ${providerConfig.model}${isPrimary}`);
+    }
+  }
+}
+
+/**
+ * Show Google Claude provider models.
+ */
+function showGoogleClaudeModels(config: { providers?: Record<string, { model?: string }> }): void {
+  if (!AVAILABLE_MODELS.googleClaude) {
+    return;
+  }
+
+  console.log('\n  🎯 Google Claude Provider (PRIMARY) - All Models:');
+  for (const model of AVAILABLE_MODELS.googleClaude) {
+    const isConfigured = config.providers?.googleClaude?.model === model ? ' (configured)' : '';
+    console.log(`      - ${model}${isConfigured}`);
+  }
+}
+
+/**
+ * Show all available models for each provider.
+ */
+function showAllProviderModels(config: { providers?: Record<string, { model?: string }> }): void {
+  for (const [providerName, models] of Object.entries(AVAILABLE_MODELS)) {
+    if (providerName === 'googleClaude') {
+      continue; // Already shown above
+    }
+    console.log(`\n    ${providerName}:`);
+    for (const model of models) {
+      const isConfigured = config.providers?.[providerName]?.model === model ? ' (configured)' : '';
+      console.log(`      - ${model}${isConfigured}`);
+    }
+  }
+}
+
+/**
+ * Show Google Cloud model details.
+ */
+function showGoogleCloudModelDetails(): void {
+  console.log('\n  Google Cloud AI Platform models (via googleClaude):');
+  console.log('    DeepSeek V3.1: deepseek-ai/deepseek-v3.1-maas (us-west2)');
+  console.log('    Qwen Coder: qwen/qwen3-coder-480b-a35b-instruct-maas (us-south1)');
+  console.log('    DeepSeek R1: deepseek-ai/deepseek-r1-0528-maas (us-central1)');
+  console.log('    Kimi K2: moonshotai/kimi-k2-thinking-maas (global)');
+  console.log('    GPT OSS 120B: openai/gpt-oss-120b-maas (global)');
+  console.log('    E5 Embeddings: intfloat/multilingual-e5-large-instruct-maas (us-central1)');
+  console.log('    Gemini 2.5 Pro: gemini-2.5-pro');
+  console.log('    Gemini 1.5 Pro: gemini-1.5-pro');
+  console.log('    Gemini 1.5 Flash: gemini-1.5-flash');
+}
+
+/**
+ * List all available models.
+ */
+async function handleListModels(): Promise<void> {
   const configManager = new ConfigManager();
   const config = await configManager.load();
 
+  console.log('Available models by provider:');
+  console.log(`\n  Default Provider: ${config.provider ?? 'googleClaude'}`);
+  console.log(`  Default Model: ${config.model ?? 'deepseek-ai/deepseek-v3.1-maas'}`);
+
+  console.log('\n  Configured provider models:');
+  showConfiguredProviders(config);
+
+  showGoogleClaudeModels(config);
+
+  console.log('\n  All available models by provider:');
+  showAllProviderModels(config);
+
+  showGoogleCloudModelDetails();
+}
+
+/**
+ * Set default model.
+ */
+async function handleSetModel(model: string): Promise<void> {
+  const configManager = new ConfigManager();
+  const config = await configManager.load();
+  config.model = model;
+  await configManager.save(config);
+  console.log(`Default model set to: ${model}`);
+}
+
+/**
+ * Show current model.
+ */
+async function handleCurrentModel(): Promise<void> {
+  const configManager = new ConfigManager();
+  const config = await configManager.load();
+  console.log(`Current default provider: ${config.provider ?? 'googleClaude'}`);
+  console.log(`Current default model: ${config.model ?? 'deepseek-ai/deepseek-v3.1-maas'}`);
+}
+
+/**
+ * Model command handler.
+ */
+export async function handleModelCommand(options: { list?: boolean; set?: string }): Promise<void> {
   if (options.list) {
-    // List available models
-    console.log('Available models by provider:');
-    console.log(`\n  Default Provider: ${config.provider ?? 'googleClaude'}`);
-    console.log(`  Default Model: ${config.model ?? 'deepseek-ai/deepseek-v3.1-maas'}`);
-
-    // Show configured provider-specific models
-    console.log('\n  Configured provider models:');
-    if (config.providers) {
-      for (const [providerName, providerConfig] of Object.entries(config.providers)) {
-        if (providerConfig.model) {
-          const isPrimary = providerName === config.provider ? ' (PRIMARY)' : '';
-          console.log(`    ${providerName}: ${providerConfig.model}${isPrimary}`);
-        }
-      }
-    }
-
-    // Show Google Claude provider first (primary)
-    if (AVAILABLE_MODELS.googleClaude) {
-      console.log('\n  🎯 Google Claude Provider (PRIMARY) - All Models:');
-      for (const model of AVAILABLE_MODELS.googleClaude) {
-        const isConfigured = config.providers?.googleClaude?.model === model ? ' (configured)' : '';
-        console.log(`      - ${model}${isConfigured}`);
-      }
-    }
-
-    // Show all available models for each provider
-    console.log('\n  All available models by provider:');
-    for (const [providerName, models] of Object.entries(AVAILABLE_MODELS)) {
-      if (providerName === 'googleClaude') {
-        continue; // Already shown above
-      }
-      console.log(`\n    ${providerName}:`);
-      for (const model of models) {
-        const isConfigured =
-          config.providers?.[providerName]?.model === model ? ' (configured)' : '';
-        console.log(`      - ${model}${isConfigured}`);
-      }
-    }
-
-    // Show Google Cloud model details
-    console.log('\n  Google Cloud AI Platform models (via googleClaude):');
-    console.log('    DeepSeek V3.1: deepseek-ai/deepseek-v3.1-maas (us-west2)');
-    console.log('    Qwen Coder: qwen/qwen3-coder-480b-a35b-instruct-maas (us-south1)');
-    console.log('    DeepSeek R1: deepseek-ai/deepseek-r1-0528-maas (us-central1)');
-    console.log('    Kimi K2: moonshotai/kimi-k2-thinking-maas (global)');
-    console.log('    GPT OSS 120B: openai/gpt-oss-120b-maas (global)');
-    console.log('    E5 Embeddings: intfloat/multilingual-e5-large-instruct-maas (us-central1)');
-    console.log('    Gemini 2.5 Pro: gemini-2.5-pro');
-    console.log('    Gemini 1.5 Pro: gemini-1.5-pro');
-    console.log('    Gemini 1.5 Flash: gemini-1.5-flash');
-  } else if (options.set) {
-    // Set default model
-    config.model = options.set;
-    await configManager.save(config);
-    console.log(`Default model set to: ${options.set}`);
-  } else {
-    // Show current model
-    console.log(`Current default provider: ${config.provider ?? 'googleClaude'}`);
-    console.log(`Current default model: ${config.model ?? 'deepseek-ai/deepseek-v3.1-maas'}`);
+    return handleListModels();
   }
+
+  if (options.set) {
+    return handleSetModel(options.set);
+  }
+
+  return handleCurrentModel();
 }

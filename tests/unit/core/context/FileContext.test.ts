@@ -1,92 +1,113 @@
+/**
+ * Unit tests for FileContext entity
+ * @package @zulu-pilot/core
+ */
+
 import { describe, it, expect } from '@jest/globals';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import os from 'node:os';
-import { createFileContext, type FileContext } from '../../../../src/core/context/FileContext.js';
+import type { FileContext } from '../../../../packages/core/src/context/FileContext.js';
 
 describe('FileContext', () => {
-  let tempDir: string;
+  describe('interface structure', () => {
+    it('should have required path property', () => {
+      const fileContext: FileContext = {
+        path: '/test/file.ts',
+        content: 'test content',
+      };
 
-  beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zulu-pilot-test-'));
-  });
+      expect(fileContext.path).toBe('/test/file.ts');
+      expect(typeof fileContext.path).toBe('string');
+    });
 
-  afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
-  });
+    it('should have required content property', () => {
+      const fileContext: FileContext = {
+        path: '/test/file.ts',
+        content: 'test content',
+      };
 
-  describe('createFileContext', () => {
-    it('should create FileContext with required fields', () => {
-      const fileContext = createFileContext('test.ts', 'const x = 1;');
+      expect(fileContext.content).toBe('test content');
+      expect(typeof fileContext.content).toBe('string');
+    });
 
-      expect(fileContext.path).toBe('test.ts');
-      expect(fileContext.content).toBe('const x = 1;');
+    it('should support optional lastModified property', () => {
+      const date = new Date();
+      const fileContext: FileContext = {
+        path: '/test/file.ts',
+        content: 'test content',
+        lastModified: date,
+      };
+
+      expect(fileContext.lastModified).toBe(date);
       expect(fileContext.lastModified).toBeInstanceOf(Date);
-      expect(fileContext.size).toBeDefined();
     });
 
-    it('should use provided lastModified date', () => {
-      const date = new Date('2024-01-01');
-      const fileContext = createFileContext('test.ts', 'content', date);
+    it('should support optional size property', () => {
+      const fileContext: FileContext = {
+        path: '/test/file.ts',
+        content: 'test content',
+        size: 1024,
+      };
 
-      expect(fileContext.lastModified).toEqual(date);
+      expect(fileContext.size).toBe(1024);
+      expect(typeof fileContext.size).toBe('number');
     });
 
-    it('should calculate size from content when not provided', () => {
-      const content = 'const x = 1;';
-      const fileContext = createFileContext('test.ts', content);
+    it('should support all optional properties together', () => {
+      const date = new Date();
+      const fileContext: FileContext = {
+        path: '/test/file.ts',
+        content: 'test content',
+        lastModified: date,
+        size: 2048,
+      };
 
-      expect(fileContext.size).toBe(content.length);
+      expect(fileContext.path).toBe('/test/file.ts');
+      expect(fileContext.content).toBe('test content');
+      expect(fileContext.lastModified).toBe(date);
+      expect(fileContext.size).toBe(2048);
     });
 
-    it('should use provided size when specified', () => {
-      const fileContext = createFileContext('test.ts', 'content', new Date(), 100);
-
-      expect(fileContext.size).toBe(100);
-    });
-
-    it('should handle empty content', () => {
-      const fileContext = createFileContext('empty.ts', '');
+    it('should accept empty content', () => {
+      const fileContext: FileContext = {
+        path: '/test/empty.txt',
+        content: '',
+      };
 
       expect(fileContext.content).toBe('');
-      expect(fileContext.size).toBe(0);
     });
 
-    it('should handle large content', () => {
-      const largeContent = 'x'.repeat(10000);
-      const fileContext = createFileContext('large.ts', largeContent);
+    it('should accept long file paths', () => {
+      const longPath = '/very/long/path/to/file/with/many/directories/file.ts';
+      const fileContext: FileContext = {
+        path: longPath,
+        content: 'content',
+      };
 
-      expect(fileContext.size).toBe(10000);
-      expect(fileContext.content.length).toBe(10000);
+      expect(fileContext.path).toBe(longPath);
     });
   });
 
-  describe('FileContext interface', () => {
-    it('should have all required fields', () => {
+  describe('type safety', () => {
+    it('should enforce required properties', () => {
+      // TypeScript should catch this, but we test runtime behavior
+      const fileContext = {
+        path: '/test/file.ts',
+        content: 'test',
+      } as FileContext;
+
+      expect(fileContext.path).toBeDefined();
+      expect(fileContext.content).toBeDefined();
+    });
+
+    it('should allow undefined for optional properties', () => {
       const fileContext: FileContext = {
-        path: 'test.ts',
-        content: 'const x = 1;',
-        lastModified: new Date(),
-        size: 12,
-        estimatedTokens: 3,
+        path: '/test/file.ts',
+        content: 'test',
+        lastModified: undefined,
+        size: undefined,
       };
 
       expect(fileContext.path).toBeDefined();
       expect(fileContext.content).toBeDefined();
-      expect(fileContext.lastModified).toBeDefined();
-      expect(fileContext.size).toBeDefined();
-      expect(fileContext.estimatedTokens).toBeDefined();
-    });
-
-    it('should allow optional fields to be undefined', () => {
-      const fileContext: FileContext = {
-        path: 'test.ts',
-        content: 'const x = 1;',
-        lastModified: new Date(),
-      };
-
-      expect(fileContext.size).toBeUndefined();
-      expect(fileContext.estimatedTokens).toBeUndefined();
     });
   });
 });

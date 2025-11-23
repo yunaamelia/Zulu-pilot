@@ -35,7 +35,6 @@ export default tseslint.config(
   },
   {
     files: ['tests/**/*.ts'],
-    ...tseslint.configs.recommended,
     rules: {
       '@typescript-eslint/no-explicit-any': 'off', // Tests may use any
     },

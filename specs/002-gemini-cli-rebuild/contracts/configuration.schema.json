@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Zulu Pilot v2 Configuration Schema",
+  "description": "Unified configuration schema for Zulu Pilot v2",
+  "type": "object",
+  "required": ["defaultProvider", "providers"],
+  "properties": {
+    "defaultProvider": {
+      "type": "string",
+      "description": "Name of default provider to use"
+    },
+    "defaultModel": {
+      "type": "string",
+      "description": "Default model identifier (format: 'model' or 'provider:model')"
+    },
+    "providers": {
+      "type": "object",
+      "description": "Map of provider name to provider configuration",
+      "additionalProperties": {
+        "$ref": "#/definitions/ProviderConfiguration"
+      }
+    },
+    "geminiCLI": {
+      "type": "object",
+      "description": "Gemini CLI specific configuration",
+      "properties": {
+        "mcpServers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/MCPServerConfig"
+          }
+        },
+        "tools": {
+          "type": "object",
+          "properties": {
+            "googleSearch": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "providerDefaults": {
+      "type": "object",
+      "description": "Default settings per provider type"
+    }
+  },
+  "definitions": {
+    "ProviderConfiguration": {
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ollama", "openai", "googleCloud", "gemini", "deepseek", "qwen"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "API key or environment variable reference (e.g., 'env:OPENAI_API_KEY')"
+        },
+        "baseUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "model": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 1000
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "providerSpecific": {
+          "type": "object",
+          "description": "Provider-specific configuration",
+          "properties": {
+            "projectId": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "credentialsPath": {
+              "type": "string"
+            },
+            "endpoint": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "MCPServerConfig": {
+      "type": "object",
+      "required": ["command"],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "includeTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludeTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  }
+}

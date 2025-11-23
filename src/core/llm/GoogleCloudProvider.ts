@@ -185,6 +185,154 @@ export class GoogleCloudProvider implements IModelProvider {
   }
 
   /**
+   * Check if chunk contains error patterns.
+   */
+  private hasErrorPattern(chunkStr: string): boolean {
+    return (
+      chunkStr.includes('"error"') ||
+      chunkStr.includes('"code"') ||
+      chunkStr.includes('404') ||
+      chunkStr.includes('not found')
+    );
+  }
+
+  /**
+   * Extract error message from JSON error chunk.
+   */
+  private extractJsonError(chunkStr: string): ConnectionError | null {
+    const errorMatch = chunkStr.match(/data:\s*({[^}]*"error"[^}]*})/);
+    if (!errorMatch) {
+      return null;
+    }
+
+    try {
+      const errorData = JSON.parse(errorMatch[1]);
+      return new ConnectionError(
+        `API Error: ${errorData.error?.message || errorData.message || 'Model or endpoint not found'}`,
+        'googleCloud'
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Create generic connection error for model/endpoint issues.
+   */
+  private createModelNotFoundError(): ConnectionError {
+    return new ConnectionError(
+      `Model or endpoint not found. Please verify:\n` +
+        `1. Model "${this.model}" is available in region "${this.region}"\n` +
+        `2. Endpoint "${this.endpoint}" is correct for this model\n` +
+        `3. API aiplatform.googleapis.com is enabled\n` +
+        `4. You have access to this model in project "${this.projectId}"`,
+      'googleCloud'
+    );
+  }
+
+  /**
+   * Check first chunk for errors and throw if error detected.
+   */
+  private checkFirstChunkForErrors(chunkStr: string): void {
+    if (!this.hasErrorPattern(chunkStr)) {
+      return;
+    }
+
+    // Try to extract error message from JSON
+    const jsonError = this.extractJsonError(chunkStr);
+    if (jsonError) {
+      throw jsonError;
+    }
+
+    // Generic error for 404/not found patterns
+    if (chunkStr.includes('404') || chunkStr.includes('not found')) {
+      throw this.createModelNotFoundError();
+    }
+  }
+
+  /**
+   * Process a single chunk and update buffer, yielding tokens.
+   */
+  private processChunk(
+    chunkStr: string,
+    buffer: string
+  ): { newBuffer: string; tokens: string[]; done: boolean } {
+    const newBuffer = buffer + chunkStr;
+    const result = this.parseStreamBuffer(newBuffer);
+    return {
+      newBuffer: result.remainingBuffer,
+      tokens: result.tokens,
+      done: result.done,
+    };
+  }
+
+  /**
+   * Log request details in debug mode.
+   */
+  private logRequestDetails(url: string): void {
+    if (!process.env.DEBUG && !process.env.ZULU_PILOT_DEBUG) {
+      return;
+    }
+
+    console.error(`[DEBUG] Request URL: ${this.axiosInstance.defaults.baseURL}${url}`);
+    console.error(
+      `[DEBUG] Model: ${this.model}, Region: ${this.region}, Endpoint: ${this.endpoint}`
+    );
+  }
+
+  /**
+   * Create request headers with authorization token.
+   */
+  private createRequestHeaders(token: string): Record<string, string> {
+    return {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  /**
+   * Process stream chunks and yield tokens.
+   */
+  private async *processStream(
+    stream: AsyncIterable<unknown>
+  ): AsyncGenerator<string, void, unknown> {
+    let buffer = '';
+    let hasData = false;
+    let firstChunk = true;
+
+    for await (const chunk of stream) {
+      const chunkStr = String(chunk);
+      hasData = true;
+
+      // Check first chunk for errors
+      if (firstChunk) {
+        firstChunk = false;
+        this.checkFirstChunkForErrors(chunkStr);
+      }
+
+      // Process chunk and yield tokens
+      const result = this.processChunk(chunkStr, buffer);
+      buffer = result.newBuffer;
+
+      for (const token of result.tokens) {
+        yield token;
+      }
+
+      if (result.done) {
+        return;
+      }
+    }
+
+    // Validate we received data
+    if (!hasData || buffer.length === 0) {
+      throw new ConnectionError(
+        `No response data received. Model "${this.model}" may not be available in region "${this.region}"`,
+        'googleCloud'
+      );
+    }
+  }
+
+  /**
    * Stream response from Google Cloud AI Platform.
    */
   async *streamResponse(
@@ -196,87 +344,15 @@ export class GoogleCloudProvider implements IModelProvider {
 
     try {
       const token = await this.getAccessToken();
-
-      // Log request details in debug mode
-      if (process.env.DEBUG || process.env.ZULU_PILOT_DEBUG) {
-        console.error(`[DEBUG] Request URL: ${this.axiosInstance.defaults.baseURL}${url}`);
-        console.error(
-          `[DEBUG] Model: ${this.model}, Region: ${this.region}, Endpoint: ${this.endpoint}`
-        );
-      }
+      this.logRequestDetails(url);
 
       const response = await this.axiosInstance.post(url, requestBody, {
         responseType: 'stream',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: this.createRequestHeaders(token),
       });
 
-      let buffer = '';
-      let hasData = false;
-      let firstChunk = true;
-
       try {
-        for await (const chunk of response.data) {
-          const chunkStr = chunk.toString();
-          hasData = true;
-
-          // On first chunk, check for immediate errors
-          if (firstChunk) {
-            firstChunk = false;
-            // Check for common error patterns in first chunk
-            if (
-              chunkStr.includes('"error"') ||
-              chunkStr.includes('"code"') ||
-              chunkStr.includes('404') ||
-              chunkStr.includes('not found')
-            ) {
-              // Try to extract error message
-              try {
-                const errorMatch = chunkStr.match(/data:\s*({[^}]*"error"[^}]*})/);
-                if (errorMatch) {
-                  const errorData = JSON.parse(errorMatch[1]);
-                  throw new ConnectionError(
-                    `API Error: ${errorData.error?.message || errorData.message || 'Model or endpoint not found'}`,
-                    'googleCloud'
-                  );
-                }
-              } catch {
-                // If parsing fails, check for common error strings
-                if (chunkStr.includes('404') || chunkStr.includes('not found')) {
-                  throw new ConnectionError(
-                    `Model or endpoint not found. Please verify:\n` +
-                      `1. Model "${this.model}" is available in region "${this.region}"\n` +
-                      `2. Endpoint "${this.endpoint}" is correct for this model\n` +
-                      `3. API aiplatform.googleapis.com is enabled\n` +
-                      `4. You have access to this model in project "${this.projectId}"`,
-                    'googleCloud'
-                  );
-                }
-              }
-            }
-          }
-
-          buffer += chunkStr;
-
-          const result = this.parseStreamBuffer(buffer);
-          buffer = result.remainingBuffer;
-          for (const token of result.tokens) {
-            yield token;
-          }
-          if (result.done) {
-            return;
-          }
-        }
-
-        // If we got response but no valid data, might be an error
-        if (!hasData || buffer.length === 0) {
-          throw new ConnectionError(
-            `No response data received. Model "${this.model}" may not be available in region "${this.region}"`,
-            'googleCloud'
-          );
-        }
+        yield* this.processStream(response.data);
       } catch (streamError) {
         // If it's already a ConnectionError, re-throw
         if (streamError instanceof ConnectionError) {
@@ -426,71 +502,123 @@ ${context.length > 0 ? `Here is the codebase context:\n\n${context.map((file) =>
   /**
    * Handle Axios errors.
    */
-  private handleAxiosError(error: AxiosError): Error {
-    const status = error.response?.status;
-    const responseData = error.response?.data;
+  /**
+   * Extract error message from response data object.
+   */
+  private extractErrorFromObject(responseData: Record<string, unknown>): string {
+    if ('readable' in responseData || '_readableState' in responseData) {
+      return 'Stream error - model or endpoint may not be available';
+    }
 
-    // Try to extract more detailed error message
-    let errorMessage = 'Unknown error';
-    if (responseData) {
-      try {
-        // Handle stream response data (might be a stream object)
-        if (
-          typeof responseData === 'object' &&
-          responseData !== null &&
-          !Array.isArray(responseData)
-        ) {
-          // If it's a stream object, try to get readable error info
-          if ('readable' in responseData || '_readableState' in responseData) {
-            errorMessage = 'Stream error - model or endpoint may not be available';
-          } else {
-            const errorObj = responseData as Record<string, unknown>;
-            errorMessage =
-              (errorObj.error as { message?: string })?.message ||
-              (errorObj.message as string) ||
-              JSON.stringify(errorObj).substring(0, 200);
-          }
-        } else if (typeof responseData === 'string') {
-          try {
-            const errorObj = JSON.parse(responseData);
-            errorMessage =
-              errorObj.error?.message || errorObj.message || responseData.substring(0, 200);
-          } catch {
-            errorMessage = responseData.substring(0, 200);
-          }
-        } else {
-          errorMessage = String(responseData).substring(0, 200);
-        }
-      } catch {
-        errorMessage = String(responseData).substring(0, 200);
+    const errorObj = responseData as { error?: { message?: string }; message?: string };
+    return (
+      errorObj.error?.message || errorObj.message || JSON.stringify(responseData).substring(0, 200)
+    );
+  }
+
+  /**
+   * Extract error message from string response data.
+   */
+  private extractErrorFromString(responseData: string): string {
+    try {
+      const errorObj = JSON.parse(responseData);
+      return errorObj.error?.message || errorObj.message || responseData.substring(0, 200);
+    } catch {
+      return responseData.substring(0, 200);
+    }
+  }
+
+  /**
+   * Extract error message from response data.
+   */
+  private extractErrorMessage(responseData: unknown): string {
+    if (!responseData) {
+      return 'Unknown error';
+    }
+
+    try {
+      if (
+        typeof responseData === 'object' &&
+        responseData !== null &&
+        !Array.isArray(responseData)
+      ) {
+        return this.extractErrorFromObject(responseData as Record<string, unknown>);
       }
-    }
 
-    if (status === 401 || status === 403) {
-      return new ConnectionError(
-        `Invalid credentials or authentication failed: ${errorMessage}`,
-        'googleCloud'
-      );
+      if (typeof responseData === 'string') {
+        return this.extractErrorFromString(responseData);
+      }
+
+      return String(responseData).substring(0, 200);
+    } catch {
+      return String(responseData).substring(0, 200);
     }
-    if (status === 429) {
-      const retryAfterHeader =
-        error.response?.headers['retry-after'] || error.response?.headers['Retry-After'];
-      const retryAfter = retryAfterHeader ? parseInt(String(retryAfterHeader), 10) : undefined;
-      return new RateLimitError('Rate limit exceeded', retryAfter);
-    }
-    if (status === 404) {
-      return new ConnectionError(
-        `Model or endpoint not found. Details: ${errorMessage}. Please verify:\n` +
-          `1. Model "${this.model}" is available in region "${this.region}"\n` +
-          `2. Endpoint "${this.endpoint}" is correct for this model\n` +
-          `3. API aiplatform.googleapis.com is enabled\n` +
-          `4. You have access to this model in project "${this.projectId}"`,
-        'googleCloud'
-      );
-    }
+  }
+
+  /**
+   * Handle authentication errors (401, 403).
+   */
+  private handleAuthenticationError(errorMessage: string): ConnectionError {
+    return new ConnectionError(
+      `Invalid credentials or authentication failed: ${errorMessage}`,
+      'googleCloud'
+    );
+  }
+
+  /**
+   * Handle rate limit errors (429).
+   */
+  private handleRateLimitError(error: AxiosError): RateLimitError {
+    const retryAfterHeader =
+      error.response?.headers['retry-after'] || error.response?.headers['Retry-After'];
+    const retryAfter = retryAfterHeader ? parseInt(String(retryAfterHeader), 10) : undefined;
+    return new RateLimitError('Rate limit exceeded', retryAfter);
+  }
+
+  /**
+   * Handle not found errors (404).
+   */
+  private handleNotFoundError(errorMessage: string): ConnectionError {
+    return new ConnectionError(
+      `Model or endpoint not found. Details: ${errorMessage}. Please verify:\n` +
+        `1. Model "${this.model}" is available in region "${this.region}"\n` +
+        `2. Endpoint "${this.endpoint}" is correct for this model\n` +
+        `3. API aiplatform.googleapis.com is enabled\n` +
+        `4. You have access to this model in project "${this.projectId}"`,
+      'googleCloud'
+    );
+  }
+
+  /**
+   * Handle other HTTP errors.
+   */
+  private handleOtherError(status: number | undefined, errorMessage: string): ConnectionError {
     return new ConnectionError(
       `Google Cloud AI Platform error (${status}): ${errorMessage}`,
       'googleCloud'
     );
+  }
+
+  /**
+   * Handle Axios errors by status code.
+   */
+  private handleAxiosError(error: AxiosError): Error {
+    const status = error.response?.status;
+    const responseData = error.response?.data;
+    const errorMessage = this.extractErrorMessage(responseData);
+
+    if (status === 401 || status === 403) {
+      return this.handleAuthenticationError(errorMessage);
+    }
+
+    if (status === 429) {
+      return this.handleRateLimitError(error);
+    }
+
+    if (status === 404) {
+      return this.handleNotFoundError(errorMessage);
+    }
+
+    return this.handleOtherError(status, errorMessage);
   }
 }

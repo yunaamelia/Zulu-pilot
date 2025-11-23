@@ -1,0 +1,21 @@
+{
+  "name": "@zulu-pilot/providers",
+  "version": "0.1.0",
+  "description": "Model provider implementations for Zulu Pilot v2",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}
+

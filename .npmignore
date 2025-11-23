@@ -1,0 +1,59 @@
+# Test files
+tests/
+__tests__/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Config files
+jest.config.js
+.eslintrc.js
+.prettierrc.json
+commitlint.config.js
+.lintstagedrc.json
+.pre-commit-config.yaml
+tsconfig.json
+vitest.config.ts
+
+# Scripts
+scripts/
+
+# Docs
+docs/
+
+# Specs
+specs/
+
+# Source files
+src/
+
+# IDE
+.vscode/
+.idea/
+
+# Dot files
+.github/
+.husky/
+.specify/
+.cursor/
+.gemini/
+
+# Node modules
+node_modules/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+.DS_Store
+
+# Env
+.env.example
+.env
+
+vertex-config.md
