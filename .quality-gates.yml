@@ -1,0 +1,332 @@
+# Quality Gates Configuration
+# This file defines all quality standards and automated checks for the Zulu Pilot project
+# Based on the project constitution at .specify/memory/constitution.md
+
+quality_gates:
+  # Pre-commit checks - run on every commit attempt (MANDATORY)
+  pre_commit:
+    - name: 'Code Formatting'
+      tools: [prettier]
+      auto_fix: true
+      blocking: true
+      description: 'Automatically format code using Prettier'
+
+    - name: 'Linting'
+      tools: [eslint]
+      blocking: true
+      max_warnings: 0
+      description: 'Enforce code quality and complexity rules (max complexity: 10)'
+
+    - name: 'Unit Tests with Coverage'
+      scope: changed_files
+      min_coverage: 80
+      min_new_code_coverage: 85
+      max_duration: 60s
+      blocking: true
+      fail_on_coverage_decrease: true
+      reports:
+        - terminal
+        - html
+        - lcov
+      badge: true
+      description: 'Run tests for changed files with coverage enforcement'
+
+    - name: 'Security Scan'
+      tools: [detect-secrets, npm-audit]
+      blocking: true
+      description: 'Detect secrets and scan dependencies for vulnerabilities'
+
+    - name: 'Type Checking'
+      tools: [typescript]
+      blocking: true
+      description: 'TypeScript strict mode type checking'
+
+    - name: 'Test File Validation'
+      check_test_file_exists: true
+      naming_convention: '*.test.ts or *.spec.ts'
+      blocking: true
+      description: 'Verify test files exist for source files'
+
+    - name: 'Commit Message Validation'
+      format: conventional_commits
+      min_length: 20
+      types: [feat, fix, docs, style, refactor, perf, test, chore, ci]
+      blocking: true
+      description: 'Enforce conventional commit message format'
+
+    - name: 'File Structure Validation'
+      max_file_size: 1MB
+      check_binary_files: true
+      check_todos: true
+      description: 'Validate file naming and structure conventions'
+
+  # Pre-push checks - run before push to remote (heavier operations)
+  pre_push:
+    - name: 'Full Test Suite with Coverage'
+      types: [unit, integration]
+      min_coverage:
+        overall: 75
+        unit: 80
+        integration: 70
+        new_code: 85
+      branch_coverage: 75
+      blocking: true
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+      upload_to: [codecov, coveralls]
+      description: 'Run complete test suite with comprehensive coverage'
+
+    - name: 'Build Verification'
+      environments: [development, production]
+      blocking: true
+      description: 'Verify production build succeeds'
+
+    - name: 'Code Quality with Coverage'
+      tool: sonarqube
+      min_rating: B
+      min_coverage: 80
+      max_coverage_decrease: 0
+      blocking: false
+      description: 'Static code analysis and quality scoring'
+
+    - name: 'Test Performance Check'
+      max_suite_duration: 300s # 5 minutes
+      warn_slow_tests: true
+      slow_test_threshold: 5s
+      description: 'Ensure tests complete within performance budget'
+
+  # CI pipeline checks - run on pull request
+  ci_pipeline:
+    - name: 'Comprehensive Testing with Coverage'
+      types: [unit, integration, e2e]
+      browsers: [chrome, firefox]
+      min_coverage:
+        overall: 80
+        unit: 85
+        integration: 75
+        new_code: 90
+      coverage_trend: must_not_decrease
+      reports:
+        - html
+        - lcov
+        - json
+        - cobertura
+        - text-summary
+      upload_to:
+        - codecov
+        - coveralls
+        - code_climate
+      pr_comment: true
+      badge_update: true
+      description: 'Complete test suite with coverage reporting'
+
+    - name: 'Security Analysis'
+      tools: [npm-audit, detect-secrets]
+      fail_on: critical
+      require_100_percent_coverage_for: [auth, security, validation]
+      description: 'Security vulnerability scanning and analysis'
+
+    - name: 'Code Quality Analysis'
+      tools: [eslint, sonarqube]
+      complexity_max: 10
+      duplication_max: 3
+      maintainability_min: B
+      blocking: true
+      description: 'Code quality metrics and static analysis'
+
+    - name: 'Performance Testing'
+      cli_startup_max: 500ms
+      model_connection_max: 5s
+      first_token_latency_max: 1s
+      description: 'Performance benchmarks for CLI operations'
+
+    - name: 'Coverage Report Publication'
+      generate_badge: true
+      update_readme: true
+      trend_analysis: true
+      alert_on_decrease: true
+      description: 'Publish coverage reports and badges'
+
+# Quality Thresholds - Specific metrics and limits
+thresholds:
+  # Code Coverage Requirements
+  code_coverage:
+    # Minimum thresholds (MANDATORY - cannot merge if below)
+    overall_min: 75
+    unit_min: 80
+    integration_min: 70
+    new_code_min: 85
+    branch_coverage_min: 75
+
+    # Target thresholds (aspirational goals)
+    overall_target: 85
+    unit_target: 90
+    integration_target: 80
+    new_code_target: 95
+
+    # Critical paths requiring 100% coverage
+    critical_paths:
+      - authentication
+      - authorization
+      - security_validation
+      - public_api_endpoints
+      - error_handling
+
+    # Coverage by layer
+    layers:
+      core: 95 # Core business logic
+      providers: 90 # Model providers
+      services: 90 # Service layer
+      cli: 80 # CLI commands
+      utilities: 85 # Utility functions
+      validators: 95 # Input validators
+
+  # Code Quality Metrics
+  complexity:
+    cyclomatic_max: 10 # Maximum cyclomatic complexity per function
+    cyclomatic_target: 7 # Target cyclomatic complexity
+    cognitive_max: 15 # Maximum cognitive complexity
+    max_depth: 4 # Maximum nesting depth
+
+  duplication:
+    max_percentage: 3 # Maximum code duplication allowed
+
+  maintainability:
+    min_rating: B # Minimum SonarQube maintainability rating
+    target_rating: A # Target maintainability rating
+
+  security:
+    max_critical: 0 # Zero critical vulnerabilities allowed
+    max_high: 0 # Zero high severity vulnerabilities allowed
+
+  performance:
+    # CLI Performance Budgets
+    cli_startup: 500ms
+    model_connection_local: 2s
+    model_connection_remote: 5s
+    first_token_latency: 1s
+    file_context_load: 100ms
+
+    # Test Performance Budgets
+    unit_test_max: 5s
+    integration_test_max: 30s
+    e2e_test_max: 300s # 5 minutes
+    pre_commit_max: 60s # 1 minute
+
+  # Technical Debt
+  technical_debt:
+    max_ratio: 5 # Maximum 5% technical debt ratio
+    target_ratio: 3 # Target 3% technical debt ratio
+
+# Bypass Policy - When quality gates can be temporarily violated
+bypass_policy:
+  # Allowed bypass scenarios
+  allowed_scenarios:
+    - emergency_hotfix
+    - revert_broken_commit
+    - prototype_spike
+
+  # Requirements for bypass
+  requirements:
+    - technical_lead_approval
+    - documented_justification
+    - tracking_ticket_created
+    - remediation_plan
+    - max_bypass_duration: 24h
+
+  # Bypass command
+  command: 'git commit --no-verify -m "fix: emergency hotfix [BYPASS: ticket #XXX]"'
+
+  # Audit trail
+  audit:
+    log_all_bypasses: true
+    require_cleanup_commit: true
+    flag_for_review: true
+
+# Exception Handling - Long-term exceptions to quality gates
+exceptions:
+  # Coverage exemptions
+  coverage_exemptions:
+    - type: prototype
+      min_coverage: 60
+      duration: 2_weeks
+      requires: time_boxed_exemption
+
+    - type: legacy_refactor
+      min_coverage: current_baseline
+      requires: gradual_increase_plan
+
+    - type: third_party_wrapper
+      alternative: integration_tests
+      requires: technical_lead_approval
+
+    - type: auto_generated_code
+      marking: coverage_exemption_comment
+      requires: code_review
+
+  # Complexity exemptions
+  complexity_exemptions:
+    - type: algorithm_implementation
+      max_complexity: 15
+      requires: detailed_documentation + unit_tests
+
+    - type: state_machine
+      max_complexity: 20
+      requires: architectural_review + comprehensive_tests
+
+# Monitoring and Reporting
+monitoring:
+  # Metrics to track
+  metrics:
+    - coverage_trend
+    - complexity_trend
+    - technical_debt_trend
+    - test_performance_trend
+    - security_vulnerabilities
+
+  # Reporting schedule
+  reporting:
+    daily: coverage_badge_update
+    weekly: quality_dashboard_review
+    monthly: trend_analysis_report
+    quarterly: constitution_compliance_audit
+
+  # Alerts
+  alerts:
+    - condition: coverage_decrease
+      threshold: 1%
+      action: notify_team
+
+    - condition: complexity_increase
+      threshold: avg_complexity > 8
+      action: code_review_required
+
+    - condition: security_vulnerability
+      severity: high
+      action: immediate_fix_required
+
+    - condition: test_performance_degradation
+      threshold: 20%
+      action: investigate_slow_tests
+
+# Tool Configuration References
+tool_configs:
+  jest: jest.config.js
+  eslint: eslint.config.js
+  prettier: .prettierrc.json
+  husky: .husky/
+  pre_commit: .pre-commit-config.yaml
+  commitlint: commitlint.config.js
+  typescript: tsconfig.json
+  lint_staged: .lintstagedrc.json
+
+# Documentation References
+documentation:
+  constitution: .specify/memory/constitution.md
+  compliance_report: docs/constitution-compliance.md
+  configuration_guide: docs/configuration-guide.md
+  contributing_guide: CONTRIBUTING.md (to be created)
+  quick_reference: docs/quality-gates-quick-reference.md (to be created)

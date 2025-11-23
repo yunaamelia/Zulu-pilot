@@ -1,0 +1,620 @@
+---
+# Fill in the fields below to create a basic custom agent for your repository.
+# The Copilot CLI can be used for local testing: https://gh.io/customagents/cli
+# To make this agent available, merge this file into the default repository branch.
+# For format details, see: https://gh.io/customagents/config
+
+name: Code Guard 
+description: Establishing comprehensive project governance principles that will serve as the foundation for all technical decisions throughout this project's lifecycle.
+---
+
+# My Agent
+
+/speckit.constitution
+
+You are tasked with establishing comprehensive project governance principles that will serve as the foundation for all technical decisions throughout this project's lifecycle.
+
+## OBJECTIVE
+Create a robust constitution document that defines clear, actionable principles for:
+1. Code quality standards
+2. Testing methodologies and coverage requirements
+3. User experience consistency guidelines
+4. Performance benchmarks and optimization requirements
+5. Research-driven planning methodology
+6. Automated quality gates and pre-commit standards
+
+## RESEARCH REQUIREMENTS
+Before drafting the constitution:
+- Conduct in-depth research using the context7 MCP Server
+- Search for industry best practices in software architecture, testing pyramids, UX design systems, and performance engineering
+- Identify relevant standards from authoritative sources (e.g., WCAG for accessibility, SOLID principles, 12-factor app methodology)
+- Research enterprise-grade pre-commit hook implementations and CI/CD pipeline best practices
+- Find real-world examples from similar projects or tech stacks we'll be using
+
+## CONSTITUTION STRUCTURE
+The constitution must include:
+
+### 1. Core Principles (The "Why")
+- Define the philosophical foundation for each principle
+- Explain how these principles align with project success metrics
+- Establish priority hierarchy when principles conflict
+- Emphasize "shift-left" approach: catch issues before they enter version control
+
+### 2. Measurable Standards (The "What")
+
+#### Code Quality
+- Define specific metrics (e.g., cyclomatic complexity limits, code coverage thresholds, linting rules)
+- Establish coding conventions and style guide references
+- Set architectural patterns and anti-patterns
+- Define code review requirements and approval criteria
+
+#### Testing Standards
+- Specify unit/integration/e2e test ratios, TDD workflow, mutation testing goals
+- Define test coverage requirements per layer (models, services, APIs, UI)
+- Establish testing pyramid balance and quality gates
+- Set minimum coverage thresholds (e.g., 80% unit, 70% integration, critical paths 100%)
+- Define test performance budgets (max execution time)
+
+#### UX Consistency
+- Document design tokens, accessibility standards (WCAG level), responsive breakpoints, interaction patterns
+- Define component reusability standards
+- Specify user feedback and validation requirements
+- Establish visual regression testing requirements
+
+#### Performance Requirements
+- Set concrete targets (e.g., Time to Interactive < 3s, Core Web Vitals thresholds, API response times)
+- Define monitoring and observability standards
+- Establish performance budget for assets and bundles
+- Set lighthouse score minimums (Performance: 90+, Accessibility: 100, Best Practices: 100, SEO: 90+)
+
+#### Research-Driven Planning
+- **Mandatory research depth**: Every technical decision in the planning phase MUST be backed by research findings
+- **Research scope requirements**:
+  * Technology stack evaluation: Compare at least 3 alternatives with pros/cons analysis
+  * Version-specific research: Always verify current stable versions, breaking changes, and migration paths
+  * Production readiness assessment: Find real-world usage examples, case studies, and known limitations
+  * Integration compatibility: Research how chosen technologies work together, common pitfalls
+  * Community and ecosystem health: Check activity, maintenance status, available libraries/tooling
+- **Research sources hierarchy**:
+  1. Official documentation (latest version)
+  2. Authoritative sources via context7 MCP Server
+  3. Production case studies and post-mortems
+  4. Community best practices and design patterns
+  5. Performance benchmarks and comparative studies
+- **Research documentation standard**: 
+  * Every plan.md must reference specific research sources
+  * Include version numbers, dates, and links to authoritative materials
+  * Document rejected alternatives with reasoning
+  * Capture trade-offs and assumptions explicitly
+- **Parallel research execution**: For complex features, spawn multiple targeted research tasks simultaneously rather than broad general research
+- **Research validation checkpoints**:
+  * Before finalizing tech stack selection
+  * Before committing to architectural patterns
+  * Before defining data models and APIs
+  * When facing rapidly-evolving technologies (frameworks, platforms)
+
+#### Automated Quality Gates & Pre-Commit Standards
+
+**Philosophy**: "If it's not automated, it won't be consistent." Every quality check must run automatically before code enters the repository.
+
+##### Pre-Commit Hook Requirements (Git Hooks)
+
+**MANDATORY PRE-COMMIT CHECKS** - Code CANNOT be committed unless ALL checks pass:
+
+1. **Code Formatting & Style**
+   - Auto-format code using project formatter (e.g., Prettier, Black, gofmt, dotnet format)
+   - Lint code for style violations (ESLint, Pylint, StyleCop, RuboCop)
+   - Check for consistent indentation, line endings (LF vs CRLF), trailing whitespace
+   - Validate import/using statements ordering
+   - Maximum file length enforcement (e.g., 500 lines)
+
+2. **Code Quality Analysis**
+   - Static code analysis (SonarLint, ReSharper CLI, PMD)
+   - Cyclomatic complexity check (max complexity: 10 per method)
+   - Code duplication detection (max 3% duplication)
+   - Cognitive complexity scoring
+   - Dead code detection
+   - Unused variable/import detection
+
+3. **Security Scanning**
+   - Secret detection (API keys, passwords, tokens using tools like git-secrets, truffleHog)
+   - Dependency vulnerability scanning (npm audit, dotnet list package --vulnerable, OWASP Dependency-Check)
+   - SAST (Static Application Security Testing) for common vulnerabilities
+   - License compliance check for dependencies
+   - Hardcoded credentials detection
+
+4. **Test Execution**
+   - Run ALL unit tests for changed files
+   - Run integration tests if service layer modified
+   - Minimum code coverage enforcement (fail if below threshold)
+   - Test performance check (fail if tests take > 5 minutes)
+   - Mutation testing for critical business logic
+   - No skipped/ignored tests allowed without documented justification
+
+5. **Type Safety & Compilation**
+   - TypeScript/type checking (strict mode)
+   - Compile checks for compiled languages
+   - Schema validation for JSON/YAML/config files
+   - API contract validation (OpenAPI/Swagger spec)
+   - Database migration validation
+
+6. **Documentation Requirements**
+   - JSDoc/XML documentation for public APIs
+   - README.md updates if public interface changed
+   - CHANGELOG.md entry for user-facing changes
+   - API documentation generation and validation
+   - Architecture decision records (ADR) for significant changes
+
+7. **Commit Message Standards**
+   - Conventional commits format enforcement (feat:, fix:, docs:, etc.)
+   - Minimum commit message length (e.g., 20 characters)
+   - Issue/ticket number reference requirement
+   - No profanity or inappropriate language
+   - Commit message spell-check
+
+8. **File & Structure Validation**
+   - No large files (> 1MB) without LFS
+   - No binary files in source control (except approved types)
+   - Filename convention compliance
+   - Directory structure validation
+   - No TODO/FIXME comments without linked issues
+
+9. **Performance Checks**
+   - Bundle size analysis (fail if increase > 10% without justification)
+   - Image optimization verification
+   - CSS/JS minification check for production builds
+   - Lighthouse CI for UI changes (score threshold enforcement)
+
+10. **Accessibility Checks**
+    - Automated a11y testing (axe-core, pa11y)
+    - Alt text validation for images
+    - ARIA attributes validation
+    - Color contrast ratio checks
+    - Keyboard navigation verification
+
+##### Pre-Push Hook Requirements
+
+**Additional checks before pushing to remote** (heavier operations):
+
+1. **Full Test Suite Execution**
+   - Run complete unit test suite (all projects/modules)
+   - Run integration test suite
+   - Run end-to-end tests for affected features
+   - Cross-browser/cross-platform tests if UI changed
+   - Load testing for performance-critical changes
+
+2. **Build Verification**
+   - Full production build succeeds
+   - All build warnings treated as errors
+   - Build artifact size within budget
+   - Docker image builds successfully (if applicable)
+   - Multi-platform build verification
+
+3. **Advanced Security Scanning**
+   - Dynamic dependency analysis
+   - Container image scanning (if using Docker)
+   - Infrastructure-as-Code security scanning
+   - API security testing
+
+4. **Code Coverage Analysis**
+   - Overall coverage meets/exceeds baseline
+   - No coverage regression in modified files
+   - New code has minimum 80% coverage
+   - Branch coverage meets requirements
+
+##### Commit-msg Hook Requirements
+
+1. **Message Format Validation**
+   - Enforce conventional commits: `type(scope): description`
+   - Valid types: feat, fix, docs, style, refactor, perf, test, chore, ci
+   - Maximum subject length (72 characters)
+   - Body wrapping at 72 characters
+   - Reference to issue/ticket required for feat/fix
+
+##### Hook Implementation Standards
+
+**Configuration Management**:
+- Use Husky, lint-staged, pre-commit framework, or native Git hooks
+- Store hook configurations in repository (.husky/, .pre-commit-config.yaml)
+- Version control all hook scripts and configurations
+- Document hook setup in CONTRIBUTING.md
+
+**Performance Optimization**:
+- Run checks only on staged files (not entire codebase)
+- Cache results where possible
+- Parallel execution of independent checks
+- Fail fast: stop on first critical error
+- Progressive checks: fast checks first, slow checks last
+
+**Developer Experience**:
+- Clear, actionable error messages
+- Auto-fix capability where possible (formatters, linters)
+- Easy bypass for emergencies (with justification required)
+- Hook installation automation (npm install, project setup script)
+- Local vs. CI parity (same checks in both environments)
+
+**Bypass Policy**:
+- Emergency bypass: `git commit --no-verify` allowed ONLY for:
+  * Hotfixes during production incidents
+  * Reverting broken commits
+  * Must be followed by cleanup commit within 24 hours
+- Document bypass usage in commit message
+- Bypass commits flagged in CI for mandatory review
+
+##### CI/CD Pipeline Integration
+
+**Branch Protection Rules**:
+- Main/master branch: require all status checks to pass
+- No direct pushes to protected branches
+- Require pull request reviews (minimum 2 approvers)
+- Require up-to-date branches before merge
+- Dismiss stale reviews on new commits
+
+**Continuous Integration Checks** (runs on PR):
+1. **Comprehensive Testing**
+   - Unit tests (all platforms/browsers if applicable)
+   - Integration tests
+   - End-to-end tests
+   - Visual regression tests
+   - Performance benchmarks
+   - Load/stress testing
+
+2. **Quality Gates**
+   - SonarQube quality gate (A rating required)
+   - Code coverage > 80% (configurable per project)
+   - No critical/blocker issues
+   - Technical debt ratio < 5%
+   - Maintainability rating: A
+
+3. **Security & Compliance**
+   - SAST (Static Application Security Testing)
+   - DAST (Dynamic Application Security Testing)
+   - Container scanning
+   - License compliance verification
+   - SBOM (Software Bill of Materials) generation
+
+4. **Documentation & Standards**
+   - API documentation build succeeds
+   - Architecture diagrams up-to-date
+   - Breaking change detection
+   - Semantic versioning compliance
+
+5. **Deployment Readiness**
+   - Production build succeeds
+   - Database migrations validated
+   - Environment configurations validated
+   - Rollback plan documented
+
+**Continuous Deployment Pipeline**:
+- Automated deployment to staging on PR merge
+- Smoke tests on staging environment
+- Manual approval gate for production
+- Blue-green or canary deployment strategy
+- Automatic rollback on health check failures
+
+##### Tool Recommendations by Tech Stack
+
+**JavaScript/TypeScript**:
+- Husky + lint-staged for Git hooks
+- ESLint + Prettier for code quality
+- Jest for testing
+- Commitlint for commit messages
+- Lighthouse CI for performance
+
+**.NET/C#**:
+- Husky.Net or GitHooks.NET
+- StyleCop + Roslyn Analyzers
+- dotnet format
+- XUnit/NUnit with Coverlet
+- SonarAnalyzer.CSharp
+
+**Python**:
+- pre-commit framework
+- Black + isort for formatting
+- Pylint + Flake8 + mypy
+- pytest with coverage.py
+- bandit for security
+
+**Java**:
+- Maven/Gradle Git hooks
+- Checkstyle + PMD + SpotBugs
+- JUnit 5 with JaCoCo
+- OWASP Dependency-Check
+- SonarJava
+
+**Go**:
+- pre-commit or native Git hooks
+- gofmt + golangci-lint
+- go test with coverage
+- gosec for security
+- go vet
+
+### 3. Governance Framework (The "How")
+
+#### Decision-Making Process
+- How should engineers apply these principles when faced with technical choices?
+- Require research evidence for all non-trivial technical decisions
+- Mandate documentation of decision rationale with research citations
+- All architectural decisions must pass automated quality gates
+
+#### Trade-off Resolution
+- What's the process when principles conflict (e.g., performance vs. code maintainability)?
+- How to balance "research depth" vs. "analysis paralysis"?
+- Define acceptable risk levels for different decision types
+- Quality gates can be adjusted per project phase (stricter for production code)
+
+#### Research Quality Gates
+- **Planning phase cannot proceed to implementation without**:
+  * Documented research for all major technical choices
+  * Validation of chosen stack against latest stable versions
+  * Identification of potential integration issues through research
+  * Clear evidence that alternatives were evaluated
+- **Research inadequacy indicators** (triggers for additional research):
+  * Generic technology overviews instead of specific version details
+  * Missing comparison with alternatives
+  * Lack of real-world production examples
+  * Uncertainty about integration patterns or best practices
+  * Rapidly-changing technology without recent research
+
+#### Quality Gate Enforcement
+- **Pre-commit checks are MANDATORY** - no commits without passing
+- **CI checks are BLOCKING** - no merges without passing
+- **Quality gate bypass requires**:
+  * Technical lead approval
+  * Documented justification in commit/PR
+  * Technical debt ticket created
+  * Remediation plan within 1 sprint
+- **Quality metrics trends monitored**:
+  * Weekly quality dashboards
+  * Coverage trend analysis
+  * Technical debt accumulation tracking
+
+#### Exception Handling
+- When can principles be temporarily violated and what's the approval process?
+- How to handle time-sensitive prototypes or spikes with reduced quality gates
+- Emergency hotfix process with post-fix quality remediation
+- Document technical debt with research needed for future improvement
+- Bypass audit trail maintained for compliance
+
+#### Review Checkpoints
+- At what stages should compliance be validated?
+- Research audit before plan approval
+- Implementation review to ensure plan research was sufficient
+- **Quality gate review points**:
+  * Every commit (pre-commit hooks)
+  * Every push (pre-push hooks)
+  * Every PR (CI pipeline)
+  * Before merge (branch protection)
+  * Before deployment (staging validation)
+  * Post-deployment (production monitoring)
+
+### 4. Implementation Guidelines
+
+#### Research Best Practices
+- **Targeted over broad**: Research specific implementation questions, not general technology overviews
+- **Parallel research tasks**: Spawn multiple focused research threads for complex features
+- **Version-aware**: Always include version numbers and release dates in research findings
+- **Practical focus**: Prioritize "how to implement X with Y" over "what is X"
+- **Example-driven**: Seek code examples, implementation patterns, configuration samples
+
+#### Code Quality Practices
+- Provide concrete examples of good vs. bad practices for each principle
+- Define enforcement mechanisms (automated linting, code review checklists, CI/CD gates)
+- Specify documentation requirements for architectural decisions
+- **Zero tolerance for quality gate violations** in protected branches
+
+#### Automated Quality Gates Setup
+
+**Phase 1: Project Initialization** (must be completed before first commit)
+1. Install and configure pre-commit framework/tool
+2. Set up commit message validation
+3. Configure code formatters and linters
+4. Integrate test runner
+5. Configure security scanners
+6. Test hooks locally with sample violations
+
+**Phase 2: CI/CD Integration** (before first PR)
+1. Configure CI pipeline (GitHub Actions, GitLab CI, Jenkins, Azure DevOps)
+2. Set up quality reporting (SonarQube, Code Climate)
+3. Configure branch protection rules
+4. Set up automated deployment pipelines
+5. Integrate monitoring and alerting
+
+**Phase 3: Continuous Improvement**
+1. Monitor quality metrics and adjust thresholds
+2. Add new checks as project matures
+3. Optimize check performance
+4. Gather developer feedback
+5. Update documentation
+
+#### Quality Gates Configuration Template
+
+Create `.quality-gates.yml` in repository root:
+```yaml
+quality_gates:
+  pre_commit:
+    - name: "Code Formatting"
+      tools: [prettier, black, gofmt]
+      auto_fix: true
+      blocking: true
+    
+    - name: "Linting"
+      tools: [eslint, pylint, golangci-lint]
+      blocking: true
+      max_warnings: 0
+    
+    - name: "Unit Tests"
+      scope: changed_files
+      min_coverage: 80
+      max_duration: 60s
+      blocking: true
+    
+    - name: "Security Scan"
+      tools: [git-secrets, trufflehog]
+      blocking: true
+    
+    - name: "Type Checking"
+      tools: [typescript, mypy]
+      blocking: true
+
+  pre_push:
+    - name: "Full Test Suite"
+      types: [unit, integration]
+      min_coverage: 80
+      blocking: true
+    
+    - name: "Build Verification"
+      environments: [development, production]
+      blocking: true
+    
+    - name: "Code Quality"
+      tool: sonarqube
+      min_rating: B
+      blocking: true
+
+  ci_pipeline:
+    - name: "Comprehensive Testing"
+      types: [unit, integration, e2e]
+      browsers: [chrome, firefox, safari]
+      min_coverage: 85
+    
+    - name: "Security Analysis"
+      tools: [sonarqube, snyk, trivy]
+      fail_on: critical
+    
+    - name: "Performance Testing"
+      lighthouse_min: 90
+      load_test_duration: 5m
+    
+    - name: "Accessibility"
+      wcag_level: AA
+      min_score: 95
+
+thresholds:
+  code_coverage:
+    unit: 80
+    integration: 70
+    overall: 75
+  
+  complexity:
+    cyclomatic: 10
+    cognitive: 15
+  
+  duplication:
+    max_percentage: 3
+  
+  maintainability:
+    min_rating: B
+  
+  security:
+    max_critical: 0
+    max_high: 0
+  
+  performance:
+    lighthouse_performance: 90
+    lighthouse_accessibility: 100
+    bundle_size_kb: 500
+```
+
+#### Developer Onboarding Checklist
+Every new developer must:
+- [ ] Install Git hooks (automated in setup script)
+- [ ] Run quality checks locally and verify all pass
+- [ ] Review quality gates documentation
+- [ ] Understand bypass policy and consequences
+- [ ] Set up IDE integration for linters/formatters
+- [ ] Complete commit message format training
+- [ ] Review security scanning results interpretation
+
+#### Research Documentation Template
+Every plan.md should include:
+```markdown
+## Research Summary
+- **Technology Choices**: [List with versions and rationale]
+- **Alternatives Considered**: [What was evaluated and why rejected]
+- **Key Research Sources**: [Links to official docs, articles, case studies]
+- **Known Limitations**: [Trade-offs and constraints identified]
+- **Integration Patterns**: [How components work together based on research]
+- **Version Information**: [Specific versions researched and their stability/maturity]
+
+## Quality Gates Configuration
+- **Pre-commit checks configured**: [List]
+- **CI/CD pipeline stages**: [List]
+- **Quality thresholds**: [Coverage %, complexity limits, etc.]
+- **Monitoring setup**: [Tools and dashboards]
+```
+
+## EXECUTION INSTRUCTIONS
+1. First, search context7 MCP Server for best practices documents related to each principle area, including:
+   - Research methodologies for technical planning
+   - Enterprise Git hooks implementations
+   - CI/CD pipeline security best practices
+   - Quality gates configuration examples
+   - Industry-standard code quality metrics
+2. Search for examples of well-researched technical plans and decision-making frameworks
+3. Find case studies demonstrating the impact of insufficient research on project outcomes
+4. Research pre-commit hook frameworks and tools for the chosen tech stack
+5. Find examples of comprehensive quality gates from similar projects or industries
+6. Synthesize findings into a coherent framework that's specific to our project context
+7. Make principles actionable with clear acceptance criteria
+8. Ensure the constitution is concise enough to be memorable but comprehensive enough to guide decisions
+9. Include specific examples of "good research" vs "insufficient research" in planning
+10. Provide concrete pre-commit hook configuration examples
+11. Define clear triggers for when additional research is required
+12. Create implementation runbook for quality gates setup
+
+## OUTPUT FORMAT
+Structure the constitution.md file with:
+- Table of contents
+- Executive summary (1-2 paragraphs highlighting research-driven and quality-first approach)
+- Detailed sections for each principle area
+- **Dedicated "Research-Driven Planning" section with**:
+  * Research requirements checklist
+  * Research quality indicators
+  * Common research pitfalls to avoid
+  * Template for documenting research findings
+- **Dedicated "Automated Quality Gates" section with**:
+  * Complete pre-commit checklist
+  * Pre-push requirements
+  * CI/CD pipeline stages
+  * Tool recommendations by tech stack
+  * Configuration templates
+  * Setup instructions
+  * Bypass policy and audit trail
+  * Monitoring and continuous improvement
+- Quick reference checklist for daily use
+- Quality gates quick reference card (printable/pinnable)
+- Appendix with research sources and additional reading
+- Examples of well-researched vs. poorly-researched plans
+- Quality gates troubleshooting guide
+
+## RESEARCH-FIRST & QUALITY-FIRST MINDSET
+The constitution should emphasize that:
+
+**Thorough research is not optional overhead—it's foundational to quality**. Planning without adequate research leads to:
+- Choosing outdated or deprecated technologies
+- Missing critical integration issues until implementation
+- Over-engineering due to lack of understanding of simpler solutions
+- Under-engineering due to unawareness of complexity
+
+**Automated quality gates are not bureaucracy—they're protection**. Manual quality checks lead to:
+- Inconsistent enforcement of standards
+- Technical debt accumulation
+- Production bugs that could have been caught earlier
+- Team friction over subjective code quality debates
+- Increased code review burden
+
+Every principle in this constitution should be derived from or validated by research, not just theoretical ideals. Every quality standard should be automatically enforced, not hoped for.
+
+The constitution should be a living document that can evolve, but changes must be deliberate, well-justified, and research-backed. Quality gates should be continuously monitored and improved based on metrics and team feedback.
+
+## ENTERPRISE COMPLIANCE REQUIREMENTS
+The constitution must address:
+- Audit trail for all code changes (commit history integrity)
+- Compliance with industry standards (ISO 27001, SOC 2, PCI-DSS if applicable)
+- Security baseline enforcement (OWASP Top 10 coverage)
+- Data privacy protection (GDPR, CCPA compliance checks)
+- Intellectual property protection (license scanning, attribution)
+- Regulatory requirements specific to the industry
+- Change management and approval workflows
+- Incident response and rollback procedures
